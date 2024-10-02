@@ -1,4 +1,4 @@
-package nl.fontys.s3.copacoproject.domain;
+package nl.fontys.s3.copacoproject.persistence.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,8 +7,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
-public class ComponentType
-{
+public class ComponentTypeEntity {
     private Long componentTypeId;
     private String componentTypeName;
     private Integer orderOfImportance;
