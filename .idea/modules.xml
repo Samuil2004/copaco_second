@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CopacoProject.main.iml" filepath="$PROJECT_DIR$/.idea/modules/CopacoProject.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/group_Copaco.iml" filepath="$PROJECT_DIR$/.idea/group_Copaco.iml" />
     </modules>
   </component>
