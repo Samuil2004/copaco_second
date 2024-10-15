@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Template {
-    private Integer templateId;
-    private Category category;
-    private String name;
-    private String brand;
-    private String Manufacturer;
-    private String imageUrl;
+public class SpecificationType {
+    private Long specificationTypeId;
+    private String specificationTypeName;
 }
