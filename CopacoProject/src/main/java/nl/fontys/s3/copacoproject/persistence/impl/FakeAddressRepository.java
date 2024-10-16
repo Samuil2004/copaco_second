@@ -25,13 +25,13 @@ public class FakeAddressRepository implements AddressRepository {
     public Optional<AddressEntity> findById(Long id) {
         return this.savedAddresses
                 .stream()
-                .filter(addressEntity -> addressEntity.getId().equals(id))
+                .filter(addressEntity -> addressEntity.getId() ==id)
                 .findFirst();
     }
 
     @Override
     public AddressEntity save(AddressEntity address) {
-        if (address.getId() == null) {
+        if (address != null) {
             address.setId(NEXT_ID++);
             savedAddresses.add(address);
             return address;
@@ -42,7 +42,7 @@ public class FakeAddressRepository implements AddressRepository {
 
     @Override
     public void deleteById(Long id) {
-        this.savedAddresses.removeIf(addressEntity -> addressEntity.getId().equals(id));
+        this.savedAddresses.removeIf(addressEntity -> addressEntity.getId() == id);
 
     }
 

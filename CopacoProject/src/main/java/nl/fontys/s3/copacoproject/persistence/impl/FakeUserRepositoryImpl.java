@@ -26,13 +26,13 @@ public class FakeUserRepositoryImpl implements UserRepository {
     public Optional<UserEntity> findById(Long id){
         return this.savedUsers
                 .stream()
-                .filter(userEntity -> userEntity.getUserId().equals(id))
+                .filter(userEntity -> userEntity.getId() == id)
                 .findFirst();
     }
     @Override
     public UserEntity save(UserEntity user) {
-        if (user.getUserId() == null) {
-            user.setUserId(NEXT_ID++);
+        if (user != null) {
+            user.setId(NEXT_ID++);
             savedUsers.add(user);
             return user;
         } else {
@@ -41,7 +41,7 @@ public class FakeUserRepositoryImpl implements UserRepository {
     }
     @Override
     public void deleteById(Long id) {
-        this.savedUsers.removeIf(userEntity -> userEntity.getUserId().equals(id));
+        this.savedUsers.removeIf(userEntity -> userEntity.getId() == id);
     }
 
 }

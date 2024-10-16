@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Dictionary;
 
 @Builder
 @Data
@@ -18,5 +18,5 @@ public class Template {
     private String brand;
     private String Manufacturer;
     private String imageUrl;
-    private List<ComponentType> components;
+    private Dictionary<ComponentType, Integer> components; //integer for order of importance
 }
