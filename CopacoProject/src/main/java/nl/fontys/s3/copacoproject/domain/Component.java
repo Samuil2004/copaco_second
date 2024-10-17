@@ -1,9 +1,8 @@
 package nl.fontys.s3.copacoproject.domain;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
-import java.util.Dictionary;
+import java.util.Map;
 
 @Builder
 @Data
@@ -17,5 +16,5 @@ public class Component
     private String componentImageUrl;
     private Brand brand;
     private Double componentPrice;
-    private Dictionary<SpecificationType,String> specifictaions; //string = the value of the specification
+    private Map<SpecificationType,String> specifications; //string = the value of the specification
 }
