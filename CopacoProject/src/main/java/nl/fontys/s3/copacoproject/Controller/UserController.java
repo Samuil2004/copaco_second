@@ -41,24 +41,24 @@ public class UserController {
         GetAllUsersResponse response = userManager.getUsers();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    @PostMapping
+    /*@PostMapping
     public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Validated CreateUserRequest user) {
         CreateNewAddressResponse savedAddress = addressManager.createNewAddress(user.getAddress());
         CreateUserResponse userResponse = userManager.createUser(user, savedAddress.getAddressId());
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
-    }
+    }*/
    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userManager.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-    @PutMapping("/{id}")
+    /*@PutMapping("/{id}")
     public ResponseEntity<Void> updateUser(@PathVariable long id,
                                            @RequestBody @Validated UpdateUserRequest user) throws Exception {
         user.setUserId(id);
         userManager.updateUser(user);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 
 
 

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Category {
-    private long categoryId;
-    private String categoryName;
+public class SpecificationType {
+    private Long specificationTypeId;
+    private String specificationTypeName;
 }

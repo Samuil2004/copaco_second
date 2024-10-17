@@ -1,17 +1,21 @@
 package nl.fontys.s3.copacoproject.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.fontys.s3.copacoproject.domain.enums.CompatibilityType;
 
-@SuperBuilder
-@Getter
-@Setter
+import java.util.List;
+
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ComponentType
 {
     private Long componentTypeId;
     private String componentTypeName;
-    private Integer orderOfImportance;
     private String componentTypeImageUrl;
-    private Long categoryId;
+    private Category category;
+    private List<SpecificationType> specificationTypeList;
+    private List<CompatibilityType> compatibilityTypeList;
 }

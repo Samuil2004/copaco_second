@@ -17,13 +17,13 @@ public final class UserConverter {
     }
     public static User convert (UserEntity userEntity){
         return User.builder()
-                .userId(userEntity.getUserId())
+                .userId(userEntity.getId())
                 .firstName(userEntity.getFirstName())
                 .lastName(userEntity.getLastName())
                 .email(userEntity.getEmail())
                 .password(userEntity.getPassword())
-                .role(Role.values()[userEntity.getRole()])
-                .address(addressManager.getAddressById(userEntity.getAddress()).orElseThrow())
+                .role(Role.valueOf(userEntity.getRole().getRoleName()))
+                .address(addressManager.getAddressById(userEntity.getAddress().getId()).orElseThrow())
                 .build();
     }
 

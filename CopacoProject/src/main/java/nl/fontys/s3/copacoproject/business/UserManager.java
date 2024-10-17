@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface UserManager {
     GetAllUsersResponse getUsers();
     Optional<User> getUser(long id);
-    CreateUserResponse createUser(CreateUserRequest request,Long AddressId);
-    void updateUser(UpdateUserRequest request) throws Exception;
+    //CreateUserResponse createUser(CreateUserRequest request,Long AddressId);
+    //void updateUser(UpdateUserRequest request) throws Exception;
     void deleteUser(long id);
 }

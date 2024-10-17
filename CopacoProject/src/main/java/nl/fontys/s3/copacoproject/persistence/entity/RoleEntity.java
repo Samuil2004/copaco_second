@@ -7,15 +7,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="Component_type")
-public class ComponentTypeEntity {
+@Table(name="User")
+public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -23,14 +21,5 @@ public class ComponentTypeEntity {
 
     @Column(name="name")
     @NotNull
-    private String componentTypeName;
-
-    @Column(name="image_URL")
-    @NotNull
-    private String componentTypeImageUrl;
-
-    @JoinColumn(name="category_id", referencedColumnName = "id")
-    @ManyToOne
-    @NotNull
-    private CategoryEntity category;
+    private String roleName;
 }

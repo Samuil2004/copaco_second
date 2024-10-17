@@ -33,26 +33,27 @@ public class UserManagerImpl implements UserManager {
     public Optional<User> getUser(long id) {
         return userRepository.findById(id).map(UserConverter::convert);
     }
-    @Override
-    public CreateUserResponse createUser(CreateUserRequest request,Long addressId) {
-
-        UserEntity savedUser = saveNewUser(request,addressId);
-
-        return CreateUserResponse.builder().userId(savedUser.getUserId()).build();
-
-    }
-    private UserEntity saveNewUser(CreateUserRequest request,Long addressId) {
-        UserEntity newUser = UserEntity.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .role(request.getRole().getValue())
-                .address(addressId)
-                .build();
-        return userRepository.save(newUser);
-    }
-    @Override
+//    @Override
+//    public CreateUserResponse createUser(CreateUserRequest request,Long addressId) {
+//
+//        UserEntity savedUser = saveNewUser(request,addressId);
+//
+//        return CreateUserResponse.builder().userId(savedUser.getId()).build();
+//
+//    }
+//    private UserEntity saveNewUser(CreateUserRequest request,Long addressId) {
+//        Address address =
+//        UserEntity newUser = UserEntity.builder()
+//                .firstName(request.getFirstName())
+//                .lastName(request.getLastName())
+//                .email(request.getEmail())
+//                .password(request.getPassword())
+//                .role(RoleEntity.builder().roleName(request.getRole().toString()).build())
+//                .address(AddressConverter.convert(request.getAddress()))
+//                .build();
+//        return userRepository.save(newUser);
+//    }
+    /*@Override
     public void updateUser(UpdateUserRequest request) throws Exception {
         Optional<UserEntity> userEntityOptional = userRepository.findById(request.getUserId());
         if (userEntityOptional.isEmpty()) {
@@ -69,7 +70,7 @@ public class UserManagerImpl implements UserManager {
         userEntity.setRole(Integer.parseInt(request.getRole().toString()));
         userRepository.save(userEntity);
 
-    }
+    }*/
 
     @Override
     public void deleteUser(long id) {

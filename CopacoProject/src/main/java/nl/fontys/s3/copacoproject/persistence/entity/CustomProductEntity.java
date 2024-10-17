@@ -7,30 +7,29 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="Component_type")
-public class ComponentTypeEntity {
+@Table(name="Custom_product")
+public class CustomProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
-    @Column(name="name")
-    @NotNull
-    private String componentTypeName;
+    @JoinColumn(name="user_id", referencedColumnName = "id")
+    @ManyToOne
+    private UserEntity userId;
 
-    @Column(name="image_URL")
-    @NotNull
-    private String componentTypeImageUrl;
-
-    @JoinColumn(name="category_id", referencedColumnName = "id")
+    @JoinColumn(name="template_id", referencedColumnName = "id")
     @ManyToOne
     @NotNull
-    private CategoryEntity category;
+    private TemplateEntity template;
+
+    @JoinColumn(name="status_id", referencedColumnName = "id")
+    @ManyToOne
+    @NotNull
+    private StatusEntity status;
 }

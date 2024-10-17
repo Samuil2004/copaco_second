@@ -1,18 +1,43 @@
 package nl.fontys.s3.copacoproject.persistence.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Builder
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name="[User]")
 public class UserEntity {
-    private Long userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private long id;
+
+    @Column(name="first_name")
+    @NotNull
     private String firstName;
+
+    @Column(name="last_name")
+    @NotNull
     private String lastName;
+
+    @Column(name="email")
+    @NotNull
     private String email;
+
+    @Column(name="password")
+    @NotNull
     private String password;
-    private int role;
-    private Long address;
+
+    @JoinColumn(name="role_id")
+    @ManyToOne
+    @NotNull
+    private RoleEntity role;
+
+    @JoinColumn(name="address_id")
+    @ManyToOne
+    private AddressEntity address;
 }

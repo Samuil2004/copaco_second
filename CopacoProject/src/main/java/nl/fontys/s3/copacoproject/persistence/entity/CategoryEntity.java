@@ -6,31 +6,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import org.hibernate.validator.constraints.Length;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="Component_type")
-public class ComponentTypeEntity {
+@Table(name="Category")
+public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
-    @Column(name="name")
     @NotNull
-    private String componentTypeName;
-
-    @Column(name="image_URL")
-    @NotNull
-    private String componentTypeImageUrl;
-
-    @JoinColumn(name="category_id", referencedColumnName = "id")
-    @ManyToOne
-    @NotNull
-    private CategoryEntity category;
+    @Column(name="category_name")
+    @Length(max = 50)
+    private String categoryName;
 }

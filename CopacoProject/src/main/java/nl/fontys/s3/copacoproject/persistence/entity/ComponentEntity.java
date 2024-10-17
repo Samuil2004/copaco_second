@@ -1,19 +1,41 @@
 package nl.fontys.s3.copacoproject.persistence.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
-@SuperBuilder
-@Getter
-@Setter
-public class ComponentEntity extends ComponentTypeEntity{
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name="Component")
+public class ComponentEntity{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long componentId;
+
+    @Column(name="name")
+    @NotNull
+    @Length(max = 50)
     private String componentName;
-    private String componentUnit;
-    private String componentValue;
-    private Double componentPrice;
-    private Long componentTypeId;
+
+    @JoinColumn(name="component_type_id")
+    @ManyToOne
+    @NotNull
+    private ComponentTypeEntity componentType;
+
+    @Column(name="component_image_url")
+    @NotNull
+    @Length(max = 256)
     private String componentImageUrl;
-    private Long brandId;
+
+    @JoinColumn(name="brand_id", referencedColumnName = "id")
+    @ManyToOne
+    private BrandEntity brand;
+
+    @Column(name="component_price")
+    private Double componentPrice;
 }
