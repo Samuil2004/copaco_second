@@ -7,6 +7,6 @@ import nl.fontys.s3.copacoproject.domain.Component;
 
 public interface ComponentManager {
     GetAllComponentsResponse getAllComponents();
-    GetComponentsByCategoryResponse getComponentsByCategory(String category);
+    //GetComponentsByCategoryResponse getComponentsByCategory(String category);
     Component GetComponentById(Long id);
 }

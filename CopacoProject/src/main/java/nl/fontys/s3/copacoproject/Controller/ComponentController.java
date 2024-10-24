@@ -21,11 +21,11 @@ public class ComponentController {
         GetAllComponentsResponse response = componentManager.getAllComponents();
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/{category}")
-    public ResponseEntity<GetComponentsByCategoryResponse> getComponentsInCategory(@PathVariable("category") String category) {
-
-        GetComponentsByCategoryResponse response = componentManager.getComponentsByCategory(category);
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/{category}")
+//    public ResponseEntity<GetComponentsByCategoryResponse> getComponentsInCategory(@PathVariable("category") String category) {
+//
+//        GetComponentsByCategoryResponse response = componentManager.getComponentsByCategory(category);
+//        return ResponseEntity.ok(response);
+//    }
 
 }

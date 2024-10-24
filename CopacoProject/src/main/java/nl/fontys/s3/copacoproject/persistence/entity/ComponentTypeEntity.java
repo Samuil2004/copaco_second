@@ -33,4 +33,7 @@ public class ComponentTypeEntity {
     @ManyToOne
     @NotNull
     private CategoryEntity category;
+
+    @OneToMany(mappedBy = "componentType")
+    private List<SpecficationTypeList_ComponentType> specifications;
 }

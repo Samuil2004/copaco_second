@@ -21,7 +21,7 @@ public class CategoryEntity {
     private long id;
 
     @NotNull
-    @Column(name="category_name")
+    @Column(name="name")
     @Length(max = 50)
     private String categoryName;
 }

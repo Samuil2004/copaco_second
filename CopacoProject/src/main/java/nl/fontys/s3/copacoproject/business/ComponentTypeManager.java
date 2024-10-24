@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public interface ComponentTypeManager {
     GetAllComponentTypeResponse getAllComponentTypes();
-    Optional<ComponentType> getComponentTypeById(long id);
-    CreateComponentTypeResponse createComponentType(CreateComponentTypeRequest request);
+    ComponentType getComponentTypeById(long id);
+    //CreateComponentTypeResponse createComponentType(CreateComponentTypeRequest request);
     /*void updateComponentType(UpdateComponentTypeRequest request);*/
-    void deleteComponentType(long id);
+    //void deleteComponentType(long id);
 }

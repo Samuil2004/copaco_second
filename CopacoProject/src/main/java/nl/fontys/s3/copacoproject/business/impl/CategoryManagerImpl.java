@@ -16,6 +16,6 @@ public class CategoryManagerImpl implements CategoryManager {
     }
     @Override
     public CategoryEntity findCategoryByName(String categoryName) {
-        return categoryRepository.findByName(categoryName);
+        return categoryRepository.findByCategoryName(categoryName);
     }
 }

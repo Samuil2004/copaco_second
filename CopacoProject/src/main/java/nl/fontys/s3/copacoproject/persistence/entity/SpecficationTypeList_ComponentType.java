@@ -19,11 +19,11 @@ public class SpecficationTypeList_ComponentType {
     @Column(name = "id")
     private Long id;
 
-    @JoinColumn(name = "component_type_id")
+    @JoinColumn(name = "component_type_id", referencedColumnName = "id")
     @ManyToOne
     private ComponentTypeEntity componentType;
 
-    @JoinColumn(name = "specification_type_id")
+    @JoinColumn(name = "specification_type_id",referencedColumnName = "id")
     @ManyToOne
     private SpecificationTypeEntity specificationType;
 }

@@ -27,7 +27,7 @@ public class ComponentManagerImpl implements ComponentManager {
 
     @Override
     public GetAllComponentsResponse getAllComponents() {
-        List<Component> components = componentRepository.getAllComponents()
+        List<Component> components = componentRepository.findAll()
                 .stream()
                 .map(entity -> {
                     List<Component_SpecificationList> specificationLists = componentSpecificationListRepository.getComponent_SpecificationListByComponentId(entity);
@@ -57,30 +57,30 @@ public class ComponentManagerImpl implements ComponentManager {
         return ComponentConverter.convertFromEntityToBase(entity, specifications);
     }
 
-    @Override
-    public GetComponentsByCategoryResponse getComponentsByCategory(String category) {
-        List<Component> componentsInCategory = componentRepository.getComponentsByType(category)
-                .stream()
-                .map(entity -> {
-                    List<Component_SpecificationList> specificationLists = componentSpecificationListRepository.getComponent_SpecificationListByComponentId(entity);
-                    Map<SpecificationTypeEntity, String> specificationMap = specificationLists.stream()
-                            .collect(Collectors.toMap(Component_SpecificationList::getSpecificationType, Component_SpecificationList::getValue));
-                    return ComponentConverter.convertFromEntityToBase(entity, specificationMap);
-                })
-                .toList();
-
-        return GetComponentsByCategoryResponse.builder()
-                .allComponentsInCategory(componentsInCategory)
-                .build();
-
-
-/*        return GetComponentsByCategoryResponse
-                .builder()
-                .allComponentsInCategory(componentRepository.getComponentsByType(category)
-                        .stream()
-                        .map(ComponentConverter::convertEntityToNormal)
-                        .toList())
-                .build();*/
-        /*return null;*/
-    }
+//    @Override
+//    public GetComponentsByCategoryResponse getComponentsByCategory(String category) {
+//        List<Component> componentsInCategory = componentRepository.getComponentsByType(category)
+//                .stream()
+//                .map(entity -> {
+//                    List<Component_SpecificationList> specificationLists = componentSpecificationListRepository.getComponent_SpecificationListByComponentId(entity);
+//                    Map<SpecificationTypeEntity, String> specificationMap = specificationLists.stream()
+//                            .collect(Collectors.toMap(Component_SpecificationList::getSpecificationType, Component_SpecificationList::getValue));
+//                    return ComponentConverter.convertFromEntityToBase(entity, specificationMap);
+//                })
+//                .toList();
+//
+//        return GetComponentsByCategoryResponse.builder()
+//                .allComponentsInCategory(componentsInCategory)
+//                .build();
+//
+//
+///*        return GetComponentsByCategoryResponse
+//                .builder()
+//                .allComponentsInCategory(componentRepository.getComponentsByType(category)
+//                        .stream()
+//                        .map(ComponentConverter::convertEntityToNormal)
+//                        .toList())
+//                .build();*/
+//        /*return null;*/
+//    }
 }

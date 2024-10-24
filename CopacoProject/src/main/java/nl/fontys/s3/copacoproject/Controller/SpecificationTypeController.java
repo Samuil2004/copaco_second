@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/specificationType")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class SpecificationTypeController {
     private final SpecificationTypeManager specificationTypeManager;
     @GetMapping
@@ -25,7 +26,7 @@ public class SpecificationTypeController {
         CreateSpecificationTypeResponse response = specificationTypeManager.createSpecificationType(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    @RequestMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<SpecificationType> getSpecificationById(@PathVariable Long id){
         SpecificationType specificationType = specificationTypeManager.getSpecificationType(id);
         if (specificationType == null){

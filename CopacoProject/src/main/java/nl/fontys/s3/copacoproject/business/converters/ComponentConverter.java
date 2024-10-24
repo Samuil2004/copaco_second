@@ -21,7 +21,7 @@ public final class ComponentConverter {
                 .componentId(entity.getComponentId())
                 .componentName(entity.getComponentName())
                 .componentImageUrl(entity.getComponentImageUrl())
-                .componentType(ComponentTypeConverter.convertFromEntityToBase(componentTypeEntity, specificationTypeList))
+                .componentType(ComponentTypeConverter.convertFromEntityToBase(componentTypeEntity))
                 .componentName(entity.getComponentName())
                 .componentPrice(entity.getComponentPrice())
                 .componentImageUrl(entity.getComponentImageUrl())
