@@ -1,18 +1,16 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
 import nl.fontys.s3.copacoproject.domain.Component;
-import nl.fontys.s3.copacoproject.domain.ComponentType;
-import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 
-import java.security.Key;
 import java.util.*;
 
-
-final class ComponentConverter {
-    public static Component convertFromEntityToBase(ComponentEntity entity, Map<SpecificationTypeEntity, String> specificationEntityList)
+public final class ComponentConverter {
+    public static Component convertFromEntityToBase(ComponentEntity entity,
+                                                    Map<SpecificationTypeEntity,
+                                                            String> specificationEntityList)
     {
         ComponentTypeEntity componentTypeEntity= entity.getComponentType();
         List<SpecificationTypeEntity> specificationTypeList = new ArrayList<>();

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-final class SpecificationConverter {
+public final class SpecificationConverter {
     //used when converting an item from a map of specifications, for writing to the database
     public static Component_SpecificationList convertFromBaseToEntity(Component component, SpecificationType specificationType, String value){
         return Component_SpecificationList.builder()

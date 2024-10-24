@@ -7,9 +7,10 @@ import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+public final class ComponentTypeConverter {
 
-final class ComponentTypeConverter {
-    public static ComponentType convertFromEntityToBase(ComponentTypeEntity entity, List<SpecificationTypeEntity> specifications) {
+    public static ComponentType convertFromEntityToBase(ComponentTypeEntity entity,
+                                                        List<SpecificationTypeEntity> specifications) {
 
         List<SpecificationType> specificationTypes = new ArrayList<>();
 

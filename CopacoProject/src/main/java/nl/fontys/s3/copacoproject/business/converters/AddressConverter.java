@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.business.converters;
 import nl.fontys.s3.copacoproject.domain.Address;
 import nl.fontys.s3.copacoproject.persistence.entity.AddressEntity;
 
-final class AddressConverter {
+public final class AddressConverter {
     public static AddressEntity convertFromBaseToEntity(Address address) {
         return AddressEntity.builder()
                 .id(address.getAddressId())

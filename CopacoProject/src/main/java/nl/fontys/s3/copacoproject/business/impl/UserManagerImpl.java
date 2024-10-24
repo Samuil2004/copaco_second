@@ -1,6 +1,7 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 
+import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.UserManager;
 import nl.fontys.s3.copacoproject.business.dto.userDto.*;
 import nl.fontys.s3.copacoproject.domain.User;
@@ -13,15 +14,13 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserManagerImpl implements UserManager {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
 
 
-    public UserManagerImpl(UserRepository userRepo,UserConverter userConverter) {
-        this.userConverter = userConverter;
-        this.userRepository = userRepo;
-    }
+
     @Override
     public GetAllUsersResponse getUsers() {
         List<UserEntity> result = userRepository.findAll();
