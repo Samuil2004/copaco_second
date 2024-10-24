@@ -76,8 +76,8 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
         return ComponentTypeConverter.convertFromEntityToBase(component.get());
     }
 
-    @Override
-    public void deleteComponentType(long id) {
-        componentTypeRepository.deleteById(id);
-    }
+//    @Override
+//    public void deleteComponentType(long id) {
+//        componentTypeRepository.deleteById(id);
+//    }
 }
