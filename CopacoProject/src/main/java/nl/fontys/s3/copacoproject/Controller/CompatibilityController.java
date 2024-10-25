@@ -1,15 +1,15 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
+import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
+import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,4 +25,13 @@ public class CompatibilityController {
         return new ResponseEntity<>(allCompatibilityTypes, HttpStatus.OK);
 
     }
+    @PostMapping("/automatic")
+    public ResponseEntity<CreateAutomaticCompatibilityDtoResponse> createAutomaticCompatibility(
+                                                                               @RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
+        CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
+        return ResponseEntity.ok(response);
+    }
+
+
+
 }

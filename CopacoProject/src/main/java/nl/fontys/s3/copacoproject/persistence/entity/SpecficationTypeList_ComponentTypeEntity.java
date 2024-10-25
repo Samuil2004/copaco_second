@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name="SpecficationType_ComponentType")
-public class SpecficationTypeList_ComponentType {
+public class SpecficationTypeList_ComponentTypeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

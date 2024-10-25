@@ -3,8 +3,7 @@ package nl.fontys.s3.copacoproject.business.converters;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentType;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
+import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ public final class ComponentTypeConverter {
         List<SpecificationType> specificationTypes = new ArrayList<>();
 
         if (entity.getSpecifications() != null) {
-            for (SpecficationTypeList_ComponentType specificationTypeList : entity.getSpecifications()) {
+            for (SpecficationTypeList_ComponentTypeEntity specificationTypeList : entity.getSpecifications()) {
                 specificationTypes.add(SpecificationTypeConverter.convertFromEntityToBase(specificationTypeList.getSpecificationType()));
             }
         }

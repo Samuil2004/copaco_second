@@ -6,22 +6,15 @@ import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ComponentTypeNotFound;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeComponentTypeRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.CreateComponentTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.CreateComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeRepository;
-import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentType;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor

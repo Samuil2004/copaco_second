@@ -1,13 +1,11 @@
 package nl.fontys.s3.copacoproject.persistence.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -18,11 +16,11 @@ public class RuleEntity {
     @Column(name = "id")
     private long id;
 
-    @JoinColumn(name="specification1_id")
+    @JoinColumn(name="specification1_id", referencedColumnName = "id")
     @ManyToOne
-    private SpecficationTypeList_ComponentType specificationToConsider1Id;
+    private SpecficationTypeList_ComponentTypeEntity specificationToConsider1Id;
 
-    @JoinColumn(name="specification2_id")
+    @JoinColumn(name="specification2_id",referencedColumnName = "id")
     @ManyToOne
-    private SpecficationTypeList_ComponentType specificationToConsider2Id;
+    private SpecficationTypeList_ComponentTypeEntity specificationToConsider2Id;
 }

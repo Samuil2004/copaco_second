@@ -2,18 +2,16 @@ package nl.fontys.s3.copacoproject.persistence.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Getter
+@Setter
 @Table(name="Component_type")
 public class ComponentTypeEntity {
     @Id
@@ -35,5 +33,5 @@ public class ComponentTypeEntity {
     private CategoryEntity category;
 
     @OneToMany(mappedBy = "componentType")
-    private List<SpecficationTypeList_ComponentType> specifications;
+    private List<SpecficationTypeList_ComponentTypeEntity> specifications;
 }
