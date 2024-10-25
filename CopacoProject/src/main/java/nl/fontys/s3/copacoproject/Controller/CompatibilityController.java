@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
+import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
+import nl.fontys.s3.copacoproject.domain.AutomaticCompatibility;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
+import nl.fontys.s3.copacoproject.persistence.entity.AutomaticCompatibilityEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +29,18 @@ public class CompatibilityController {
 
     }
     @PostMapping("/automatic")
-    public ResponseEntity<CreateAutomaticCompatibilityDtoResponse> createAutomaticCompatibility(
-                                                                               @RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
+    public ResponseEntity<Void> createAutomaticCompatibility(@RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
         CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/allAutomaticCompatibilities/{automaticCompatibilityId}")
+    public ResponseEntity<GetAutomaticCompatibilityByIdResponse> getAllAutomaticCompatibilities(@PathVariable("automaticCompatibilityId") Long automaticCompatibilityId){
+        GetAutomaticCompatibilityByIdResponse automaticCompatibility = compatibilityManager.allAutomaticCompatibilities(automaticCompatibilityId);
+
+        return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
+
+    }
 
 
 }
