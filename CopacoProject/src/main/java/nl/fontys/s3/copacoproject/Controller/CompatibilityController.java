@@ -34,9 +34,17 @@ public class CompatibilityController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/allAutomaticCompatibilities/{automaticCompatibilityId}")
-    public ResponseEntity<GetAutomaticCompatibilityByIdResponse> getAllAutomaticCompatibilities(@PathVariable("automaticCompatibilityId") Long automaticCompatibilityId){
-        GetAutomaticCompatibilityByIdResponse automaticCompatibility = compatibilityManager.allAutomaticCompatibilities(automaticCompatibilityId);
+    @GetMapping("/automaticCompatibility/{automaticCompatibilityId}")
+    public ResponseEntity<GetAutomaticCompatibilityByIdResponse> automaticCompatibilityByCompatibilityId(@PathVariable("automaticCompatibilityId") Long automaticCompatibilityId){
+        GetAutomaticCompatibilityByIdResponse automaticCompatibility = compatibilityManager.automaticCompatibilityByCompatibilityId(automaticCompatibilityId);
+
+        return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
+
+    }
+
+    @GetMapping("/allAutomaticCompatibilitiesByGivenComponentTypeId/{componentTypeId}")
+    public ResponseEntity<List<GetAutomaticCompatibilityByIdResponse>> getAllAutomaticCompatibilitiesForAComponentType(@PathVariable("componentTypeId") Long automaticCompatibilityId){
+        List<GetAutomaticCompatibilityByIdResponse> automaticCompatibility = compatibilityManager.allCompatibilitiesForComponentTypeByComponentTypeId(automaticCompatibilityId);
 
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
 
