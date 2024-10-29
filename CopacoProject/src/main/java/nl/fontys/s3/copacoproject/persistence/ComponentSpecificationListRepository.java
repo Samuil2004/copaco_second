@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ComponentSpecificationListRepository extends JpaRepository<Component_SpecificationList,Long> {
-    List<Component_SpecificationList> getComponent_SpecificationListByComponentId(ComponentEntity componentId);
+    List<Component_SpecificationList> findByComponentId(ComponentEntity component);
 
 }

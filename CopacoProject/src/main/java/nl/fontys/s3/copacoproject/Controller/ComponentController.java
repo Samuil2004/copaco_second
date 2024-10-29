@@ -3,9 +3,12 @@ package nl.fontys.s3.copacoproject.Controller;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentManager;
 import nl.fontys.s3.copacoproject.business.dto.GetAllComponentsResponse;
+import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentsByCategoryResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/components")
@@ -16,9 +19,9 @@ public class ComponentController {
 
 
     @GetMapping("")
-    public ResponseEntity<GetAllComponentsResponse> getAllComponents() {
+    public ResponseEntity<List<GetComponentResponse>> getAllComponents() {
 
-        GetAllComponentsResponse response = componentManager.getAllComponents();
+        List<GetComponentResponse> response = componentManager.getAllComponents();
         return ResponseEntity.ok(response);
     }
 //    @GetMapping("/{category}")
