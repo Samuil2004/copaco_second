@@ -22,12 +22,12 @@ public class ManualCompatibilityEntity {
     @JoinColumn(name="specification_type1_id")
     @ManyToOne
     @NotNull
-    private SpecficationTypeList_ComponentType specificationType1Id;
+    private SpecficationTypeList_ComponentTypeEntity specificationType1Id;
 
     @JoinColumn(name="specification_type2_id")
     @ManyToOne
     @NotNull
-    private SpecficationTypeList_ComponentType specificationType2Id;
+    private SpecficationTypeList_ComponentTypeEntity specificationType2Id;
 
     @JoinColumn(name="specification_value1_id")
     @ManyToOne

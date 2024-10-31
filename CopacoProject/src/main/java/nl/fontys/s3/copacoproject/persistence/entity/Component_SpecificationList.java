@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 public class Component_SpecificationList {
 
     //when saving new data make validation ex: component id 3 + specification id 5 only have 1 value
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.business.converters;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 
-final class SpecificationTypeConverter {
+public final class SpecificationTypeConverter {
     public static SpecificationType convertFromEntityToBase(SpecificationTypeEntity entity) {
         return SpecificationType.builder()
                 .specificationTypeId(entity.getId())

@@ -11,19 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="SpecficationType_ComponentType")
-public class SpecficationTypeList_ComponentType {
-
+@Table(name = "CompatibilityType")
+public class CompatibilityTypeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @JoinColumn(name = "component_type_id")
-    @ManyToOne
-    private ComponentTypeEntity componentType;
-
-    @JoinColumn(name = "specification_type_id")
-    @ManyToOne
-    private SpecificationTypeEntity specificationType;
+    @Column(name = "typeOfCompatibility")
+    private String typeOfCompatibility;
 }

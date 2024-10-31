@@ -1,13 +1,12 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
-import nl.fontys.s3.copacoproject.domain.Address;
 import nl.fontys.s3.copacoproject.domain.User;
 import nl.fontys.s3.copacoproject.domain.enums.Role;
 import nl.fontys.s3.copacoproject.persistence.entity.AddressEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.RoleEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.UserEntity;
 
-final class UserConverter {
+public final class UserConverter {
     public static User convertFromEntityToBase(UserEntity userEntity, AddressEntity addressEntity) {
         return User.builder()
                 .userId(userEntity.getId())

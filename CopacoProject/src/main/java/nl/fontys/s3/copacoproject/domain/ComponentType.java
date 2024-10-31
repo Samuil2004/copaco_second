@@ -1,13 +1,13 @@
 package nl.fontys.s3.copacoproject.domain;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import nl.fontys.s3.copacoproject.domain.enums.CompatibilityType;
 
 import java.util.List;
 
 @Builder
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ComponentType
@@ -17,5 +17,5 @@ public class ComponentType
     private String componentTypeImageUrl;
     private Category category;
     private List<SpecificationType> specificationTypeList;
-    private List<CompatibilityType> compatibilityTypeList;
+    //private List<CompatibilityType> compatibilityTypeList;
 }

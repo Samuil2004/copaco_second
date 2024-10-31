@@ -11,8 +11,5 @@
         <module name="CopacoProject.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="CopacoProject" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
