@@ -18,13 +18,12 @@ public class TemplateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id;  // Ensure this is Long
+    private Long id;
 
-    // Map the foreign key relationship to CategoryEntity
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     @NotNull
-    private CategoryEntity category;  // Reference the whole CategoryEntity
+    private CategoryEntity category;
 
     @Column(name = "name")
     @NotNull
@@ -33,7 +32,7 @@ public class TemplateEntity {
     @ManyToOne
     @JoinColumn(name = "brand_id", referencedColumnName = "id")
     @NotNull
-    private BrandEntity brand;  // Same for BrandEntity
+    private BrandEntity brand;
 
     @Column(name = "image_url")
     private String imageURL;

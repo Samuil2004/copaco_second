@@ -15,8 +15,7 @@ public class Template {
     private long templateId;
     private Category category;
     private String name;
-    private String brand;
-    private String Manufacturer;
+    private Brand brand;
     private String imageUrl;
     private Dictionary<ComponentType, Integer> components; //integer for order of importance
 }

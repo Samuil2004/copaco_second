@@ -21,7 +21,7 @@ public class ComponentTypeList_Template {
     @Id
     @JoinColumn(name="template_id")
     @ManyToOne
-    private TemplateEntity templateId;
+    private TemplateEntity template;
 
     @Id
     @JoinColumn(name="component_type")
