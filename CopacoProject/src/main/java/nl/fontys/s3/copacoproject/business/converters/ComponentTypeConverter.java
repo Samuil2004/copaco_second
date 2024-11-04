@@ -23,7 +23,7 @@ public final class ComponentTypeConverter {
                 .componentTypeId(entity.getId())
                 .componentTypeName(entity.getComponentTypeName())
                 .componentTypeImageUrl(entity.getComponentTypeImageUrl())
-                .category(CategoryConverter.convertFromBaseToEntity(entity.getCategory())) // Ensure to convert Category if needed
+                .category(CategoryConverter.convertFromEntityToBase(entity.getCategory())) // Ensure to convert Category if needed
                 .specificationTypeList(specificationTypes)
                 .build();
     }

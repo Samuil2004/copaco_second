@@ -13,7 +13,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Data
 public class ComponentTypeList_Template_CPK implements Serializable {
-    private TemplateEntity templateId;
+    private TemplateEntity template;
     private ComponentTypeEntity componentType;
 
     @Override
@@ -21,12 +21,12 @@ public class ComponentTypeList_Template_CPK implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComponentTypeList_Template_CPK that = (ComponentTypeList_Template_CPK) o;
-        return Objects.equals(templateId, that.templateId) &&
+        return Objects.equals(template, that.template) &&
                 Objects.equals(componentType, that.componentType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(templateId, componentType);
+        return Objects.hash(template, componentType);
     }
 }
