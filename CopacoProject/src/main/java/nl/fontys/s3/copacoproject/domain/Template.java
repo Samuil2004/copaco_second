@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.Dictionary;
+import java.util.Map;
 
 @Builder
 @Data
@@ -18,5 +17,5 @@ public class Template {
     private String name;
     private Brand brand;
     private String imageUrl;
-    private Dictionary<ComponentType, Integer> components; //integer for order of importance
+    private Map<ComponentType, Integer> components; //integer for order of importance
 }

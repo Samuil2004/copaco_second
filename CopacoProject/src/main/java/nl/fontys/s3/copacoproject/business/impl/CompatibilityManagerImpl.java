@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-import nl.fontys.s3.copacoproject.business.Exceptions.ComponentTypeNotFound;
+import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.CompatibilityTypeConverter;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
@@ -14,7 +14,6 @@ import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +63,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
             return CreateAutomaticCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
-        throw new ComponentTypeNotFound("ERROR SAVING AUTOMATIC COMPATIBILITY");
+        throw new ObjectNotFound("ERROR SAVING AUTOMATIC COMPATIBILITY");
     }
 
     @Override
@@ -121,7 +120,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
             return response;
         }
-        throw new ComponentTypeNotFound("ERROR FINDING AUTOMATIC COMPATIBILITY");
+        throw new ObjectNotFound("ERROR FINDING AUTOMATIC COMPATIBILITY");
 
     }
 

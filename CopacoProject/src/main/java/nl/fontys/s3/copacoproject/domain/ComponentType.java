@@ -1,7 +1,6 @@
 package nl.fontys.s3.copacoproject.domain;
 
 import lombok.*;
-import nl.fontys.s3.copacoproject.domain.enums.CompatibilityType;
 
 import java.util.List;
 
@@ -18,4 +17,10 @@ public class ComponentType
     private Category category;
     private List<SpecificationType> specificationTypeList;
     //private List<CompatibilityType> compatibilityTypeList;
+
+    @Override
+    public String toString() {
+        return "ComponentType{name='" + componentTypeName + "', id=" + componentTypeId + "}"; // Customize as needed
+    }
+
 }

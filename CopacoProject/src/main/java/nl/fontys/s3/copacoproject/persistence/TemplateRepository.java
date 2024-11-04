@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.persistence;
 
+import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeList_Template;
 import nl.fontys.s3.copacoproject.persistence.entity.TemplateEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     boolean existsTemplateEntityByNameAndBrandAndCategory(@Param("templateName") String templateName,
                                                           @Param("brandId") long brandId,
                                                           @Param("categoryId") long categoryId);
+    @Query("SELECT c FROM ComponentTypeList_Template c WHERE c.template.id = :template_id")
+    List<ComponentTypeList_Template> findComponentTypeListByTemplateId(@Param("template_id") long templateId);
+
 }
