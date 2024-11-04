@@ -23,4 +23,8 @@ public class SpecificationTypeEntity {
     @Length(max = 50)
     private String specificationTypeName;
 
+    @Column(name="unit")
+    @Length(max = 50)
+    private String unit;
+
 }
