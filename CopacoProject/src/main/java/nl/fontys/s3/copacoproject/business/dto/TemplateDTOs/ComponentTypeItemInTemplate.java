@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.business.dto.TemplateDTOs;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ComponentTypeItemInTemplate {
+    @NotNull
     private long componentTypeId;
+    @NotNull
     private int orderOfImportance;
 }
