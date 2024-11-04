@@ -24,11 +24,30 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot dependencies
+    implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // JPA and Hibernate dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Optional: H2 Database for testing and development
+    runtimeOnly 'com.h2database:h2'
+
+    // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Testing dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    //Mssql
+    implementation 'com.microsoft.sqlserver:mssql-jdbc'
+
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 }
 
 tasks.named('test') {
