@@ -1,5 +1,8 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
@@ -14,10 +17,12 @@ import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeList_TemplateRepository;
 import nl.fontys.s3.copacoproject.persistence.TemplateRepository;
+import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeList_Template;
 import nl.fontys.s3.copacoproject.persistence.entity.TemplateEntity;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +35,23 @@ public class TemplateManagerImpl implements TemplateManager {
     private final CategoryManager categoryManager;
     private final BrandManager brandManager;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Override
     public void createTemplate(CreateTemplateRequest request) {
+        // Retrieve related entities
         Category category = categoryManager.findCategoryById(request.getCategoryId());
         Brand brand = brandManager.getBrandById(request.getBrandId());
 
+        if(category == null || brand == null) {
+            throw new InvalidParameterException("Inputs not valid");
+        }
+        if(templateRepository.existsTemplateEntityByNameAndBrandAndCategory(request.getName(), request.getBrandId(), request.getCategoryId())) {
+            throw new InvalidParameterException("Template already exists");
+        }
+
+        // Create and save template
         Template template = Template.builder()
                 .brand(brand)
                 .name(request.getName())
@@ -42,21 +59,30 @@ public class TemplateManagerImpl implements TemplateManager {
                 .imageUrl(request.getImageUrl())
                 .build();
 
-        //save the template
-        long id = templateRepository.save(TemplateConverter.convertFromBaseToEntity(template)).getId();
-        template.setTemplateId(id);
+        TemplateEntity templateEntity = TemplateConverter.convertFromBaseToEntity(template);
+        templateEntity = templateRepository.save(templateEntity);
 
-        //add components in the template's list
-        for(ComponentTypeItemInTemplate item : request.getComponentTypes()){
+        //save list of componentTypes in template
+        for (ComponentTypeItemInTemplate item : request.getComponentTypes()) {
             ComponentType componentType = componentTypeManager.getComponentTypeById(item.getComponentTypeId());
-            ComponentTypeList_Template listItem= ComponentTypeList_Template.builder()
-                    .template(TemplateConverter.convertFromBaseToEntity(template))
-                    .componentType(ComponentTypeConverter.convertFromBaseToEntity(componentType))
+            ComponentTypeEntity componentTypeEntity = entityManager.find(ComponentTypeEntity.class, componentType.getComponentTypeId());
+
+            ComponentTypeList_Template listItem = ComponentTypeList_Template.builder()
+                    .template(templateEntity)
+                    .componentType(componentTypeEntity)
                     .orderOfImportance(item.getOrderOfImportance())
                     .build();
-            componentTypeListRepository.save(listItem);
+
+            saveComponentTypeListTemplate(listItem);
         }
     }
+
+    // Transactional method to save ComponentTypeList_Template
+    @Transactional
+    public void saveComponentTypeListTemplate(ComponentTypeList_Template listItem) {
+        componentTypeListRepository.save(listItem);
+    }
+
 
     @Override
     public void deleteTemplate(long id) {
