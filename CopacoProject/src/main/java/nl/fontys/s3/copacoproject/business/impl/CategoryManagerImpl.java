@@ -8,10 +8,26 @@ import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryManagerImpl implements CategoryManager {
     private final CategoryRepository categoryRepository;
+
+    @Override
+    public List<Category> getAllCategories() {
+        List<CategoryEntity> categoryEntities = categoryRepository.findAll();
+        List<Category> categories = new ArrayList<>();
+        if(categoryEntities.size() > 0){
+            for(CategoryEntity categoryEntity : categoryEntities) {
+                categories.add(CategoryConverter.convertFromEntityToBase(categoryEntity));
+            }
+        }
+        return categories;
+    }
+
     @Override
     public Category findCategoryById(long id) {
         return CategoryConverter.convertFromEntityToBase(categoryRepository.findById(id).orElse(null));

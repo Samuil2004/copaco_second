@@ -19,3 +19,4 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             @Param("componentId") ComponentEntity componentId,
             @Param("specificationTypeId") SpecificationTypeEntity specificationTypeId);
 }
+//test

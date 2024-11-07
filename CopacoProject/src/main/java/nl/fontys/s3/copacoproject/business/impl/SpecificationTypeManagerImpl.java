@@ -7,10 +7,12 @@ import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecif
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
+import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -19,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class SpecificationTypeManagerImpl implements SpecificationTypeManager {
     private final SpecificationTypeRepository specificationTypeRepository;
+    private final ComponentRepository componentRepository;
 
     @Override
     public GetAllSpecificationTypeResponse getAllSpecificationType() {
@@ -50,6 +53,20 @@ public class SpecificationTypeManagerImpl implements SpecificationTypeManager {
         }
         return SpecificationTypeConverter.convertFromEntityToBase(specificationTypeEntity);
     }
+
+    @Override
+    public List<SpecificationType> getSpecificationTypesByComponentId(Long componentId) {
+        if(!componentRepository.existsById(componentId)) {
+            throw new IllegalArgumentException("Component not found");
+        }
+        List<SpecificationType> sepcifications = new ArrayList<>();
+        List<SpecificationTypeEntity> specificationTypeEntities = specificationTypeRepository.findSpecificationTypeEntitiesByComponentId(componentId);
+        for(SpecificationTypeEntity specificationTypeEntity : specificationTypeEntities) {
+            sepcifications.add(SpecificationTypeConverter.convertFromEntityToBase(specificationTypeEntity));
+        }
+        return sepcifications;
+    }
+
     @Override
     public void deleteSpecificationType(Long id){
         specificationTypeRepository.deleteById(id);

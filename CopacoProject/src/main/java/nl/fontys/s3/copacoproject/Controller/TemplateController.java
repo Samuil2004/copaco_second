@@ -1,6 +1,7 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import lombok.RequiredArgsConstructor;
+import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Template;
@@ -36,8 +37,8 @@ public class TemplateController {
         try{
             return ResponseEntity.ok(templateManager.getTemplateById(id));
         }
-        catch (IndexOutOfBoundsException e) {
-            return ResponseEntity.badRequest().build();
+        catch(ObjectNotFound e){
+            return ResponseEntity.notFound().build();
         }
         catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -48,6 +49,9 @@ public class TemplateController {
     public ResponseEntity<List<Template>> getTemplatesByName(@PathVariable("name") String name) {
         try{
             return ResponseEntity.ok(templateManager.getTemplatesByName(name));
+        }
+        catch(ObjectNotFound e){
+            return ResponseEntity.notFound().build();
         }
         catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -70,8 +74,8 @@ public class TemplateController {
             templateManager.deleteTemplate(id);
             return ResponseEntity.ok().build();
         }
-        catch(InvalidParameterException e) {
-            return ResponseEntity.badRequest().build();
+        catch(ObjectNotFound e) {
+            return ResponseEntity.notFound().build();
         }
         catch (Exception e) {
             return ResponseEntity.internalServerError().build();
