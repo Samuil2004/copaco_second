@@ -18,5 +18,6 @@ public class CreateTemplateRequest {
     private String name;
     private long brandId;
     private String imageUrl;
+    @NotNull
     private List<ComponentTypeItemInTemplate> componentTypes;
 }

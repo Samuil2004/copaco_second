@@ -12,4 +12,5 @@ public interface ComponentManager {
     List<GetComponentResponse> getAllComponents();
     //GetComponentsByCategoryResponse getComponentsByCategory(String category);
     //Component GetComponentById(Long id);
+    List<Component> getAllComponentsByCategory(long categoryId);
 }

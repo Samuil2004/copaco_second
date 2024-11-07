@@ -20,6 +20,7 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity,Long>
             @Param("specificationTypeId") Long specificationTypeId,
             @Param("values") List<String> values);
 
-    Optional<ComponentEntity> findByComponentId(Long componentId);
+    @Query("SELECT c FROM ComponentEntity c WHERE c.componentType.category.id = :categoryId")
+    List<ComponentEntity> findComponentEntitiesByCategory(@Param("categoryId") long categoryId);
 
 }

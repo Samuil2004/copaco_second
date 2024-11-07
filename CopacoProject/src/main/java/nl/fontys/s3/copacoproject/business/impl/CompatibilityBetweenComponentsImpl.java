@@ -190,17 +190,13 @@ package nl.fontys.s3.copacoproject.business.impl;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ComponentTypeNotFound;
+import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
-import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
 import nl.fontys.s3.copacoproject.domain.Component;
-import nl.fontys.s3.copacoproject.domain.SpecificationType;
-import nl.fontys.s3.copacoproject.domain.SpecificationType_ComponentType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
-import org.hibernate.query.sqm.tree.expression.Compatibility;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -399,7 +395,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             return  allComponentsBase;
 
         }
-        throw new ComponentTypeNotFound("COMPONENT NOT FOUND");
+        throw new ObjectNotFound("COMPONENT NOT FOUND");
     }
 
 }

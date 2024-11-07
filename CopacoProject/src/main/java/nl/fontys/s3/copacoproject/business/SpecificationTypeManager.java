@@ -5,9 +5,12 @@ import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecif
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 
+import java.util.List;
+
 public interface SpecificationTypeManager {
     GetAllSpecificationTypeResponse getAllSpecificationType();
     CreateSpecificationTypeResponse createSpecificationType(CreateSpecificationTypeRequest request);
     void deleteSpecificationType(Long id);
     SpecificationType getSpecificationType(Long id);
+    List<SpecificationType> getSpecificationTypesByComponentId(Long componentId);
 }

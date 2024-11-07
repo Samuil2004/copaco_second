@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ComponentTypeNotFound;
+import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeComponentTypeRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
@@ -64,7 +64,7 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
     public ComponentType getComponentTypeById(long id){
         Optional<ComponentTypeEntity> component = componentTypeRepository.findById(id);
         if (component.isEmpty()) {
-            throw new ComponentTypeNotFound("COMPONENT_TYPE_NOT_FOUND");
+            throw new ObjectNotFound("COMPONENT_TYPE_NOT_FOUND");
         }
         return ComponentTypeConverter.convertFromEntityToBase(component.get());
     }
