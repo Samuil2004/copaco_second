@@ -1,7 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import lombok.RequiredArgsConstructor;
-import nl.fontys.s3.copacoproject.business.AddressManager;
 import nl.fontys.s3.copacoproject.business.UserManager;
 import nl.fontys.s3.copacoproject.business.dto.userDto.GetAllUsersResponse;
 import nl.fontys.s3.copacoproject.domain.User;
@@ -43,6 +42,7 @@ public class UserController {
         userManager.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
     /*@PutMapping("/{id}")
     public ResponseEntity<Void> updateUser(@PathVariable long id,
                                            @RequestBody @Validated UpdateUserRequest user) throws Exception {
