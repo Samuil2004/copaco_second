@@ -10,6 +10,7 @@ import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.converters.BrandConverter;
 import nl.fontys.s3.copacoproject.business.converters.CategoryConverter;
+import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.converters.TemplateConverter;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.ComponentTypeItemInTemplate;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
@@ -19,6 +20,7 @@ import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
+import nl.fontys.s3.copacoproject.persistence.entity.primaryKeys.ComponentTypeList_Template_CPK;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
@@ -154,7 +156,7 @@ public class TemplateManagerImpl implements TemplateManager {
                 throw new InvalidParameterException("Component type not found");
             }
         }
-        if(templateRepository.existsTemplateEntityByNameAndBrandAndCategory(request.getName(), request.getBrandId(), request.getCategoryId())) {
+        if(templateRepository.existsTemplateEntityForUpdate(templateId ,request.getName(), request.getBrandId(), request.getCategoryId())) {
             throw new ObjectExistsAlreadyException("Template already exists");
         }
 
@@ -186,15 +188,23 @@ public class TemplateManagerImpl implements TemplateManager {
         componentTypeListRepository.deleteAll(itemsToDelete);
 
 
-       /* //save updates in order of importance / add new component types in template
+        //save updates in order of importance / add new component types in template
         for(ComponentTypeItemInTemplate item : componentTypes) {
             ComponentTypeEntity componentTypeEntity = componentTypeRepository.findComponentTypeEntityById(item.getComponentTypeId());
             ComponentTypeList_Template_CPK componentInTemplateId = new ComponentTypeList_Template_CPK(templateEntity, componentTypeEntity);
 
             ComponentTypeList_Template orderedItemInTemplate = new ComponentTypeList_Template();
             if(componentTypeListRepository.existsById(componentInTemplateId)){
-//                orderedItemInTemplate = componentTypeListRepository.
+                orderedItemInTemplate = componentTypeListRepository.findComponentTypeList_TemplateByTemplateAndComponentType(componentInTemplateId.getTemplate(), componentInTemplateId.getComponentType());
             }
-        }*/
+            else{
+                orderedItemInTemplate = ComponentTypeList_Template.builder()
+                        .orderOfImportance(item.getOrderOfImportance())
+                        .componentType(componentTypeEntity)
+                        .template(templateEntity)
+                        .build();
+                componentTypeListRepository.save(orderedItemInTemplate);
+            }
+        }
     }
 }

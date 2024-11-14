@@ -35,16 +35,8 @@ public class TemplateController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Template> getTemplateById(@PathVariable("id") long id) {
-        try{
-            return ResponseEntity.ok(templateManager.getTemplateById(id));
-        }
-        catch(ObjectNotFound e){
-            return ResponseEntity.notFound().build();
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public Template getTemplateById(@PathVariable("id") long id) {
+        return templateManager.getTemplateById(id);
     }
 
     @GetMapping("/name/{name}")

@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.persistence;
 
+import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeList_Template;
 import nl.fontys.s3.copacoproject.persistence.entity.TemplateEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.primaryKeys.ComponentTypeList_Template_CPK;
@@ -18,4 +19,6 @@ public interface ComponentTypeList_TemplateRepository extends JpaRepository<Comp
     void deleteByTemplateId(@Param("templateId") Long templateId);
 
     List<ComponentTypeList_Template> findComponentTypeList_TemplatesByTemplate(TemplateEntity template);
+
+    ComponentTypeList_Template findComponentTypeList_TemplateByTemplateAndComponentType(TemplateEntity template, ComponentTypeEntity componentType);
 }
