@@ -25,13 +25,34 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
+
     @Override
-    public List<Component> automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    public List<Component>automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
     {
-        List<Component> allComponentsBase = new ArrayList<>();
+        List<Component> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(request.getFirstComponentId(), request.getSearchedComponentTypeId());
+return compatibilityBetweenFirstComponentAndComponentType;
+        //        List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentTypeENTITY = compatibilityBetweenFirstComponentAndComponentType.stream().map(ComponentConverter::convertFromBaseToEntity).toList();
+//
+//        Optional<ComponentEntity> foundComponentByIdFromRequest = componentRepository.findByComponentId(request.getSearchedComponentTypeId());
+//        Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(request.getSearchedComponentTypeId());
+//
+//        List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypes(foundComponentByIdFromRequest.get().getComponentType(), foundComponentTypeByIdFromRequest.get());
+//        if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty())
+//        {
+//            return compatibilityBetweenFirstComponentAndComponentType;
+//        }
+//        CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundComponentByIdFromRequest.get(),foundComponentTypeByIdFromRequest.get());
+//
+//        return CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibilityBetweenFirstComponentAndComponentTypeENTITY,compatibilityResult.getSpecificationsMap());
+
+
+    }
+    public List<Component> getCompatibleItemsBetweenAComponentAndComponentType(Long componentId, Long componentTypeId)
+    {
+//        List<Component> allComponentsBase = new ArrayList<>();
         //Identify the component Id and the component type Id that are past trough the api and find their objects
-        Optional<ComponentEntity> foundComponentByIdFromRequest = componentRepository.findByComponentId(request.getFirstComponentId());
-        Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(request.getSearchedComponentTypeId());
+        Optional<ComponentEntity> foundComponentByIdFromRequest = componentRepository.findByComponentId(componentId);
+        Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(componentTypeId);
 
         if(foundComponentByIdFromRequest.isPresent() && foundComponentTypeByIdFromRequest.isPresent()) {
             //Get all the automatic compatibility records and rules there are between the component type of the first component and the component type that is passed in the request
@@ -54,100 +75,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //This list store all components from the selected component type that are compatible with the first component considering each rule separately (later all of them will be considered)
             List<ComponentEntity> allCompatibleComponentsBeforeFiltering = compatibilityResult.getCompatibleComponents();
 
-
-            //some components are duplicated in the allCompatibleComponentsBeforeFiltering list, so now we map only the unique ones
-            Set<ComponentEntity> uniqueComponentEntities = new HashSet<>(allCompatibleComponentsBeforeFiltering);
-
-            for(ComponentEntity componentEntity : uniqueComponentEntities) {
-                List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
-                Map<SpecificationTypeEntity, List<String>> mapOfUniqueSpecificationsForItemAndItsValues = new HashMap<>();
-
-                for (Component_SpecificationList specificationForTheSelectedComponent : allSpecificationsForComponent)
-                {
-                    SpecificationTypeEntity specType = specificationForTheSelectedComponent.getSpecificationType();
-                    String value = specificationForTheSelectedComponent.getValue();
-
-                    //Check if there are already any values for the specification type in the dictionary
-                    List<String> valuesList = mapOfUniqueSpecificationsForItemAndItsValues.get(specType);
-
-                    //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-                    if (valuesList == null) {
-                        valuesList = new ArrayList<>();
-                        valuesList.add(value);
-                        mapOfUniqueSpecificationsForItemAndItsValues.put(specType, valuesList);
-
-                    }
-                    //otherwise just add the value
-                    else {
-                        valuesList.add(value);
-                    }
-                }
-
-                boolean atLeastOneMatches = false;
-
-                //Loop trough all the specifications for the component and see if there are any matching the those that will be considered for
-                // the compatibility and if yes to check if the values that are compatible with the first component can be found as values
-                // in the specification of the component values [ex. motherboard and ram are defined as compatible by the clock speed and the DDR values and
-                //the motherboard supports clock speed of 2000 and the ram has a clock speed of 2000, but if the motherboard supports DDR5 and the ram has
-                //DDR4 they are not compatible. this loop below goes trough all the specifications of the component type, checks which are considered in the
-                //rules for the compatibility between the two component types (all the specifications considered are mapped in the
-                // allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide map) and checks if the values that the components have are supported by the first
-                //component.
-
-                //outerLoop:
-                for (Map.Entry<SpecificationTypeEntity, List<String>> entry : mapOfUniqueSpecificationsForItemAndItsValues.entrySet()) {
-                    SpecificationTypeEntity specification = entry.getKey();
-                    List<String> values = entry.getValue();
-                    atLeastOneMatches = false;
-                    if (allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.containsKey(specification)) {
-                        // Retrieve the list of expected values for this specification type
-                        List<String> expectedValues =
-                                allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.get(specification);
-
-                        if(!expectedValues.isEmpty()) {
-                            for (String value : values) {
-                                if (expectedValues.contains(value)) {
-                                    atLeastOneMatches = true;
-                                    break; // Found a match, no need to check further
-                                }
-                            }
-                            if (!atLeastOneMatches) {
-                                break;
-
-                            }
-                        }
-
-                    }
-                }
-
-                if(atLeastOneMatches) {
-                    Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
-
-                    //Loop over all the specification of a component type THIS IS NEEDED ONLY FOR THE CONVERTER
-                    for (Component_SpecificationList specificationList : allSpecificationsForComponent) {
-                        SpecificationTypeEntity specType = specificationList.getSpecificationType();
-                        String value = specificationList.getValue();
-
-                        //Check if there are already any values for the specification type in the dictionary
-                        List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
-
-                        //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-                        if (valuesList == null) {
-                            valuesList = new ArrayList<>();
-                            valuesList.add(value);
-                            dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
-
-                        }
-                        else {
-                            valuesList.add(value);
-                        }
-                    }
-                    Component componentBase = ComponentConverter.convertFromEntityToBase(componentEntity, dictionaryWithTheSpecificationAndAllValuesForComponent);
-                    allComponentsBase.add(componentBase);
-                }
-
-            }
-            return  allComponentsBase;
+            return CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(allCompatibleComponentsBeforeFiltering,allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide);
 
         }
         throw new ObjectNotFound("COMPONENT NOT FOUND");
@@ -199,13 +127,23 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
         //Loop all the automatic compatibilities in order to find the rules and the specifications to consider for each component type
         for (AutomaticCompatibilityEntity automaticCompatibility : allCompatibilityRecordsBetweenTwoComponentTypes) {
+            SpecificationTypeEntity specificationForTheMainComponent;
+            SpecificationTypeEntity specificationForTheSearchedComponents;
+            if(automaticCompatibility.getComponent1Id().getId() == selectedComponent.getComponentType().getId()) {
+                //Find the specifications to consider for each rule
+                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
+                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
 
-            //Find the specifications to consider for each rule
-            SpecificationTypeEntity specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-            allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
+                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
+                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
+            }
+            else {
+                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
+                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
 
-            SpecificationTypeEntity specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-            allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
+                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
+                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
+            }
             //Get all specification values for the given specification to consider for the main component
             List<Component_SpecificationList> specificationsForTheSelectedComponent = componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(selectedComponent, specificationForTheMainComponent);
             List<String> values = new ArrayList<>();
@@ -225,6 +163,106 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 .specificationsMap(allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide)
                 .compatibleComponents(allCompatibleComponentsBeforeFiltering)
                 .build();
+    }
+
+
+    private List<Component> CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(List<ComponentEntity> allCompatibleComponentsBeforeFiltering,Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide)
+    {
+        List<Component> allComponentsBase = new ArrayList<>();
+        //some components are duplicated in the allCompatibleComponentsBeforeFiltering list, so now we map only the unique ones
+        Set<ComponentEntity> uniqueComponentEntities = new HashSet<>(allCompatibleComponentsBeforeFiltering);
+
+        for(ComponentEntity componentEntity : uniqueComponentEntities) {
+            List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
+            Map<SpecificationTypeEntity, List<String>> mapOfUniqueSpecificationsForItemAndItsValues = new HashMap<>();
+
+            for (Component_SpecificationList specificationForTheSelectedComponent : allSpecificationsForComponent)
+            {
+                SpecificationTypeEntity specType = specificationForTheSelectedComponent.getSpecificationType();
+                String value = specificationForTheSelectedComponent.getValue();
+
+                //Check if there are already any values for the specification type in the dictionary
+                List<String> valuesList = mapOfUniqueSpecificationsForItemAndItsValues.get(specType);
+
+                //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
+                if (valuesList == null) {
+                    valuesList = new ArrayList<>();
+                    valuesList.add(value);
+                    mapOfUniqueSpecificationsForItemAndItsValues.put(specType, valuesList);
+
+                }
+                //otherwise just add the value
+                else {
+                    valuesList.add(value);
+                }
+            }
+
+            boolean atLeastOneMatches = false;
+
+            //Loop trough all the specifications for the component and see if there are any matching the those that will be considered for
+            // the compatibility and if yes to check if the values that are compatible with the first component can be found as values
+            // in the specification of the component values [ex. motherboard and ram are defined as compatible by the clock speed and the DDR values and
+            //the motherboard supports clock speed of 2000 and the ram has a clock speed of 2000, but if the motherboard supports DDR5 and the ram has
+            //DDR4 they are not compatible. this loop below goes trough all the specifications of the component type, checks which are considered in the
+            //rules for the compatibility between the two component types (all the specifications considered are mapped in the
+            // allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide map) and checks if the values that the components have are supported by the first
+            //component.
+
+            //outerLoop:
+            for (Map.Entry<SpecificationTypeEntity, List<String>> entry : mapOfUniqueSpecificationsForItemAndItsValues.entrySet()) {
+                SpecificationTypeEntity specification = entry.getKey();
+                List<String> values = entry.getValue();
+                //atLeastOneMatches = false;
+                if (allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.containsKey(specification)) {
+                    atLeastOneMatches = false;
+                    // Retrieve the list of expected values for this specification type
+                    List<String> expectedValues =
+                            allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.get(specification);
+
+                    if(!expectedValues.isEmpty()) {
+                        for (String value : values) {
+                            if (expectedValues.contains(value)) {
+                                atLeastOneMatches = true;
+                                break; // Found a match, no need to check further
+                            }
+                        }
+                        if (!atLeastOneMatches) {
+                            break;
+
+                        }
+                    }
+
+                }
+            }
+
+            if(atLeastOneMatches) {
+                Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
+
+                //Loop over all the specification of a component type THIS IS NEEDED ONLY FOR THE CONVERTER
+                for (Component_SpecificationList specificationList : allSpecificationsForComponent) {
+                    SpecificationTypeEntity specType = specificationList.getSpecificationType();
+                    String value = specificationList.getValue();
+
+                    //Check if there are already any values for the specification type in the dictionary
+                    List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
+
+                    //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
+                    if (valuesList == null) {
+                        valuesList = new ArrayList<>();
+                        valuesList.add(value);
+                        dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
+
+                    }
+                    else {
+                        valuesList.add(value);
+                    }
+                }
+                Component componentBase = ComponentConverter.convertFromEntityToBase(componentEntity, dictionaryWithTheSpecificationAndAllValuesForComponent);
+                allComponentsBase.add(componentBase);
+            }
+
+        }
+        return  allComponentsBase;
     }
 
 }
