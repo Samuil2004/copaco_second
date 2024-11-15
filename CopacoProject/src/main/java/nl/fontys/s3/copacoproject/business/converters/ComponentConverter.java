@@ -37,10 +37,10 @@ public final class ComponentConverter {
                 .componentId(component.getComponentId())
                 .componentName(component.getComponentName())
                 .componentImageUrl(component.getComponentImageUrl())
-                .componentId(component.getComponentId())
-                .componentName(component.getComponentName())
+                .componentType(ComponentTypeConverter.convertFromBaseToEntity(component.getComponentType()))
+                .brand(BrandConverter.convertFromBaseToEntity(component.getBrand()))
                 .componentPrice(component.getComponentPrice())
-                .componentImageUrl(component.getComponentImageUrl())
+                //.componentImageUrl(component.getComponentImageUrl())
                 .build();
     }
 }
