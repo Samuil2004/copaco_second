@@ -16,6 +16,12 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     boolean existsTemplateEntityByNameAndBrandAndCategory(@Param("templateName") String templateName,
                                                           @Param("brandId") long brandId,
                                                           @Param("categoryId") long categoryId);
+    @Query("SELECT CASE WHEN COUNT(te) > 0 THEN true ELSE false END FROM TemplateEntity te " +
+            "WHERE te.name = :templateName AND te.brand.id = :brandId AND te.category.id = :categoryId AND te.id!= :templateId")
+    boolean existsTemplateEntityForUpdate(@Param("templateId") long templateId,
+                                          @Param("templateName") String templateName,
+                                          @Param("brandId") long brandId,
+                                          @Param("categoryId") long categoryId);
     @Query("SELECT c FROM ComponentTypeList_Template c WHERE c.template.id = :template_id")
     List<ComponentTypeList_Template> findComponentTypeListByTemplateId(@Param("template_id") long templateId);
 
