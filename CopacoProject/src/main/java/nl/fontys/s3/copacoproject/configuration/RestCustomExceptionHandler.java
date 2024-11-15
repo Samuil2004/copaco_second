@@ -1,3 +1,4 @@
+package nl.fontys.s3.copacoproject.configuration;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

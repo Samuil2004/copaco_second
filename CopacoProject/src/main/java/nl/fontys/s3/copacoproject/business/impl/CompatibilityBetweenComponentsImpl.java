@@ -22,41 +22,50 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenComponents {
     private final AutomaticCompatibilityRepository automaticCompatibilityRepository;
-    private final CompatibilityManager compatibilityManager;
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
 
-    @Override
-    public List<Component>automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+
+    private List<Long> checkAndMapInputtedIds (GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
     {
         List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
-                request.getSecondComponentId(),
-                request.getThirdComponentId(),
-                request.getFourthComponentId(),
-                request.getFifthComponentId(),
-                request.getSixthComponentId(),
-                request.getSeventhComponentId())
+                        request.getSecondComponentId(),
+                        request.getThirdComponentId(),
+                        request.getFourthComponentId(),
+                        request.getFifthComponentId(),
+                        request.getSixthComponentId(),
+                        request.getSeventhComponentId())
                 .filter(Objects::nonNull)
                 .toList();
 
-        //List<Component> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(request.getFirstComponentId(), request.getSearchedComponentTypeId());
-        //List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(request.getFirstComponentId(), request.getSearchedComponentTypeId());
+        Set<Long> seen = new HashSet<>();
+        boolean hasDuplicates = notNullIds.stream().anyMatch(id -> !seen.add(id));
+        if(hasDuplicates)
+        {
+            throw new ObjectNotFound("Duplicate components are not allowed.");
+        }
+        return notNullIds;
+    }
 
-//return compatibilityBetweenFirstComponentAndComponentType;
-        //List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentTypeENTITY = compatibilityBetweenFirstComponentAndComponentType.stream().map(ComponentConverter::convertFromBaseToEntity).toList();
+    @Override
+    public List<Component>automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    {
+        List<Long> notNullIds = checkAndMapInputtedIds(request);
 
         List<ComponentEntity> compatibleComponentsEntity = new ArrayList<>();
         Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(request.getSearchedComponentTypeId());
+        if(foundComponentTypeByIdFromRequest.isEmpty())
+        {
+            throw new ObjectNotFound("Component type not found");
+        }
         for(Long componentId : notNullIds)
         {
             Optional<ComponentEntity> foundComponentById = componentRepository.findByComponentId(componentId);
             if(foundComponentById.isEmpty())
             {
-                return convertComponentEntityToBase(compatibleComponentsEntity);
+                throw new ObjectNotFound("Component not found");
             }
-            List<ComponentEntity> compatibilityBetweenCurrentComponentAndTheSearchedComponentType = getCompatibleItemsBetweenAComponentAndComponentType(foundComponentById.get().getComponentId(), foundComponentTypeByIdFromRequest.get().getId());
-
             List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypes(foundComponentById.get().getComponentType(), foundComponentTypeByIdFromRequest.get());
             if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty())
             {
@@ -65,7 +74,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     return convertComponentEntityToBase(compatibleComponentsEntity);
                 }
                 continue;
-                //return convertComponentEntityToBase(compatibleComponentsEntity);
             }
             CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundComponentById.get(),foundComponentTypeByIdFromRequest.get());
             if(compatibilityResult.getCompatibleComponents().isEmpty())
@@ -75,54 +83,31 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             List<ComponentEntity> compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = new ArrayList<>();
             if(notNullIds.indexOf(componentId) == 0 || compatibleComponentsEntity.isEmpty())
             {
-                List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(componentId, foundComponentTypeByIdFromRequest.get().getId());
+                List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(foundComponentById.get(), foundComponentTypeByIdFromRequest.get());
                 compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibilityBetweenFirstComponentAndComponentType,compatibilityResult.getSpecificationsMap());
             }
             else {
-//                if(compatibleComponentsEntity.isEmpty())
-//                {
-//                    List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(componentId, foundComponentTypeByIdFromRequest.get().getId());
-//                    compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibleComponentsEntity, compatibilityResult.getSpecificationsMap());
-//                }
                 compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibleComponentsEntity, compatibilityResult.getSpecificationsMap());
             }
             compatibleComponentsEntity.clear();
             compatibleComponentsEntity.addAll(compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType);
         }
         return convertComponentEntityToBase(compatibleComponentsEntity);
-
-//        Optional<ComponentEntity> foundSecondComponentByIdFromRequest = componentRepository.findByComponentId(request.getSecondComponentId());
-//        if(foundSecondComponentByIdFromRequest.isEmpty())
-//        {
-//            return convertComponentEntityToBase(compatibilityBetweenFirstComponentAndComponentType);
-//        }
-//        //Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(request.getSearchedComponentTypeId());
-//
-//        List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypes(foundSecondComponentByIdFromRequest.get().getComponentType(), foundComponentTypeByIdFromRequest.get());
-//        if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty())
-//        {
-//            return convertComponentEntityToBase(compatibilityBetweenFirstComponentAndComponentType);
-//        }
-//        CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundSecondComponentByIdFromRequest.get(),foundComponentTypeByIdFromRequest.get());
-//
-//        List<ComponentEntity> compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibilityBetweenFirstComponentAndComponentType,compatibilityResult.getSpecificationsMap());
-//        return convertComponentEntityToBase(compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType);
-
     }
-    public List<ComponentEntity> getCompatibleItemsBetweenAComponentAndComponentType(Long componentId, Long componentTypeId)
+    public List<ComponentEntity> getCompatibleItemsBetweenAComponentAndComponentType(ComponentEntity foundComponentByIdFromRequest, ComponentTypeEntity foundComponentTypeByIdFromRequest)
     {
 //        List<Component> allComponentsBase = new ArrayList<>();
         //Identify the component Id and the component type Id that are past trough the api and find their objects
-        Optional<ComponentEntity> foundComponentByIdFromRequest = componentRepository.findByComponentId(componentId);
-        Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(componentTypeId);
+        //Optional<ComponentEntity> foundComponentByIdFromRequest = componentRepository.findByComponentId(componentId);
+        //Optional<ComponentTypeEntity> foundComponentTypeByIdFromRequest = componentTypeRepository.findById(componentTypeId);
 
-        if(foundComponentByIdFromRequest.isPresent() && foundComponentTypeByIdFromRequest.isPresent()) {
+        //if(foundComponentByIdFromRequest.isPresent() && foundComponentTypeByIdFromRequest.isPresent()) {
             //Get all the automatic compatibility records and rules there are between the component type of the first component and the component type that is passed in the request
-            List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypes(foundComponentByIdFromRequest.get().getComponentType(), foundComponentTypeByIdFromRequest.get());
+            List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypes(foundComponentByIdFromRequest.getComponentType(), foundComponentTypeByIdFromRequest);
 
             //if there are no rules, all components from the two component types should be considered compatible
             if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty()) {
-                List<ComponentEntity> allComponentsFromGivenComponentType = componentRepository.findByComponentType_Id(foundComponentTypeByIdFromRequest.get().getId());
+                List<ComponentEntity> allComponentsFromGivenComponentType = componentRepository.findByComponentType_Id(foundComponentTypeByIdFromRequest.getId());
                 if(allComponentsFromGivenComponentType.isEmpty())
                 {
                     throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
@@ -131,7 +116,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 //return convertComponentEntityToBase(allComponentsFromGivenComponentType);
             }
 
-            CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundComponentByIdFromRequest.get(),foundComponentTypeByIdFromRequest.get());
+            CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundComponentByIdFromRequest,foundComponentTypeByIdFromRequest);
 
             //This map will store all specifications that should be considered from the first component side and the corresponding values
             Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide = compatibilityResult.getSpecificationsMap();
@@ -142,8 +127,8 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
             return allComponentsEntity;
             //return convertComponentEntityToBase(allComponentsEntity);
-        }
-        throw new ObjectNotFound("COMPONENT NOT FOUND");
+        //}
+        //throw new ObjectNotFound("COMPONENT NOT FOUND");
     }
 
 
