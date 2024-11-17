@@ -3,20 +3,25 @@ package nl.fontys.s3.copacoproject.Controller;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.AddressManager;
 import nl.fontys.s3.copacoproject.business.UserManager;
+import nl.fontys.s3.copacoproject.business.dto.addressDto.CreateNewAddressResponse;
+import nl.fontys.s3.copacoproject.business.dto.userDto.CreateUserRequest;
+import nl.fontys.s3.copacoproject.business.dto.userDto.CreateUserResponse;
 import nl.fontys.s3.copacoproject.business.dto.userDto.GetAllUsersResponse;
 import nl.fontys.s3.copacoproject.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserManager userManager;
-    /*private final AddressManager addressManager;*/
+    private final AddressManager addressManager;
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
@@ -27,17 +32,20 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
     @GetMapping
     public ResponseEntity<GetAllUsersResponse> getAllUsers() {
         GetAllUsersResponse response = userManager.getUsers();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    /*@PostMapping
+
+    @PostMapping()
     public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Validated CreateUserRequest user) {
-        CreateNewAddressResponse savedAddress = addressManager.createNewAddress(user.getAddress());
-        CreateUserResponse userResponse = userManager.createUser(user, savedAddress.getAddressId());
+        //CreateNewAddressResponse savedAddress = addressManager.createNewAddress(user.getAddress());
+        CreateUserResponse userResponse = userManager.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
-    }*/
+    }
+
    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userManager.deleteUser(id);
