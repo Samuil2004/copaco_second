@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface ComponentTypeRepository extends JpaRepository<ComponentTypeEntity, Long> {
-    //Optional<ComponentTypeEntity> findById(Long id);
+    Optional<ComponentTypeEntity> findById(Long id);
 
 
 }

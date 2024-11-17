@@ -37,4 +37,17 @@ public class ComponentController {
         }
     }
 
+    @GetMapping("/findByComponentTypeId/{componentTypeId}")
+    public ResponseEntity<List<Component>> getComponentsFromComponentType(@PathVariable("componentTypeId") Long componentTypeId) {
+        try{
+            return ResponseEntity.ok(componentManager.getAllComponentFromComponentType(componentTypeId));
+        }
+        catch(ObjectNotFound e){
+            return ResponseEntity.notFound().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }

@@ -69,6 +69,11 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypes(foundComponentById.get().getComponentType(), foundComponentTypeByIdFromRequest.get());
             if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty())
             {
+                if(notNullIds.indexOf(componentId) == 0 && notNullIds.size() == 1)
+                {
+                    List<ComponentEntity> allComponentsFromGivenComponentType = componentRepository.findByComponentType_Id(foundComponentTypeByIdFromRequest.get().getId());
+                    return convertComponentEntityToBase(allComponentsFromGivenComponentType);
+                }
                 if(notNullIds.indexOf(componentId) == notNullIds.size() - 1)
                 {
                     return convertComponentEntityToBase(compatibleComponentsEntity);
