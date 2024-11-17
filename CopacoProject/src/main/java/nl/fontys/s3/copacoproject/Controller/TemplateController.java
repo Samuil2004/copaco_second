@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
@@ -19,6 +20,7 @@ public class TemplateController {
     private final TemplateManager templateManager;
 
     @PostMapping()
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createTemplate(@RequestBody @Validated CreateTemplateRequest request) {
         try {
             templateManager.createTemplate(request);
@@ -33,6 +35,7 @@ public class TemplateController {
     }
 
     @GetMapping("/{id}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<Template> getTemplateById(@PathVariable("id") long id) {
         try{
             return ResponseEntity.ok(templateManager.getTemplateById(id));
@@ -46,6 +49,7 @@ public class TemplateController {
     }
 
     @GetMapping("/name/{name}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Template>> getTemplatesByName(@PathVariable("name") String name) {
         try{
             return ResponseEntity.ok(templateManager.getTemplatesByName(name));
@@ -59,6 +63,7 @@ public class TemplateController {
     }
 
     @GetMapping()
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Template>> getTemplates() {
         try{
             return ResponseEntity.ok(templateManager.getTemplates());
@@ -69,6 +74,7 @@ public class TemplateController {
     }
 
     @DeleteMapping("/{id}")
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> deleteTemplate(@PathVariable long id) {
         try{
             templateManager.deleteTemplate(id);

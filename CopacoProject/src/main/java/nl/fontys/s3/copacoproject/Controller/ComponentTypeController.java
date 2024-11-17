@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class ComponentTypeController {
     private ComponentTypeManager componentTypeManager;
     @GetMapping
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<GetAllComponentTypeResponse> getAllComponentTypes(){
         GetAllComponentTypeResponse response = componentTypeManager.getAllComponentTypes();
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -29,6 +31,7 @@ public class ComponentTypeController {
 //        return ResponseEntity.status(HttpStatus.CREATED).body(response);
 //    }
     @GetMapping("/{id}")
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<ComponentType> getComponentTypeById(@PathVariable Long id){
         ComponentType componentType = componentTypeManager.getComponentTypeById(id);
 

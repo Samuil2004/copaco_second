@@ -22,7 +22,8 @@ import java.util.List;
 public class CompatibilityController {
     private final CompatibilityManager compatibilityManager;
     private final CompatibilityBetweenComponents compatibilityBetweenComponents;
-    @GetMapping("")
+
+    @GetMapping()
     public ResponseEntity<List<CompatibilityType>> getAllCompatibilityTypes(){
         List<CompatibilityType> allCompatibilityTypes = compatibilityManager.allCompatibilityTypes();
 

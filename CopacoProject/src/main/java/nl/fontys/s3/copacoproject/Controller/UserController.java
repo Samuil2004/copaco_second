@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.AddressManager;
 import nl.fontys.s3.copacoproject.business.UserManager;
@@ -24,6 +25,7 @@ public class UserController {
     private final AddressManager addressManager;
 
     @GetMapping("/{id}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userManager.getUser(id);
         if (user.isPresent()) {
@@ -34,6 +36,7 @@ public class UserController {
     }
 
     @GetMapping
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<GetAllUsersResponse> getAllUsers() {
         GetAllUsersResponse response = userManager.getUsers();
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -47,6 +50,7 @@ public class UserController {
     }
 
    @DeleteMapping("/{id}")
+   @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userManager.deleteUser(id);
         return ResponseEntity.noContent().build();
