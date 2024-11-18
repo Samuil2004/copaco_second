@@ -76,7 +76,6 @@ public class ComponentManagerImpl implements ComponentManager {
             allComponentsResponse.add(getComponentResponse);
         }
 
-        //GetAllComponentsResponse response = GetAllComponentsResponse.builder().allComponents(allComponentsBase).build();
         return allComponentsResponse;
     }
 

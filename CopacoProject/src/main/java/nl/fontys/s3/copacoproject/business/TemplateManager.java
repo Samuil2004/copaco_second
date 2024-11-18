@@ -1,6 +1,7 @@
 package nl.fontys.s3.copacoproject.business;
 
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Template;
 
 import java.util.List;
@@ -11,4 +12,5 @@ public interface TemplateManager {
     Template getTemplateById(long id);
     List<Template> getTemplates();
     List<Template> getTemplatesByName(String name);
+    void updateTemplate(long templateId, UpdateTemplateRequest request);
 }
