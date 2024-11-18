@@ -21,5 +21,5 @@ public class CreateUserRequest {
     private String password;
     @NotNull
     private Role role;
-    private CreateNewAddressRequest address;
+    //private CreateNewAddressRequest address;
 }

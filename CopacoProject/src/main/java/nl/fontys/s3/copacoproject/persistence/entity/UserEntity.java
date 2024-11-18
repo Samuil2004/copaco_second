@@ -14,7 +14,7 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(name="first_name")
     @NotNull
@@ -32,7 +32,7 @@ public class UserEntity {
     @NotNull
     private String password;
 
-    @JoinColumn(name="role_id")
+    @JoinColumn(name="role_id", referencedColumnName = "id")
     @ManyToOne
     @NotNull
     private RoleEntity role;

@@ -1,8 +1,9 @@
-package nl.fontys.s3.copacoproject.configuration;
+package nl.fontys.s3.copacoproject.configuration.exceptionhandler;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -24,6 +25,12 @@ public class RestCustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final URI VALIDATION_ERROR_TYPE = URI.create("/validation-error");
 
+    @ExceptionHandler(value = {AccessDeniedException.class})
+    public ResponseEntity<Object> handleConstraintViolationException(final AccessDeniedException error) {
+        log.error("Access Denied with status {} occurred.", HttpStatus.FORBIDDEN, error);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException error, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -33,12 +40,6 @@ public class RestCustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(convertToProblemDetail(errors));
     }
-
-//    @ExceptionHandler(value = {NotFoundException.class})
-//    public ProblemDetail handleConstraintViolationException(final ConstraintViolationException error) {
-//        final List<ValidationErrorDTO> errors = convertToErrorsList(error);
-//        return convertToProblemDetail(errors);
-//    }
 
     @ExceptionHandler(value = {ConstraintViolationException.class})
     public ProblemDetail handleConstraintViolationException(final ConstraintViolationException error) {
