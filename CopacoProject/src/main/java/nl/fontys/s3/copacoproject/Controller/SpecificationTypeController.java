@@ -3,6 +3,7 @@ package nl.fontys.s3.copacoproject.Controller;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
+import nl.fontys.s3.copacoproject.business.SpecificationType_ComponentType;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
@@ -18,6 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SpecificationTypeController {
     private final SpecificationTypeManager specificationTypeManager;
+    private final SpecificationType_ComponentType specificationType_ComponentType;
+
 
     @GetMapping
     @RolesAllowed({"ADMIN", "CUSTOMER"})
@@ -56,6 +59,13 @@ public class SpecificationTypeController {
         }
         else
             return new ResponseEntity<>(specificationType, HttpStatus.OK);
+    }
+
+    //Authentication disabled for this one
+    @GetMapping("findIdByComponentTypeIdAndSpecificationTypeId/{componentTypeId}/{specificationTypeId}")
+    public Long findIdByComponentTypeIdAndSpecificationTypeId(@PathVariable Long componentTypeId, @PathVariable Long specificationTypeId){
+        Long response = specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
+        return response;
     }
 
 
