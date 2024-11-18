@@ -48,6 +48,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return notNullIds;
     }
 
+    //comments of what each method does to be added
     @Override
     public List<Component>automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
     {
