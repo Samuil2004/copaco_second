@@ -1,12 +1,12 @@
 package nl.fontys.s3.copacoproject.business.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Builder
 @Getter
 @Setter
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class CreateAutomaticCompatibilityDtoRequest {
     private Long componentType1Id;
     private Long componentType2Id;

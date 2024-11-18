@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
@@ -31,6 +32,7 @@ public class CompatibilityController {
 
     }
     @PostMapping("/automatic")
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createAutomaticCompatibility(@RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
         CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
         return ResponseEntity.noContent().build();

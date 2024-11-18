@@ -38,17 +38,26 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
         if(createAutomaticCompatibilityDtoRequest.getComponentType1Id().equals(createAutomaticCompatibilityDtoRequest.getComponentType2Id())){
             throw new CompatibilityError("Component types must be different");
         }
+
         Optional<ComponentTypeEntity> componentType1 = componentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getComponentType1Id());
         Optional<ComponentTypeEntity> componentType2 = componentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getComponentType2Id());
 
         if(componentType1.isPresent() && componentType2.isPresent()) {
 
-            SpecficationTypeList_ComponentTypeEntity sp1 = specificationTypeList_ComponentTypeRepository.findByComponentTypeAndSpecificationType(componentType1.get().getId(),createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
-            SpecficationTypeList_ComponentTypeEntity sp2 = specificationTypeList_ComponentTypeRepository.findByComponentTypeAndSpecificationType(componentType2.get().getId(),createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
+//            SpecficationTypeList_ComponentTypeEntity sp1 = specificationTypeList_ComponentTypeRepository.findByComponentTypeAndSpecificationType(componentType1.get().getId(),createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
+//            SpecficationTypeList_ComponentTypeEntity sp2 = specificationTypeList_ComponentTypeRepository.findByComponentTypeAndSpecificationType(componentType2.get().getId(),createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
+
+            Optional<SpecficationTypeList_ComponentTypeEntity> sp1 = specificationTypeList_ComponentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
+            Optional<SpecficationTypeList_ComponentTypeEntity> sp2 = specificationTypeList_ComponentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
+
+            if(sp1.isEmpty() || sp2.isEmpty())
+            {
+                throw new ObjectNotFound("Specification not found");
+            }
 
             RuleEntity ruleEntity = RuleEntity.builder()
-                    .specificationToConsider1Id(sp1)
-                    .specificationToConsider2Id(sp2)
+                    .specificationToConsider1Id(sp1.get())
+                    .specificationToConsider2Id(sp2.get())
                     .build();
 
             RuleEntity returnedRuleEntity = ruleEntityRepository.save(ruleEntity);
