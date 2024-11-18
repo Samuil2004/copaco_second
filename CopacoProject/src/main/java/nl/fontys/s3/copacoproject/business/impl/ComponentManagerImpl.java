@@ -7,19 +7,14 @@ import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
-import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
-import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
-import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
-import nl.fontys.s3.copacoproject.persistence.SpecificationTypeRepository;
+import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
+import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.Component_SpecificationList;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -30,6 +25,7 @@ public class ComponentManagerImpl implements ComponentManager {
     private final ComponentSpecificationListRepository  componentSpecificationListRepository;
     private final SpecificationTypeRepository specificationTypeRepository;
     private final CategoryRepository categoryRepository;
+    private final ComponentTypeRepository componentTypeRepository;
 
     @Override
     public List<GetComponentResponse> getAllComponents() {
@@ -139,40 +135,42 @@ public class ComponentManagerImpl implements ComponentManager {
         return allComponentsBase;
     }
 
+    @Override
+    public List<Component> getAllComponentFromComponentType(Long componentTypeId) {
 
-    //@Override
-//    public Component GetComponentById(Long id){
-////        ComponentEntity entity = componentRepository.getComponentEntitiesByComponentId(id);
-////        Map<SpecificationTypeEntity, String> specifications = componentSpecificationListRepository.getComponent_SpecificationListByComponentId(entity)
-////                .stream()
-////                .collect(Collectors.toMap(Component_SpecificationList::getSpecificationType, Component_SpecificationList::getValue));
-////        return ComponentConverter.convertFromEntityToBase(entity, specifications);
-//    }
+        Optional<ComponentTypeEntity> foundComponentType = componentTypeRepository.findById(componentTypeId);
 
-//    @Override
-//    public GetComponentsByCategoryResponse getComponentsByCategory(String category) {
-//        List<Component> componentsInCategory = componentRepository.getComponentsByType(category)
-//                .stream()
-//                .map(entity -> {
-//                    List<Component_SpecificationList> specificationLists = componentSpecificationListRepository.getComponent_SpecificationListByComponentId(entity);
-//                    Map<SpecificationTypeEntity, String> specificationMap = specificationLists.stream()
-//                            .collect(Collectors.toMap(Component_SpecificationList::getSpecificationType, Component_SpecificationList::getValue));
-//                    return ComponentConverter.convertFromEntityToBase(entity, specificationMap);
-//                })
-//                .toList();
-//
-//        return GetComponentsByCategoryResponse.builder()
-//                .allComponentsInCategory(componentsInCategory)
-//                .build();
-//
-//
-///*        return GetComponentsByCategoryResponse
-//                .builder()
-//                .allComponentsInCategory(componentRepository.getComponentsByType(category)
-//                        .stream()
-//                        .map(ComponentConverter::convertEntityToNormal)
-//                        .toList())
-//                .build();*/
-//        /*return null;*/
-//    }
+        if(foundComponentType.isEmpty()){
+            throw new ObjectNotFound("Component type does not exist");
+        }
+
+        List<ComponentEntity> allComponentsEntities = componentRepository.findByComponentType_Id(componentTypeId);
+        List<Component> allComponentsBase = new ArrayList<>();
+        List<GetComponentResponse> allComponentsResponse = new ArrayList<>();
+        for (ComponentEntity componentEntity : allComponentsEntities) {
+            List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
+            Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
+
+            for(Component_SpecificationList specificationList : allSpecificationsForComponent){
+                SpecificationTypeEntity specType = specificationList.getSpecificationType();
+                String value = specificationList.getValue();
+
+                List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
+
+                if (valuesList == null) {
+                    valuesList = new ArrayList<>();
+                    valuesList.add(value);
+                    dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
+                } else {
+                    valuesList.add(value);
+                }
+            }
+            Component componentBase = ComponentConverter.convertFromEntityToBase(componentEntity,dictionaryWithTheSpecificationAndAllValuesForComponent);
+            allComponentsBase.add(componentBase);
+
+
+        }
+        return allComponentsBase;
+    }
+
 }

@@ -7,11 +7,9 @@ import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
-import nl.fontys.s3.copacoproject.domain.AutomaticCompatibility;
+import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import nl.fontys.s3.copacoproject.domain.Component;
-import nl.fontys.s3.copacoproject.domain.ComponentType;
-import nl.fontys.s3.copacoproject.persistence.entity.AutomaticCompatibilityEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +22,8 @@ import java.util.List;
 public class CompatibilityController {
     private final CompatibilityManager compatibilityManager;
     private final CompatibilityBetweenComponents compatibilityBetweenComponents;
-    @GetMapping("")
+
+    @GetMapping()
     public ResponseEntity<List<CompatibilityType>> getAllCompatibilityTypes(){
         List<CompatibilityType> allCompatibilityTypes = compatibilityManager.allCompatibilityTypes();
 
@@ -55,10 +54,27 @@ public class CompatibilityController {
 
     @GetMapping("/getAllComponentsFromAGivenComponentTypeAndSpecification")
     public ResponseEntity<List<Component>> getAllComponentsFromAGivenComponentTypeAndSpecification(
-            @RequestParam("componentId") Long componentId,
+            @RequestParam("firstComponentId") Long firstComponentId,
+            @RequestParam(value = "secondComponentId", required = false) Long secondComponentId,
+            @RequestParam(value = "thirdComponentId", required = false) Long thirdComponentId,
+            @RequestParam(value = "fourthComponentId", required = false) Long fourthComponentId,
+            @RequestParam(value = "fifthComponentId", required = false) Long fifthComponentId,
+            @RequestParam(value = "sixthComponentId", required = false) Long sixthComponentId,
+            @RequestParam(value = "seventhComponentId", required = false) Long seventhComponentId,
             @RequestParam("searchedComponentsType") Long searchedComponentsType
+
     ){
-        List<Component> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(componentId,searchedComponentsType);
+        GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+                .firstComponentId(firstComponentId)
+                .secondComponentId(secondComponentId)
+                .thirdComponentId(thirdComponentId)
+                .fourthComponentId(fourthComponentId)
+                .fifthComponentId(fifthComponentId)
+                .sixthComponentId(sixthComponentId)
+                .seventhComponentId(seventhComponentId)
+                .searchedComponentTypeId(searchedComponentsType)
+                .build();
+        List<Component> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
 
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
 

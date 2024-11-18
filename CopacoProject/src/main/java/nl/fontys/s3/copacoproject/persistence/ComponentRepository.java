@@ -24,4 +24,6 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity,Long>
     List<ComponentEntity> findComponentEntitiesByCategory(@Param("categoryId") long categoryId);
 
     Optional<ComponentEntity> findByComponentId(Long componentId);
+
+    List<ComponentEntity> findByComponentType_Id(Long componentTypeId);
 }

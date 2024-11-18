@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.domain.Category;
@@ -18,12 +19,9 @@ public class CategoryController {
     private final CategoryManager categoryManager;
 
     @GetMapping()
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Category>> getAllCategories() {
-        try{
-            return ResponseEntity.ok().body(categoryManager.getAllCategories());
-        }
-        catch(Exception e){
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(categoryManager.getAllCategories());
     }
+
 }
