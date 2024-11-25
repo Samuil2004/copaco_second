@@ -13,8 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomProduct {
-
-    private Integer customProductId;
+    private long customProductId;
     private Template template;
     private User user;
     private List<Component> componentsIncluded;

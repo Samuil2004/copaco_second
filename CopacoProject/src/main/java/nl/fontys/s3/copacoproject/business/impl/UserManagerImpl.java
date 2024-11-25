@@ -10,6 +10,7 @@ import nl.fontys.s3.copacoproject.business.dto.userDto.*;
 import nl.fontys.s3.copacoproject.configuration.security.token.AccessTokenEncoder;
 import nl.fontys.s3.copacoproject.configuration.security.token.impl.AccessTokenImpl;
 import nl.fontys.s3.copacoproject.domain.User;
+import nl.fontys.s3.copacoproject.domain.enums.Role;
 import nl.fontys.s3.copacoproject.persistence.UserRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.RoleEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.UserEntity;
@@ -51,13 +52,14 @@ public class UserManagerImpl implements UserManager {
     }
     private UserEntity saveNewUser(CreateUserRequest request) {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
+        Role role = Role.valueOf(request.getRole());
 
         UserEntity newUser = UserEntity.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(encodedPassword)
-                .role(RoleEntity.builder().roleName(request.getRole().toString()).build())
+                .role(RoleEntity.builder().roleName(role.name()).id(role.getValue()).build())
                 .build();
         return userRepository.save(newUser);
     }
