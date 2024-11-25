@@ -13,10 +13,20 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
     List<Component_SpecificationList> findByComponentId(ComponentEntity component);
 
     @Query("SELECT cs FROM Component_SpecificationList cs " +
-            "WHERE cs.componentId = :componentId " +
-            "AND cs.specificationType = :specificationTypeId")
-    List<Component_SpecificationList> findByComponentIdAndSpecificationTypeId(
-            @Param("componentId") ComponentEntity componentId,
-            @Param("specificationTypeId") SpecificationTypeEntity specificationTypeId);
+            "WHERE cs.componentId.componentId = :componentId")
+    List<Component_SpecificationList> findByComponentId(@Param("componentId") Long componentId);
+
+    //    @Query("SELECT cs FROM Component_SpecificationList cs " +
+//            "WHERE cs.componentId = :componentId " +
+//            "AND cs.specificationType = :specificationTypeId")
+//    List<Component_SpecificationList> findByComponentIdAndSpecificationTypeId(
+//            @Param("componentId") ComponentEntity componentId,
+//            @Param("specificationTypeId") SpecificationTypeEntity specificationTypeId);
+@Query("SELECT cs FROM Component_SpecificationList cs " +
+        "WHERE cs.componentId.componentId = :componentId " +
+        "AND cs.specificationType = :specificationType")
+List<Component_SpecificationList> findByComponentIdAndSpecificationTypeId(
+        @Param("componentId") Long componentId,
+        @Param("specificationType") SpecificationTypeEntity specificationType);
 }
 //test
