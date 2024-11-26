@@ -4,10 +4,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.CreateCustomProductRequest;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.CreateCustomProductResponse;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.CustomProductResponse;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.GetCustomProductsByUserAndStatusRequest;
+import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
 import nl.fontys.s3.copacoproject.configuration.security.auth.RequestAuthenticatedUserProvider;
 import nl.fontys.s3.copacoproject.configuration.security.token.AccessToken;
 import org.springframework.http.HttpStatus;
@@ -63,6 +60,17 @@ public class CustomProductController {
         }
 
         customProductManager.deleteCustomProduct(customProductId, accessToken.getUserId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PutMapping("/{customProductId}")
+    @RolesAllowed({"CUSTOMER"})
+    public ResponseEntity<Void> updateCustomProduct(@PathVariable("customProductId") long id, @RequestBody UpdateCustomTemplateRequest request){
+        AccessToken accessToken = requestAuthenticatedUserProvider.getAuthenticatedUserInRequest();
+        if (accessToken == null || accessToken.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        customProductManager.updateCustomProduct(id, request, accessToken.getUserId());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

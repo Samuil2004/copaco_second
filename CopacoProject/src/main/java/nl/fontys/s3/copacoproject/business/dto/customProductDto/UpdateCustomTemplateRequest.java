@@ -5,10 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class ComponentInCustomProductInput {
-    private Long componentId;
+public class UpdateCustomTemplateRequest {
+    private List<ComponentInCustomProductInput> componentsIncluded;
+    private int statusId;
 }

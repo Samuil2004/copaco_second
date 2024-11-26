@@ -54,7 +54,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
 
     @Override
     public List<CustomProductResponse> getCustomProductsOfUserByState(long userId, long authenticatedUser, GetCustomProductsByUserAndStatusRequest request) {
-        validateGetRequest(userId, authenticatedUser, request);
+        validateGetRequest(userId, authenticatedUser, request.getStatusId());
         List<CustomProductResponse> customProducts = new ArrayList<>();
         Status status = Status.fromValue(request.getStatusId());
         StatusEntity statusEntity = StatusEntity.builder()
@@ -80,17 +80,25 @@ public class CustomProductManagerImpl implements CustomProductManager {
     @Override
     public void deleteCustomProduct(long productId, long authenticatedUserId) {
         CustomProductEntity productEntity = customProductRepository.findById(productId);
-        if(authenticatedUserId != productEntity.getUserId().getId()) {
-            throw new UnauthorizedException("You are not authorized to perform this operation");
+        if(productEntity == null){
+            throw new ObjectNotFound("Product not found");
         }
-        if(!customProductRepository.existsById(productId)) {
-            throw new ObjectNotFound("Custom product not found");
-        }
-        if(Objects.equals(productEntity.getStatus().getName(), Status.FINISHED.name())){
-            throw new ActionDeniedException("You cannot delete a finished product");
-        }
+        validate(productId, authenticatedUserId, productEntity);
         assemblingRepository.deleteAssemblingEntitiesByCustomProductId(productEntity);
         customProductRepository.deleteById(productId);
+    }
+
+    @Transactional
+    @Override
+    public void updateCustomProduct(long productId, UpdateCustomTemplateRequest request, long authenticatedUserId) {
+        CustomProductEntity productEntity = customProductRepository.findById(productId);
+        if(productEntity == null) {
+            throw new ObjectNotFound("Custom product not found");
+        }
+        validate(productId, authenticatedUserId, productEntity);
+
+        List<Component> currentComponents = getComponentsOfCustomProductEntity(productEntity);
+        updateComponents(productEntity, currentComponents, request.getComponentsIncluded());
     }
 
     private void validateCreateRequest(CreateCustomProductRequest request){
@@ -122,7 +130,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
         }
     }
 
-    private void validateGetRequest( long userId,long authenticatedUserId, GetCustomProductsByUserAndStatusRequest request) {
+    private void validateGetRequest( long userId,long authenticatedUserId, int statusId) {
 
         if(userId != authenticatedUserId) {
             throw new UnauthorizedException("You are not authorized to perform this operation");
@@ -130,7 +138,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
         if(!userRepository.existsById(userId)) {
             throw new ObjectNotFound("User not found");
         }
-        if(!statusRepository.existsById(request.getStatusId())){
+        if(!statusRepository.existsById(statusId)){
             throw new ObjectNotFound("Invalid status");
         }
     }
@@ -162,5 +170,47 @@ public class CustomProductManagerImpl implements CustomProductManager {
         }
 
         return components;
+    }
+
+    private void validate(long productId, long authenticatedUserId, CustomProductEntity productEntity) {
+        if(authenticatedUserId != productEntity.getUserId().getId()) {
+            throw new UnauthorizedException("You are not authorized to perform this operation");
+        }
+        if(!customProductRepository.existsById(productId)) {
+            throw new ObjectNotFound("Custom product not found");
+        }
+        if(Objects.equals(productEntity.getStatus().getName(), Status.FINISHED.name())){
+            throw new ActionDeniedException("You cannot delete a finished product");
+        }
+    }
+
+    private void updateComponents(CustomProductEntity customProductEntity ,List<Component> currentComponents, List<ComponentInCustomProductInput> newComponentIdsList){
+        List<Long> newComponentIds = newComponentIdsList.stream()
+                .map(ComponentInCustomProductInput::getComponentId)
+                .toList();
+
+        List<AssemblingEntity> itemsToDelete = currentComponents.stream()
+                .filter(existing -> !newComponentIds.contains(existing.getComponentId()))
+                .map(existing -> AssemblingEntity.builder()
+                        .customProductId(customProductEntity)
+                        .componentId(ComponentConverter.convertFromBaseToEntity(existing))
+                        .build())
+                .toList();
+
+        assemblingRepository.deleteAll(itemsToDelete);
+
+        for(Long componentId : newComponentIds){
+            if(componentRepository.existsById(componentId)) {
+                ComponentEntity component = componentRepository.findComponentEntityByComponentId(componentId);
+                if(!assemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId(component, customProductEntity)) {
+                    assemblingRepository.save(AssemblingEntity.builder()
+                                    .componentId(component)
+                                    .customProductId(customProductEntity).build());
+                }
+            }
+            else{
+                throw new ObjectNotFound("Component not found");
+            }
+        }
     }
 }
