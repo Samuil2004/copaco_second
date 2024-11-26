@@ -12,5 +12,5 @@ public interface SpecificationTypeRepository extends JpaRepository<Specification
     Optional<SpecificationTypeEntity> findById(Long id);
     SpecificationTypeEntity findBySpecificationTypeName(String specificationTypeName);
     @Query("SELECT s.specificationType FROM SpecficationTypeList_ComponentTypeEntity s WHERE s.componentType.id = (SELECT c.componentType.id FROM ComponentEntity c WHERE c.componentId = :componentId)")
-    List<SpecificationTypeEntity> findSpecificationTypeEntitiesByComponentId(@Param("componentId") long componentId);
+    List<SpecificationTypeEntity> findSpecificationTypeEntitiesByComponentId(@Param("componentId") Long componentId);
 }
