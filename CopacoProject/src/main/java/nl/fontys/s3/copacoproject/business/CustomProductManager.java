@@ -10,4 +10,5 @@ import java.util.List;
 public interface CustomProductManager {
     CreateCustomProductResponse createCustomProduct(CreateCustomProductRequest request, long authenticatedUserId);
     List<CustomProductResponse> getCustomProductsOfUserByState(long userId, long authenticatedUser, GetCustomProductsByUserAndStatusRequest request);
+    void deleteCustomProduct(long productId, long authenticatedUserId);
 }

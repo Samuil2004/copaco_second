@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface AssemblingRepository extends JpaRepository<AssemblingEntity, AssemblingCPK> {
     List<AssemblingEntity> findAssemblingEntitiesByCustomProductId(CustomProductEntity customProductEntity);
+    void deleteAssemblingEntitiesByCustomProductId(CustomProductEntity customProductEntity);
 }

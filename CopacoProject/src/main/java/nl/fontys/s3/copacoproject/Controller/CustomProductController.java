@@ -54,4 +54,16 @@ public class CustomProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @DeleteMapping("/{customProductId}")
+    @RolesAllowed({"CUSTOMER"})
+    public ResponseEntity<Void> deleteCustomProduct(@PathVariable("customProductId") long customProductId) {
+        AccessToken accessToken = requestAuthenticatedUserProvider.getAuthenticatedUserInRequest();
+        if (accessToken == null || accessToken.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        customProductManager.deleteCustomProduct(customProductId, accessToken.getUserId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }

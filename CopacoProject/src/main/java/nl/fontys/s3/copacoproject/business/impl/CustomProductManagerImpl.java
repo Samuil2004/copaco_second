@@ -3,6 +3,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
+import nl.fontys.s3.copacoproject.business.Exceptions.ActionDeniedException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.Exceptions.UnauthorizedException;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
@@ -14,10 +15,7 @@ import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -76,6 +74,23 @@ public class CustomProductManagerImpl implements CustomProductManager {
                     .build());
         }
         return customProducts;
+    }
+
+    @Transactional
+    @Override
+    public void deleteCustomProduct(long productId, long authenticatedUserId) {
+        CustomProductEntity productEntity = customProductRepository.findById(productId);
+        if(authenticatedUserId != productEntity.getUserId().getId()) {
+            throw new UnauthorizedException("You are not authorized to perform this operation");
+        }
+        if(!customProductRepository.existsById(productId)) {
+            throw new ObjectNotFound("Custom product not found");
+        }
+        if(Objects.equals(productEntity.getStatus().getName(), Status.FINISHED.name())){
+            throw new ActionDeniedException("You cannot delete a finished product");
+        }
+        assemblingRepository.deleteAssemblingEntitiesByCustomProductId(productEntity);
+        customProductRepository.deleteById(productId);
     }
 
     private void validateCreateRequest(CreateCustomProductRequest request){
@@ -148,6 +163,4 @@ public class CustomProductManagerImpl implements CustomProductManager {
 
         return components;
     }
-
-
 }
