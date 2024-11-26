@@ -1,21 +1,22 @@
-package nl.fontys.s3.copacoproject.domain;
+package nl.fontys.s3.copacoproject.business.dto.customProductDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nl.fontys.s3.copacoproject.domain.enums.Status;
+import nl.fontys.s3.copacoproject.domain.Component;
 
 import java.util.List;
 
-@Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomProduct {
+@Data
+@Builder
+public class CustomProductResponse {
+    private long userId;
     private long customProductId;
-    private Template template;
-    private User user;
+    private long templateId;
     private List<Component> componentsIncluded;
-    private Status status;
+    private long statusId;
+
 }

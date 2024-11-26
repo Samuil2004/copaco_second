@@ -2,8 +2,6 @@ package nl.fontys.s3.copacoproject.business.dto.userDto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import nl.fontys.s3.copacoproject.business.dto.addressDto.CreateNewAddressRequest;
-import nl.fontys.s3.copacoproject.domain.enums.Role;
 
 @Getter
 @Setter
@@ -20,6 +18,6 @@ public class CreateUserRequest {
     @NotNull
     private String password;
     @NotNull
-    private Role role;
+    private String role;
     //private CreateNewAddressRequest address;
 }
