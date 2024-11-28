@@ -4,9 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-public class ObjectNotFound extends RuntimeException {
+
+public class ObjectNotFound extends ResponseStatusException {
+    public ObjectNotFound() {
+        super(HttpStatus.NOT_FOUND, "This object already exists");
+    }
+
     public ObjectNotFound(String message) {
-        super(message);
+        super(HttpStatus.CONFLICT, message);
     }
 }
