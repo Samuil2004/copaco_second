@@ -98,20 +98,23 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 }
                 continue;
             }
+            //Get a list of components that are compatible with the selected component and also a map with specifications (those that should be considered from the searched component side)
+            //and all the values for each specification. Both data structures are stored in te Compatibility Result class as fields
             CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,componentId,componentTypeIdOfProvidedComponent,request.getSearchedComponentTypeId());
+            //if there are not any compatible component, there is no point to move downwards, because the flow is stopped, so we return empty list (if we have components A B C D and A is compatible
+            //with B C and D and B is NOT compatible with C, there is no point to check if C is compatible with D
             if(compatibilityResult.getCompatibleComponents().isEmpty())
             {
-                return null;
+                return List.of();
             }
             List<ComponentEntity> compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = new ArrayList<>();
+
+            //if it is the first component or there are not any compatible component so far (not because the previous component is not compatible with any!)
             if(notNullIds.indexOf(componentId) == 0 || compatibleComponentsEntity.isEmpty())
             {
 
-                //-------------------------------------------
                 List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(componentId,componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId());
                 compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibilityBetweenFirstComponentAndComponentType,compatibilityResult.getSpecificationsMap());
-                //Set<ComponentEntity> uniqueComponentEntities = new HashSet<>(compatibilityResult.getCompatibleComponents());
-               // compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = uniqueComponentEntities.stream().toList();
 
             }
             else {
@@ -210,6 +213,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
 
+    //OK
     private CompatibilityResult GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId)
     {
         List<ComponentEntity> allCompatibleComponentsBeforeFiltering = new ArrayList<>();
@@ -253,6 +257,15 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                             Component_SpecificationList::getSpecificationType,
                             Collectors.mapping(Component_SpecificationList::getValue, Collectors.toList())));
 
+            //Check if there is a specification type in the map that does not have attached values it's the data provider fault, but we can not establish the compatibility of this item,
+            // so we neglect it and move to the next ones (agreement with client) if A and B have compatibility rule with specification C and D AND E and F, but A has only C and no D,
+            //we should consider only D
+            boolean hasEmptyOrMissingKey = specMap.entrySet().stream()
+                    .anyMatch(entry -> entry.getKey() == null || entry.getValue() == null || entry.getValue().isEmpty());
+
+            if (hasEmptyOrMissingKey || specMap.isEmpty()) {
+                continue;
+            }
 
             //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
             //to be compatible with the selected component
