@@ -2,17 +2,14 @@ package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.CreateComponentTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.CreateComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/componentType")
@@ -39,5 +36,12 @@ public class ComponentTypeController {
 
     }
 
+    @GetMapping("/category/{id}")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<List<ComponentType>> getComponentTypeByCategory(@PathVariable Long id){
+        List<ComponentType> componentType = componentTypeManager.getComponentTypesByCategory(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(componentType);
+    }
 
 }
