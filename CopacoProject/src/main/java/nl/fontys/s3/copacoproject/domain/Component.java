@@ -1,7 +1,6 @@
 package nl.fontys.s3.copacoproject.domain;
 
 import lombok.*;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class Component
 {
-    private Long componentId;
+    private long componentId;
     private String componentName;
     private ComponentType componentType;
     private String componentImageUrl;

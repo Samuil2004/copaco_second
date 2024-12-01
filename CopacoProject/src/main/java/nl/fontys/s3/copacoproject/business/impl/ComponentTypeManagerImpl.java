@@ -4,15 +4,18 @@ import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeComponentTypeRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeRepository;
+import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,9 +23,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ComponentTypeManagerImpl implements ComponentTypeManager {
     private final ComponentTypeRepository componentTypeRepository;
-    private final SpecificationTypeComponentTypeRepository specificationTypeCompTypeRepository;
-    private final SpecificationTypeRepository specificationTypeRepository;
-    private final CategoryManager categoryManager;
+    private final CategoryRepository categoryRepository;
+
     @Override
     public GetAllComponentTypeResponse getAllComponentTypes() {
         List<ComponentTypeEntity> componentTypeEntities = componentTypeRepository.findAll();
@@ -67,6 +69,22 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
             throw new ObjectNotFound("COMPONENT_TYPE_NOT_FOUND");
         }
         return ComponentTypeConverter.convertFromEntityToBase(component.get());
+    }
+
+    @Override
+    public List<ComponentType> getComponentTypesByCategory(long categoryId) {
+        if(!categoryRepository.existsById(categoryId)) {
+            throw new ObjectNotFound("Category not found");
+        }
+        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).get();
+        List<ComponentTypeEntity> componentTypeEntities = componentTypeRepository.findComponentTypeEntitiesByCategory(categoryEntity);
+
+        List<ComponentType> componentTypes = new ArrayList<>();
+        for(ComponentTypeEntity componentTypeEntity : componentTypeEntities) {
+            componentTypes.add(ComponentTypeConverter.convertFromEntityToBase(componentTypeEntity));
+        }
+
+        return componentTypes;
     }
 
 //    @Override
