@@ -75,7 +75,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
             //Get the component type of the current component id from the loop
             Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
-
+            if(Objects.equals(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId()))
+            {
+                throw new CompatibilityError("Once a component is selected, other components from the same category can not be searched.");
+            }
             //Find all automatic compatibility records between the component type of current component id from the loop and the searched component type
             List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId());
 
