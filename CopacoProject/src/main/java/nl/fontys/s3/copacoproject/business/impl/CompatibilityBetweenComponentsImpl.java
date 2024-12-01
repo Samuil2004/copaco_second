@@ -168,7 +168,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .brand(componentEntity.getBrand().getName())
                     .price(componentEntity.getComponentPrice())
-                    .specificationsConsideredForCompatibilityAndValues(getComponentSpecification(componentEntity.getComponentId()))
+                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .build());
         }
         return allComponentsForResponse;
