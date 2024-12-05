@@ -75,6 +75,17 @@ public class TemplateController {
         }
     }
 
+    @GetMapping("/filtered")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<Template>> getFilteredTemplates(
+            @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
+            @RequestParam(value = "currentPage", defaultValue = "0") int currentPage,
+            @RequestParam(value = "categoryId", defaultValue = "0") long categoryId) {
+
+        List<Template> filteredTemplates = templateManager.getFilteredTemplates(itemsPerPage, currentPage, categoryId);
+        return ResponseEntity.ok(filteredTemplates);
+    }
+
     @DeleteMapping("/{id}")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> deleteTemplate(@PathVariable long id) {
