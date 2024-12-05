@@ -27,4 +27,7 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity,Long>
     ComponentEntity findComponentEntityByComponentId(Long componentId);
 
     List<ComponentEntity> findByComponentType_Id(Long componentTypeId);
+
+    @Query("SELECT c.componentType.id FROM ComponentEntity c WHERE c.componentId = :componentId")
+    Long findComponentTypeIdByComponentId(@Param("componentId") Long componentId);
 }
