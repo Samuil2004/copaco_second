@@ -5,10 +5,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
-import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
-import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.*;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import nl.fontys.s3.copacoproject.domain.Component;
 import org.springframework.http.HttpStatus;
@@ -55,7 +52,7 @@ public class CompatibilityController {
     }
 
     @GetMapping("/getAllComponentsFromAGivenComponentTypeAndSpecification")
-    public ResponseEntity<List<Component>> getAllComponentsFromAGivenComponentTypeAndSpecification(
+    public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsFromAGivenComponentTypeAndSpecification(
             @RequestParam("firstComponentId") Long firstComponentId,
             @RequestParam(value = "secondComponentId", required = false) Long secondComponentId,
             @RequestParam(value = "thirdComponentId", required = false) Long thirdComponentId,
@@ -76,7 +73,7 @@ public class CompatibilityController {
                 .seventhComponentId(seventhComponentId)
                 .searchedComponentTypeId(searchedComponentsType)
                 .build();
-        List<Component> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
+        List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
 
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
 
