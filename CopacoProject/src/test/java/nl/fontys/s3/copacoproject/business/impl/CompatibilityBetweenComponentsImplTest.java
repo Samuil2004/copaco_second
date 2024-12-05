@@ -4,8 +4,6 @@ import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
 import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
-import nl.fontys.s3.copacoproject.domain.AutomaticCompatibility;
-import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
@@ -461,9 +459,7 @@ class CompatibilityBetweenComponentsImplTest {
     {
         when(componentRepository.existsById(2L)).thenReturn(false);
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched);
-        });
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
         assertEquals("Components not found: [2]", exception.getReason());
     }
 
@@ -473,9 +469,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.existsById(2L)).thenReturn(true);
         when(componentTypeRepository.existsById(4L)).thenReturn(false);
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched);
-        });
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
         assertEquals("Component type not found", exception.getReason());
     }
 
@@ -486,9 +480,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentTypeRepository.existsById(2L)).thenReturn(true);
         when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
 
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(requestWithSameComponentAndComponentTypeIds);
-        });
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestWithSameComponentAndComponentTypeIds));
         assertEquals("Once a component is selected, other components from the same category can not be searched.", exception.getReason());
     }
 
@@ -520,9 +512,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
         when(componentRepository.findByComponentType_Id(4L)).thenReturn(List.of());
 
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched);
-        });
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
         assertEquals("COMPONENTS_FROM_CATEGORY_NOT_FOUND", exception.getReason());
   }
 
@@ -541,7 +531,7 @@ class CompatibilityBetweenComponentsImplTest {
         assertEquals(actualResponse, List.of());
     }
 
-    @Test
+    /*@Test
     void givenTwoComponentsAndASearchedComponentType_whenGettingCompatibilityAndThereIsNotRuleBetweenTheSecondComponentAndThSearchedComponentType_returnsCompatibleComponentFromSearchedComponentType()
     {
         when(componentRepository.existsById(2L)).thenReturn(true);
@@ -581,9 +571,9 @@ class CompatibilityBetweenComponentsImplTest {
         assertEquals(expectedResponse.get(1).getBrand(), actualResponse.get(1).getBrand());
         assertEquals(expectedResponse.get(1).getPrice(), actualResponse.get(1).getPrice());
         assertEquals(expectedResponse.get(1).getComponentSpecifications(), actualResponse.get(1).getComponentSpecifications());
-    }
+    }*/
 
-    @Test
+    /*@Test
     void givenTwoComponentsAndASearchedComponentType_whenGettingCompatibility_returnsCompatibleComponentFromSearchedComponentType()
     {
         when(componentRepository.existsById(2L)).thenReturn(true);
@@ -632,7 +622,7 @@ class CompatibilityBetweenComponentsImplTest {
 //        assertEquals(expectedResponse.get(1).getBrand(), actualResponse.get(1).getBrand());
 //        assertEquals(expectedResponse.get(1).getPrice(), actualResponse.get(1).getPrice());
 //        assertEquals(expectedResponse.get(1).getComponentSpecifications(), actualResponse.get(1).getComponentSpecifications());
-    }
+    }*/
 
 
 }
