@@ -86,6 +86,13 @@ public class TemplateController {
         return ResponseEntity.ok(filteredTemplates);
     }
 
+    @GetMapping("/countItems")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<Integer> getNumberOfTemplates(@RequestParam(value = "categoryId", defaultValue = "0") long categoryId) {
+        int numberOfTemplates = templateManager.getNumberOfTemplates(categoryId);
+        return ResponseEntity.ok().body(numberOfTemplates);
+    }
+
     @DeleteMapping("/{id}")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> deleteTemplate(@PathVariable long id) {

@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.BrandManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
+import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
@@ -155,6 +156,22 @@ public class TemplateManagerImpl implements TemplateManager {
         }
 
         return templates;
+    }
+
+    @Override
+    public int getNumberOfTemplates(Long categoryId) {
+        CategoryEntity categoryEntity = null;
+        if (categoryId > 0) {
+            if (!categoryRepository.existsById(categoryId)) {
+                throw new ObjectNotFound("Category not found");
+            }
+            categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
+        }
+        else{
+            throw new InvalidInputException("Invalid category id");
+        }
+
+        return templateRepository.countTemplateEntitiesByCategory(categoryEntity);
     }
 
 

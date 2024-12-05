@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 
@@ -36,6 +37,12 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                           @Param("categoryId") long categoryId);
     @Query("SELECT c FROM ComponentTypeList_Template c WHERE c.template.id = :template_id")
     List<ComponentTypeList_Template> findComponentTypeListByTemplateId(@Param("template_id") long templateId);
+
+    @Query("""
+    SELECT COUNT(t)
+    FROM TemplateEntity t
+    WHERE (:category IS NULL OR t.category = :category)""")
+    int countTemplateEntitiesByCategory(@Nullable @Param("category") CategoryEntity category);
 
 
 
