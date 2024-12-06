@@ -1,6 +1,7 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
@@ -37,18 +38,31 @@ public class CustomProductController {
 
     @GetMapping("/{userId}")
     @RolesAllowed({"CUSTOMER"})
-    public ResponseEntity<List<CustomProductResponse>> getCustomProductsOfUserByState(@PathVariable("userId") long userId, @RequestParam("statusId") @Positive int statusId) {
+    public ResponseEntity<List<CustomProductResponse>> getCustomProductsOfUserByState(@PathVariable("userId") long userId,
+                                                                                      @RequestParam("statusId") @Positive int statusId,
+                                                                                      @RequestParam(value = "currentPage", defaultValue = "0") int currentPage,
+                                                                                      @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage) {
         AccessToken accessToken = requestAuthenticatedUserProvider.getAuthenticatedUserInRequest();
 
         if (accessToken == null || accessToken.getUserId() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        GetCustomProductsByUserAndStatusRequest request = new GetCustomProductsByUserAndStatusRequest();
-        request.setStatusId(statusId);
-
-        List<CustomProductResponse> response = customProductManager.getCustomProductsOfUserByState(userId, accessToken.getUserId(), request);
+        List<CustomProductResponse> response = customProductManager.getCustomProductsOfUserByState(userId, accessToken.getUserId(), currentPage, itemsPerPage, statusId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/countItems/{userId}")
+    @RolesAllowed({"CUSTOMER"})
+    public ResponseEntity<Integer> getNumberOfCustomProductsOfUserByState(@PathVariable("userId") long userId, @RequestParam("statusId") @NotNull @Positive int statusId) {
+        AccessToken accessToken = requestAuthenticatedUserProvider.getAuthenticatedUserInRequest();
+
+        if (accessToken == null || accessToken.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        int numberOfItems = customProductManager.getNumberOfCustomProductsOfUserByStatus(userId, accessToken.getUserId(), statusId);
+        return ResponseEntity.ok().body(numberOfItems);
     }
 
     @DeleteMapping("/{customProductId}")
