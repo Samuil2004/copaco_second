@@ -483,6 +483,11 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     if (allAutomaticCompatibilityRulesBetweenTwoComponentTypes.isEmpty()) {
                         //If there is no automatic compatibility, and it is the first component from the request, get the first ten components from the searched category and consider them as compatible (since there is no rule)
                         if (notNullIds.indexOf(componentId) == 0) {
+
+                            //Get the specification "meant for"
+                            //If there is a map returned - use it
+                            //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
+
                             //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
                             List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
                             if (elevenComponentsFromTheSearchedComponentType.isEmpty()) {
@@ -706,6 +711,162 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         }
         return baseMap;
 
+    }
+
+
+    private Map<String,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
+    {
+        //Component voor - 1070
+        //Bedoel voor - 947
+        //Soort - 954
+        Map<String, List<String>> serverConfig = new HashMap<>();
+        if(componentTypeId == 1)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Component voor", List.of("Server"));
+                    break;
+                case "PC":
+                    serverConfig.put("Component voor", List.of("Workstation"));
+                    break;
+                case "Workstation":
+                    serverConfig.put("Component voor", List.of("Workstation"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 2)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Component voor", List.of("Server"));
+                    break;
+                case "PC":
+                    serverConfig.put("Component voor", List.of("PC"));
+                    break;
+                case "Workstation":
+                    serverConfig.put("Component voor", List.of("Workstation"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 4)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Component voor", List.of("Server"));
+                    break;
+                case "PC":
+                    serverConfig.put("Component voor", List.of("PC"));
+                    break;
+                case "Workstation":
+                    serverConfig.put("Component voor", List.of("Workstation"));
+                    break;
+                case "Laptop":
+                    serverConfig.put("Component voor", List.of("Notebook"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 5)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Bedoeld voor", List.of("Server"));
+                    break;
+                case "PC":
+                    serverConfig.put("Bedoeld voor", List.of("PC"));
+                    break;
+                case "Workstation":
+                    serverConfig.put("Bedoeld voor", List.of("PC"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 6)
+        {
+            switch(configurationType)
+            {
+                case "PC":
+                    serverConfig.put("Soort", List.of("PC"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 7)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Soort", List.of("Fan","Fan module"));
+                    break;
+                case "PC":
+                    serverConfig.put("Soort", List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
+                    break;
+                case "Laptop":
+                    serverConfig.put("Soort", List.of("Thermal paste"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 8)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Soort", List.of("Fan","Fan tray","Cooler"));
+                    break;
+                case "PC":
+                    serverConfig.put("Soort", List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
+                    break;
+                case "Laptop":
+                    serverConfig.put("Soort", List.of("Thermal paste"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 10)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Component voor", List.of("Server"));
+                    break;
+                case "Workstation":
+                    serverConfig.put("Component voor", List.of("Workstation"));
+                    break;
+                case "PC":
+                    serverConfig.put("Component voor", List.of("PC"));
+                    break;
+                case "Laptop":
+                    serverConfig.put("Component voor", List.of("Notebook"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else if(componentTypeId == 11)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    serverConfig.put("Component voor", List.of("Server"));
+                    break;
+                case "Workstation":
+                    serverConfig.put("Component voor", List.of("Workstation","workstation"));
+                    break;
+                case "PC":
+                    serverConfig.put("Component voor", List.of("PC"));
+                    break;
+            }
+            return serverConfig;
+        }
+        else {
+            return null;
+        }
     }
 
 //
