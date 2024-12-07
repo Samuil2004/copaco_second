@@ -60,7 +60,9 @@ public class CompatibilityController {
             @RequestParam(value = "fifthComponentId", required = false) Long fifthComponentId,
             @RequestParam(value = "sixthComponentId", required = false) Long sixthComponentId,
             @RequestParam(value = "seventhComponentId", required = false) Long seventhComponentId,
-            @RequestParam("searchedComponentsType") Long searchedComponentsType
+            @RequestParam("searchedComponentsType") Long searchedComponentsType,
+            @RequestParam("pageNumber") Integer pageNumber
+
 
     ){
         GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
@@ -72,6 +74,7 @@ public class CompatibilityController {
                 .sixthComponentId(sixthComponentId)
                 .seventhComponentId(seventhComponentId)
                 .searchedComponentTypeId(searchedComponentsType)
+                .pageNumber(pageNumber)
                 .build();
         List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
 

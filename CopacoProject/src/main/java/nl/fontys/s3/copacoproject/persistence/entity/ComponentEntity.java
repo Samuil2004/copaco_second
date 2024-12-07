@@ -25,7 +25,8 @@ public class ComponentEntity{
     private String componentName;
 
     @JoinColumn(name="component_type_id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity componentType;
 

@@ -16,4 +16,5 @@ public class GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest
     private Long sixthComponentId;
     private Long seventhComponentId;
     private Long searchedComponentTypeId;
+    private Integer pageNumber;
 }

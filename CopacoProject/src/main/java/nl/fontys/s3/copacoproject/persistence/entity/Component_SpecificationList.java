@@ -22,7 +22,8 @@ public class Component_SpecificationList {
     private long id;
 
     @JoinColumn(name="component_id", referencedColumnName = "id")
-    @ManyToOne()
+//    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     private ComponentEntity componentId;
 
     @JoinColumn(name="specification_type_id", referencedColumnName = "id")
