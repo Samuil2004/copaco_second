@@ -451,6 +451,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     {
         Boolean thereIsNextPage = true;
         Pageable pageable = PageRequest.of(request.getPageNumber(), 11);
+        String typeOfConfiguration = request.getTypeOfConfiguration();
 
         long startTime = System.nanoTime();
         List<ComponentEntity> filteredComponentsSoFar = new ArrayList<>();
@@ -484,12 +485,29 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                         //If there is no automatic compatibility, and it is the first component from the request, get the first ten components from the searched category and consider them as compatible (since there is no rule)
                         if (notNullIds.indexOf(componentId) == 0) {
 
-                            //Get the specification "meant for"
+
+                            List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
+
+                            //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+                            Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
+                            //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+                            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+                            {
+                                //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+                                elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
+                            }
+                            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+                            else
+                            {
+                                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                                elevenComponentsFromTheSearchedComponentType = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),pageable);
+                            }
                             //If there is a map returned - use it
                             //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
 
                             //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-                            List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
+                            //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
                             if (elevenComponentsFromTheSearchedComponentType.isEmpty()) {
                                 throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
                             }
@@ -518,7 +536,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
                     //If it is the first component -> consider the rules and get the compatible component (based on the rule) from the searched component type
                     //If it is NOT the first component -> consider the rules and filter the compatible components that we have so far
-                    FilterComponentsResult filteredComponents = filterComponentsBasedOnRule(allAutomaticCompatibilityRulesBetweenTwoComponentTypes, componentId, componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(), notNullIds.indexOf(componentId), filteredComponentsSoFar,pageable,thereIsNextPage);
+                    FilterComponentsResult filteredComponents = filterComponentsBasedOnRule(allAutomaticCompatibilityRulesBetweenTwoComponentTypes, componentId, componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(), notNullIds.indexOf(componentId), filteredComponentsSoFar,pageable,thereIsNextPage,typeOfConfiguration);
                     if (filteredComponents.getComponents().isEmpty()) {
                         throw new ObjectNotFound("There aren't compatible components");
                     }
@@ -540,7 +558,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
 
-    private FilterComponentsResult filterComponentsBasedOnRule(List<AutomaticCompatibilityEntity> allAutomaticCompatibilityRulesBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage)
+    private FilterComponentsResult filterComponentsBasedOnRule(List<AutomaticCompatibilityEntity> allAutomaticCompatibilityRulesBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration)
     {
         List<SpecificationTypeEntity> allSpecificationForTheFirstComponent = new ArrayList<>();
         List<SpecificationTypeEntity> allSpecificationForTheSearchedComponents = new ArrayList<>();
@@ -599,8 +617,25 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
             //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
             if(indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
+                //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+                Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,searchedComponentTypeId);
+                Page<ComponentEntity> page = null;
+                //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+                if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+                {
+                    //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
+                    page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
+
+                }
+                //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+                else
+                {
+                    //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                    Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                    page = componentRepository.findComponentsByTypeAndSpecificationsAndPurpose(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(),firstEntry.getKey(),firstEntry.getValue(), pageable);
+                }
                 //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-                Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
+                //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
                 List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
 
                 if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty())
@@ -714,24 +749,24 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
 
-    private Map<String,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
+    private Map<Long,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
     {
         //Component voor - 1070
         //Bedoel voor - 947
         //Soort - 954
-        Map<String, List<String>> serverConfig = new HashMap<>();
+        Map<Long, List<String>> serverConfig = new HashMap<>();
         if(componentTypeId == 1)
         {
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Component voor", List.of("Server"));
+                    serverConfig.put(1070L, List.of("Server"));
                     break;
                 case "PC":
-                    serverConfig.put("Component voor", List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
                 case "Workstation":
-                    serverConfig.put("Component voor", List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
             }
             return serverConfig;
@@ -741,13 +776,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Component voor", List.of("Server"));
+                    serverConfig.put(1070L, List.of("Server"));
                     break;
                 case "PC":
-                    serverConfig.put("Component voor", List.of("PC"));
+                    serverConfig.put(1070L, List.of("PC"));
                     break;
                 case "Workstation":
-                    serverConfig.put("Component voor", List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
             }
             return serverConfig;
@@ -757,16 +792,16 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Component voor", List.of("Server"));
+                    serverConfig.put(1070L, List.of("Server"));
                     break;
                 case "PC":
-                    serverConfig.put("Component voor", List.of("PC"));
+                    serverConfig.put(1070L, List.of("PC"));
                     break;
                 case "Workstation":
-                    serverConfig.put("Component voor", List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
                 case "Laptop":
-                    serverConfig.put("Component voor", List.of("Notebook"));
+                    serverConfig.put(1070L, List.of("Notebook"));
                     break;
             }
             return serverConfig;
@@ -776,13 +811,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Bedoeld voor", List.of("Server"));
+                    serverConfig.put(947L, List.of("Server","server"));
                     break;
                 case "PC":
-                    serverConfig.put("Bedoeld voor", List.of("PC"));
+                    serverConfig.put(947L, List.of("PC"));
                     break;
                 case "Workstation":
-                    serverConfig.put("Bedoeld voor", List.of("PC"));
+                    serverConfig.put(947L, List.of("PC"));
                     break;
             }
             return serverConfig;
@@ -792,7 +827,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "PC":
-                    serverConfig.put("Soort", List.of("PC"));
+                    serverConfig.put(954L, List.of("PC"));
                     break;
             }
             return serverConfig;
@@ -802,13 +837,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Soort", List.of("Fan","Fan module"));
+                    serverConfig.put(954L, List.of("Fan","Fan module"));
                     break;
                 case "PC":
-                    serverConfig.put("Soort", List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
+                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
                     break;
                 case "Laptop":
-                    serverConfig.put("Soort", List.of("Thermal paste"));
+                    serverConfig.put(954L, List.of("Thermal paste"));
                     break;
             }
             return serverConfig;
@@ -818,13 +853,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Soort", List.of("Fan","Fan tray","Cooler"));
+                    serverConfig.put(954L, List.of("Fan","Fan tray","Cooler"));
                     break;
                 case "PC":
-                    serverConfig.put("Soort", List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
+                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
                     break;
                 case "Laptop":
-                    serverConfig.put("Soort", List.of("Thermal paste"));
+                    serverConfig.put(954L, List.of("Thermal paste"));
                     break;
             }
             return serverConfig;
@@ -834,16 +869,16 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Component voor", List.of("Server"));
+                    serverConfig.put(1070L, List.of("Server"));
                     break;
                 case "Workstation":
-                    serverConfig.put("Component voor", List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
                 case "PC":
-                    serverConfig.put("Component voor", List.of("PC"));
+                    serverConfig.put(1070L, List.of("PC"));
                     break;
                 case "Laptop":
-                    serverConfig.put("Component voor", List.of("Notebook"));
+                    serverConfig.put(1070L, List.of("Notebook"));
                     break;
             }
             return serverConfig;
@@ -853,13 +888,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put("Component voor", List.of("Server"));
+                    serverConfig.put(1070L, List.of("Server"));
                     break;
                 case "Workstation":
-                    serverConfig.put("Component voor", List.of("Workstation","workstation"));
+                    serverConfig.put(1070L, List.of("Workstation","workstation"));
                     break;
                 case "PC":
-                    serverConfig.put("Component voor", List.of("PC"));
+                    serverConfig.put(1070L, List.of("PC"));
                     break;
             }
             return serverConfig;
