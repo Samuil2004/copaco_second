@@ -1,392 +1,3 @@
-//package nl.fontys.s3.copacoproject.business.impl;
-//
-//import lombok.RequiredArgsConstructor;
-//import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
-//import nl.fontys.s3.copacoproject.business.CompatibilityManager;
-//import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-//import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-//import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
-//import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
-//import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-//import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
-//import nl.fontys.s3.copacoproject.domain.CompatibilityResult;
-//import nl.fontys.s3.copacoproject.domain.Component;
-//import nl.fontys.s3.copacoproject.domain.SpecificationType;
-//import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
-//import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
-//import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
-//import nl.fontys.s3.copacoproject.persistence.entity.*;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.*;
-//import java.util.stream.Collectors;
-//import java.util.stream.Stream;
-//
-//import static java.util.Locale.filter;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenComponents {
-//    private final AutomaticCompatibilityRepository automaticCompatibilityRepository;
-//    private final ComponentRepository componentRepository;
-//    private final ComponentTypeRepository componentTypeRepository;
-//    private final ComponentSpecificationListRepository componentSpecificationListRepository;
-//
-//
-//    private List<Long> checkIfGivenIdsExistInDatabase(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
-//    {
-//        List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
-//                        request.getSecondComponentId(),
-//                        request.getThirdComponentId(),
-//                        request.getFourthComponentId(),
-//                        request.getFifthComponentId(),
-//                        request.getSixthComponentId(),
-//                        request.getSeventhComponentId())
-//                .filter(Objects::nonNull)
-//                .toList();
-//
-//        List<Long> missingIds = notNullIds.stream()
-//                .filter(id -> !componentRepository.existsById(id))
-//                .toList();
-//        if (!missingIds.isEmpty()) {
-//            throw new ObjectNotFound("Components not found: " + missingIds);
-//        }
-//        return notNullIds;
-//    }
-//
-//
-//
-//
-//    @Override
-//    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
-//    {
-//        List<Long> notNullIds = checkIfGivenIdsExistInDatabase(request);
-//
-//        List<ComponentEntity> compatibleComponentsEntity = new ArrayList<>();
-//        boolean searchedComponentTypeExists = componentTypeRepository.existsById(request.getSearchedComponentTypeId());
-//        if(!searchedComponentTypeExists)
-//        {
-//            throw new ObjectNotFound("Component type not found");
-//        }
-//
-//        //Loop over the given selected component ids (those that are already selected by the user)
-//        for(Long componentId : notNullIds)
-//        {
-//
-//            //Get the component type of the current component id from the loop
-//            Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
-//            if(Objects.equals(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId()))
-//            {
-//                throw new CompatibilityError("Once a component is selected, other components from the same category can not be searched.");
-//            }
-//            //Find all automatic compatibility records between the component type of current component id from the loop and the searched component type
-//            List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId());
-//
-//            if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty())
-//            {
-//                //If there are no automatic compatibility rules and there is only one component id in the request, return all components within the searched component type
-//                if(notNullIds.indexOf(componentId) == 0 && notNullIds.size() == 1)
-//                {
-//                    List<ComponentEntity> allComponentsFromGivenComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId());
-//                    if(allComponentsFromGivenComponentType.isEmpty())
-//                    {
-//                        throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
-//                    }
-//                    return buildResponse(allComponentsFromGivenComponentType);
-//                }
-//                //If there are no automatic compatibility rules and it is the last component id, return the compatible components that are in the list so far
-//                if(notNullIds.indexOf(componentId) == notNullIds.size() - 1)
-//                {
-//                    return buildResponse(compatibleComponentsEntity);
-//                }
-//                continue;
-//            }
-//            //Get a list of components that are compatible with the selected component and also a map with specifications (those that should be considered from the searched component side)
-//            //and all the values for each specification. Both data structures are stored in te Compatibility Result class as fields
-//            CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,componentId,componentTypeIdOfProvidedComponent,request.getSearchedComponentTypeId());
-//            //if there are not any compatible component, there is no point to move downwards, because the flow is stopped, so we return empty list (if we have components A B C D and A is compatible
-//            //with B C and D and B is NOT compatible with C, there is no point to check if C is compatible with D
-//            if(compatibilityResult.getCompatibleComponents().isEmpty())
-//            {
-//                return List.of();
-//            }
-//            List<ComponentEntity> compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = new ArrayList<>();
-//
-//            //if it is the first component or there are not any compatible component so far (not because the previous component is not compatible with any!)
-//            if(notNullIds.indexOf(componentId) == 0 || compatibleComponentsEntity.isEmpty())
-//            {
-//
-//                List<ComponentEntity> compatibilityBetweenFirstComponentAndComponentType = getCompatibleItemsBetweenAComponentAndComponentType(componentId,componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId());
-//                compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibilityBetweenFirstComponentAndComponentType,compatibilityResult.getSpecificationsMap());
-//
-//            }
-//            else {
-//                compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(compatibleComponentsEntity, compatibilityResult.getSpecificationsMap());
-//            }
-//            compatibleComponentsEntity.clear();
-//            compatibleComponentsEntity.addAll(compatibilityBetweenSelectedComponentAndListOfComponentsFromDifferentComponentType);
-//        }
-//
-//        return buildResponse(compatibleComponentsEntity);
-//
-//    }
-//
-//    public List<ComponentEntity> getCompatibleItemsBetweenAComponentAndComponentType(Long foundComponentId,Long foundComponentTypeFromComponentFromRequest, Long foundComponentTypeByIdFromRequestId)
-//    {
-//            //Get all the automatic compatibility records and rules there are between the component type of the first component and the component type that is passed in the request
-//            List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(foundComponentTypeFromComponentFromRequest, foundComponentTypeByIdFromRequestId);
-//
-//            //if there are no rules, all components from the two component types should be considered compatible
-//            if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty()) {
-//                List<ComponentEntity> allComponentsFromGivenComponentType = componentRepository.findByComponentType_Id(foundComponentTypeByIdFromRequestId);
-//                if(allComponentsFromGivenComponentType.isEmpty())
-//                {
-//                    throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
-//                }
-//                return allComponentsFromGivenComponentType;
-//            }
-//
-//            CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundComponentId,foundComponentTypeFromComponentFromRequest,foundComponentTypeByIdFromRequestId);
-//
-//            //This map will store all specifications that should be considered from the first component side and the corresponding values
-//            Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide = compatibilityResult.getSpecificationsMap();
-//            //This list store all components from the selected component type that are compatible with the first component considering each rule separately (later all of them will be considered)
-//            List<ComponentEntity> allCompatibleComponentsBeforeFiltering = compatibilityResult.getCompatibleComponents();
-//
-//            List<ComponentEntity> allComponentsEntity = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(allCompatibleComponentsBeforeFiltering,allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide);
-//
-//            return allComponentsEntity;
-//    }
-//
-//
-//
-//    private List<GetAutomaticCompatibilityResponse> buildResponse(List<ComponentEntity> componentsEntities) {
-//        List<GetAutomaticCompatibilityResponse> allComponentsForResponse = new ArrayList<>();
-//        for (ComponentEntity componentEntity : componentsEntities) {
-//            allComponentsForResponse.add(GetAutomaticCompatibilityResponse.builder()
-//                    .componentId(componentEntity.getComponentId())
-//                    .componentName(componentEntity.getComponentName())
-//                    .componentTypeId(componentEntity.getComponentType().getId())
-//                    .componentTypeName(componentEntity.getComponentType().getComponentTypeName())
-//                    .componentImageUrl(componentEntity.getComponentImageUrl())
-//                    .brand(componentEntity.getBrand().getName())
-//                    .price(componentEntity.getComponentPrice())
-//                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
-//                    .build());
-//        }
-//        return allComponentsForResponse;
-//    }
-//
-//    private  Map<SpecificationType, List<String>>  getComponentSpecification(Long componentId)
-//    {
-//
-//            Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
-//            List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentId);
-//
-//            //Loop over all the specification of a component type THIS IS NEEDED ONLY FOR THE CONVERTER
-//            for (Component_SpecificationList specificationList : allSpecificationsForComponent) {
-//                SpecificationTypeEntity specType = specificationList.getSpecificationType();
-//                String value = specificationList.getValue();
-//
-//                //Check if there are already any values for the specification type in the dictionary
-//                List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
-//
-//                //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-//                if (valuesList == null) {
-//                    valuesList = new ArrayList<>();
-//                    valuesList.add(value);
-//                    dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
-//
-//                }
-//                //otherwise just add the value
-//                else {
-//                    valuesList.add(value);
-//                }
-//            }
-//        Map<SpecificationType, List<String>> baseMap = new HashMap<>();
-//
-//        for (Map.Entry<SpecificationTypeEntity, List<String>> entry : dictionaryWithTheSpecificationAndAllValuesForComponent.entrySet()) {
-//            SpecificationTypeEntity entityKey = entry.getKey();
-//            List<String> values = entry.getValue();
-//            SpecificationType baseKey = SpecificationTypeConverter.convertFromEntityToBase(entityKey);
-//            baseMap.put(baseKey, values);
-//        }
-//            return baseMap;
-//
-//    }
-//
-//
-//    //OK
-//    private CompatibilityResult GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId)
-//    {
-//        List<ComponentEntity> allCompatibleComponentsBeforeFiltering = new ArrayList<>();
-//        List<SpecificationTypeEntity> allSpecificationForTheFirstComponent = new ArrayList<>();
-//        List<SpecificationTypeEntity> allSpecificationForTheSearchedComponents = new ArrayList<>();
-//        Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide = new HashMap<>();
-//
-//        //Loop all the automatic compatibilities in order to find the rules and the specifications to consider for each component type
-//        for (AutomaticCompatibilityEntity automaticCompatibility : allCompatibilityRecordsBetweenTwoComponentTypes) {
-//            SpecificationTypeEntity specificationForTheMainComponent;
-//            SpecificationTypeEntity specificationForTheSearchedComponents;
-//
-//            //The compatibility table works with couples <component_type_1,component_type_2>
-//            //This case has two scenarios <component_type_1,component_type_2> and <component_type_2,component_type_1>
-//
-//            //Scenario <provided_component_type,searched_component_type>
-//            if(automaticCompatibility.getComponent1Id().getId() == providedComponentComponentTypeId) {
-//                //Find the specifications to consider for each rule
-//                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-//                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
-//
-//                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-//                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
-//            }
-//            //Scenario <searched_component_type,provided_component_type>
-//            else {
-//                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-//                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
-//
-//                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-//                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
-//            }
-//
-//            //Get all specifications records for the selected component and specification_type
-//            List<Component_SpecificationList> specificationsForTheSelectedComponent = componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(providedComponentId, specificationForTheMainComponent);
-//
-//            //A map containing the specification type entity and all the values that the provided component has for this specification
-//            // (In this case it will be only 1 specification type and many values (List<String>) -> only the one specification from the rule in the automatic compatibility
-//            Map<SpecificationTypeEntity, List<String>> specMap = specificationsForTheSelectedComponent.stream()
-//                    .collect(Collectors.groupingBy(
-//                            Component_SpecificationList::getSpecificationType,
-//                            Collectors.mapping(Component_SpecificationList::getValue, Collectors.toList())));
-//
-//            //Check if there is a specification type in the map that does not have attached values it's the data provider fault, but we can not establish the compatibility of this item,
-//            // so we neglect it and move to the next ones (agreement with client) if A and B have compatibility rule with specification C and D AND E and F, but A has only C and no D,
-//            //we should consider only D
-//            boolean hasEmptyOrMissingKey = specMap.entrySet().stream()
-//                    .anyMatch(entry -> entry.getKey() == null || entry.getValue() == null || entry.getValue().isEmpty());
-//
-//            if (hasEmptyOrMissingKey || specMap.isEmpty()) {
-//                continue;
-//            }
-//
-//            //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
-//            //to be compatible with the selected component
-//            allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
-//
-//
-//            //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-//            List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue());
-//            allCompatibleComponentsBeforeFiltering.addAll(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification);
-//        }
-//        return CompatibilityResult.builder()
-//                .specificationsMap(allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide)
-//                .compatibleComponents(allCompatibleComponentsBeforeFiltering)
-//                .build();
-//    }
-//
-//    //Old
-//    private List<ComponentEntity> CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(List<ComponentEntity> allCompatibleComponentsBeforeFiltering,Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide)
-//    {
-//        List<ComponentEntity> allComponentsEntity = new ArrayList<>();
-//        //some components are duplicated in the allCompatibleComponentsBeforeFiltering list, so now we map only the unique ones
-//        Set<ComponentEntity> uniqueComponentEntities = new HashSet<>(allCompatibleComponentsBeforeFiltering);
-//
-//        for(ComponentEntity componentEntity : uniqueComponentEntities) {
-//            List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
-//            Map<SpecificationTypeEntity, List<String>> mapOfUniqueSpecificationsForItemAndItsValues = new HashMap<>();
-//
-//            for (Component_SpecificationList specificationForTheSelectedComponent : allSpecificationsForComponent)
-//            {
-//                SpecificationTypeEntity specType = specificationForTheSelectedComponent.getSpecificationType();
-//                String value = specificationForTheSelectedComponent.getValue();
-//
-//                //Check if there are already any values for the specification type in the dictionary
-//                List<String> valuesList = mapOfUniqueSpecificationsForItemAndItsValues.get(specType);
-//
-//                //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-//                if (valuesList == null) {
-//                    valuesList = new ArrayList<>();
-//                    valuesList.add(value);
-//                    mapOfUniqueSpecificationsForItemAndItsValues.put(specType, valuesList);
-//
-//                }
-//                //otherwise just add the value
-//                else {
-//                    valuesList.add(value);
-//                }
-//            }
-//
-//            boolean atLeastOneMatches = false;
-//
-//            //Loop trough all the specifications for the component and see if there are any matching the those that will be considered for
-//            // the compatibility and if yes to check if the values that are compatible with the first component can be found as values
-//            // in the specification of the component values [ex. motherboard and ram are defined as compatible by the clock speed and the DDR values and
-//            //the motherboard supports clock speed of 2000 and the ram has a clock speed of 2000, but if the motherboard supports DDR5 and the ram has
-//            //DDR4 they are not compatible. this loop below goes trough all the specifications of the component type, checks which are considered in the
-//            //rules for the compatibility between the two component types (all the specifications considered are mapped in the
-//            // allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide map) and checks if the values that the components have are supported by the first
-//            //component.
-//
-//            //outerLoop:
-//            for (Map.Entry<SpecificationTypeEntity, List<String>> entry : mapOfUniqueSpecificationsForItemAndItsValues.entrySet()) {
-//                SpecificationTypeEntity specification = entry.getKey();
-//                List<String> values = entry.getValue();
-//                if (allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.containsKey(specification)) {
-//                    atLeastOneMatches = false;
-//
-//                    // Retrieve the list of expected values for this specification type
-//                    List<String> expectedValues =
-//                            allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.get(specification);
-//
-//                    if(!expectedValues.isEmpty()) {
-//                        for (String value : values) {
-//                            if (expectedValues.contains(value)) {
-//                                atLeastOneMatches = true;
-//                                break; // Found a match, no need to check further
-//                            }
-//                        }
-//                        if (!atLeastOneMatches) {
-//                            break;
-//
-//                        }
-//                    }
-//
-//                }
-//            }
-//
-//            if(atLeastOneMatches) {
-//                Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
-//
-//                //Loop over all the specification of a component type THIS IS NEEDED ONLY FOR THE CONVERTER
-//                for (Component_SpecificationList specificationList : allSpecificationsForComponent) {
-//                    SpecificationTypeEntity specType = specificationList.getSpecificationType();
-//                    String value = specificationList.getValue();
-//
-//                    //Check if there are already any values for the specification type in the dictionary
-//                    List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
-//
-//                    //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-//                    if (valuesList == null) {
-//                        valuesList = new ArrayList<>();
-//                        valuesList.add(value);
-//                        dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
-//
-//                    }
-//                    else {
-//                        valuesList.add(value);
-//                    }
-//                }
-//                allComponentsEntity.add(componentEntity);
-//            }
-//
-//        }
-//        return  allComponentsEntity;
-//    }
-//}
-
-
-
 package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.RequiredArgsConstructor;
@@ -398,10 +9,7 @@ import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
 import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
-import nl.fontys.s3.copacoproject.domain.CompatibilityResult;
-import nl.fontys.s3.copacoproject.domain.Component;
-import nl.fontys.s3.copacoproject.domain.FilterComponentsResult;
-import nl.fontys.s3.copacoproject.domain.SpecificationType;
+import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -422,6 +30,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
+    private final RuleEntityRepository ruleEntityRepository;
     //private Integer pageNumber = 0;
 //    private Boolean thereIsNextPage = true;
 
@@ -537,9 +146,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     //If it is the first component -> consider the rules and get the compatible component (based on the rule) from the searched component type
                     //If it is NOT the first component -> consider the rules and filter the compatible components that we have so far
                     FilterComponentsResult filteredComponents = filterComponentsBasedOnRule(allAutomaticCompatibilityRulesBetweenTwoComponentTypes, componentId, componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(), notNullIds.indexOf(componentId), filteredComponentsSoFar,pageable,thereIsNextPage,typeOfConfiguration);
-                    if (filteredComponents.getComponents().isEmpty()) {
-                        throw new ObjectNotFound("There aren't compatible components");
-                    }
+//                    if (filteredComponents.getComponents().isEmpty()) {
+//                        throw new ObjectNotFound("There aren't compatible components");
+//                    }
                     filteredComponentsSoFar.clear();
                     filteredComponentsSoFar.addAll(filteredComponents.getComponents());
                     thereIsNextPage = filteredComponents.getThereIsNextPage();
@@ -558,138 +167,265 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
 
-    private FilterComponentsResult filterComponentsBasedOnRule(List<AutomaticCompatibilityEntity> allAutomaticCompatibilityRulesBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration)
+
+
+    private FilterComponentsResult handleManualCompatibilityBetweenSpecifications(AutomaticCompatibilityEntity automaticCompatibility,Long providedComponentId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration) {
+        //------1. Get the specification for the main component of the rule
+        SpecificationTypeEntity specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
+        SpecificationTypeEntity specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
+
+
+        //------2. Get the values the component has for the specification
+        List<Component_SpecificationList> specificationsForTheSelectedComponent = componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(providedComponentId, specificationForTheMainComponent);
+
+        //-> A map containing the specification type entity and all the values that the provided component has for this specification
+        // (In this case it will be only 1 specification type and many values (List<String>) -> only the one specification from the rule in the automatic compatibility
+        Map<SpecificationTypeEntity, List<String>> specMap = specificationsForTheSelectedComponent.stream()
+                .collect(Collectors.groupingBy(
+                        Component_SpecificationList::getSpecificationType,
+                        Collectors.mapping(Component_SpecificationList::getValue, Collectors.toList())));
+
+        //-> Check if there is a specification type in the map that does not have attached values it's the data provider fault, but we can not establish the compatibility of this item,
+        // so we neglect it and move to the next ones (agreement with client) if A and B have compatibility rule with specification C and D AND E and F, but A has only C and no D,
+        //we should consider only D
+        boolean hasEmptyOrMissingKey = specMap.entrySet().stream()
+                .anyMatch(entry -> entry.getKey() == null || entry.getValue() == null || entry.getValue().isEmpty());
+
+        if (hasEmptyOrMissingKey || specMap.isEmpty()) {
+            return null;
+        }
+
+        //------2. Check if any of the values are mentioned in the rules values
+        //Get the first couple from the specMap
+        Map.Entry<SpecificationTypeEntity, List<String>> firstEntryInMap = specMap.entrySet().iterator().next();
+        //Get all the values that should be considered for the searched component type for the given by the rule specification
+        // ex: in the rule_entity table there is a record specification1,specification2,value1,value2 as following (1,2,"3200","3400,4500,3450") and another one
+        // (1,2,"3400","4562,3456,5436") and for example, if the motherboard has for specification 1 values 3200 and 3400, the list below will store
+        // all values that correspond to these two specifications and that should be considered for manual compatibility (ex: "3400,4500,3450,4562,3456,5436")
+        List<String> valuesThatShouldBeConsideredForTheSearchedComponentTypeForGivenSpecification = ruleEntityRepository.findValuesOfSecondSpecificationForManualCompatibility(automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getId(),automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getId(),firstEntryInMap.getValue());
+        //If for none of the specifications of the current component there aren't values for the searched component, technically there isn't a rule for it,
+        //so it can skip to the next rule
+        if(valuesThatShouldBeConsideredForTheSearchedComponentTypeForGivenSpecification.isEmpty()) {
+            return null;
+        }
+
+        //We need to flat map the values because they are in such format: List.of("value1,value2,value3", "value4,value5", "value6");
+        List<String> separatedValues = valuesThatShouldBeConsideredForTheSearchedComponentTypeForGivenSpecification.stream()
+                .flatMap(value -> List.of(value.split(",")).stream())
+                .collect(Collectors.toList());
+
+        //Make the list with values contain only unique values and no duplicates
+        List<String> uniqueValues = new ArrayList<>(
+                new HashSet<>(separatedValues)
+        );
+
+
+        //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
+        //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
+        if (indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
+            //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+            Map<Long, List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration, searchedComponentTypeId);
+            Page<ComponentEntity> page = null;
+            //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty()) {
+                //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of unique values from the rule
+                page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), uniqueValues, pageable);
+
+            }
+            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+            else {
+                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                page = componentRepository.findComponentsByTypeAndSpecificationsAndPurpose(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), uniqueValues, firstEntry.getKey(), firstEntry.getValue(), pageable);
+            }
+            //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
+            //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
+            List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
+
+            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty()) {
+                throw new ObjectNotFound("Compatible components from searched component type were not found");
+            }
+            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 11) {
+                thereIsNextPage = false;
+            }
+            //if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 10)
+            compatibleComponentsSoFar.addAll(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification);
+        } else {
+
+            //We need a copy of the list, because we need it to loop trough it, otherwise if we loop trought the original 'compatibleComponentsSoFar' list and try to remove items
+            //while looping, it will give us an error
+            List<ComponentEntity> copyOfCompatibleComponents = new ArrayList<>(compatibleComponentsSoFar);
+            //Filter the compatible components that we have so far based on the new rules from the loop
+            for (ComponentEntity componentEntity : copyOfCompatibleComponents) {
+                //Get the values of the componentEntity (from the loop) for the specificationThatShouldBeConsideredFromTheSearchedType
+                // + If there are no value/s -> the combination component_id <-> specification_that_should_be_considered_from_the_searched_component_type ( that is
+                //read by the rule ) this means that the component does not have this specification which automatically means not compatible
+                // + If there are values, then we have to check if these values are the same as the ones from the specification map that is above
+                List<String> allTheValuesTheComponentHasForTheConsideredSpecification = componentSpecificationListRepository.findValuesByComponentAndSpecification(componentEntity.getComponentId(), specificationForTheSearchedComponents.getId());
+                //if there are no values -> this means component is not compatible
+                if (allTheValuesTheComponentHasForTheConsideredSpecification.isEmpty()) {
+                    compatibleComponentsSoFar.remove(componentEntity);
+                    continue;
+                }
+
+                //Check if any of the values for the searched component type for the current specification that are defined by the rule, can be found in the values of the current component for the same specification
+                // + If yes, this means they are compatible
+                // + If not, this means they are not compatible
+                boolean matchFound = allTheValuesTheComponentHasForTheConsideredSpecification
+                        .stream()
+                        .anyMatch(uniqueValues::contains);
+                if (!matchFound) {
+                    compatibleComponentsSoFar.remove(componentEntity);
+                    continue;
+                }
+
+            }
+        }
+        return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), thereIsNextPage);
+    }
+
+    private FilterComponentsResult handleAutomaticCompatibilityBetweenSpecifications(AutomaticCompatibilityEntity automaticCompatibility,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration)
     {
         List<SpecificationTypeEntity> allSpecificationForTheFirstComponent = new ArrayList<>();
         List<SpecificationTypeEntity> allSpecificationForTheSearchedComponents = new ArrayList<>();
         Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide = new HashMap<>();
+        SpecificationTypeEntity specificationForTheMainComponent;
+        SpecificationTypeEntity specificationForTheSearchedComponents;
 
-        //Loop all the automatic compatibilities in order to find the rules and the specifications to consider for each component type
-        for (AutomaticCompatibilityEntity automaticCompatibility : allAutomaticCompatibilityRulesBetweenTwoComponentTypes) {
-            SpecificationTypeEntity specificationForTheMainComponent;
-            SpecificationTypeEntity specificationForTheSearchedComponents;
+        //The compatibility table works with couples <component_type_1,component_type_2>
+        //This case has two scenarios <component_type_1,component_type_2> and <component_type_2,component_type_1>
 
-            //The compatibility table works with couples <component_type_1,component_type_2>
-            //This case has two scenarios <component_type_1,component_type_2> and <component_type_2,component_type_1>
+        //Scenario <provided_component_type,searched_component_type>
+        if (automaticCompatibility.getComponent1Id().getId() == providedComponentComponentTypeId) {
+            //Find the specifications to consider for each rule
+            specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
+            allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
 
-            //Scenario <provided_component_type,searched_component_type>
-            if(automaticCompatibility.getComponent1Id().getId() == providedComponentComponentTypeId) {
-                //Find the specifications to consider for each rule
-                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
-
-                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
-            }
-            //Scenario <searched_component_type,provided_component_type>
-            else {
-                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
-
-                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
-            }
-
-            //Get all specifications records for the selected component and specification_type
-            List<Component_SpecificationList> specificationsForTheSelectedComponent = componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(providedComponentId, specificationForTheMainComponent);
-
-            //A map containing the specification type entity and all the values that the provided component has for this specification
-            // (In this case it will be only 1 specification type and many values (List<String>) -> only the one specification from the rule in the automatic compatibility
-            Map<SpecificationTypeEntity, List<String>> specMap = specificationsForTheSelectedComponent.stream()
-                    .collect(Collectors.groupingBy(
-                            Component_SpecificationList::getSpecificationType,
-                            Collectors.mapping(Component_SpecificationList::getValue, Collectors.toList())));
-
-            //Check if there is a specification type in the map that does not have attached values it's the data provider fault, but we can not establish the compatibility of this item,
-            // so we neglect it and move to the next ones (agreement with client) if A and B have compatibility rule with specification C and D AND E and F, but A has only C and no D,
-            //we should consider only D
-            boolean hasEmptyOrMissingKey = specMap.entrySet().stream()
-                    .anyMatch(entry -> entry.getKey() == null || entry.getValue() == null || entry.getValue().isEmpty());
-
-            if (hasEmptyOrMissingKey || specMap.isEmpty()) {
-                continue;
-            }
-
-            //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
-            //to be compatible with the selected component
-            allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
-
-            //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
-            //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
-            if(indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
-                //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
-                Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,searchedComponentTypeId);
-                Page<ComponentEntity> page = null;
-                //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
-                if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
-                {
-                    //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-                    page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
-
-                }
-                //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
-                else
-                {
-                    //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
-                    Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
-                    page = componentRepository.findComponentsByTypeAndSpecificationsAndPurpose(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(),firstEntry.getKey(),firstEntry.getValue(), pageable);
-                }
-                //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-                //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
-                List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
-
-                if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty())
-                {
-                    throw new ObjectNotFound("Compatible components from searched component type were not found");
-                }
-                if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 11)
-                {
-                    thereIsNextPage = false;
-                }
-                //if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 10)
-                compatibleComponentsSoFar.addAll(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification);
-                continue;
-            }
-            else {
-
-                //We need a copy of the list, because we need it to loop trough it, otherwise if we loop trought the original 'compatibleComponentsSoFar' list and try to remove items
-                //while looping, it will give us an error
-                List<ComponentEntity> copyOfCompatibleComponents = new ArrayList<>(compatibleComponentsSoFar);
-                //Filter the compatible components that we have so far based on the new rules from the loop
-                for(ComponentEntity componentEntity : copyOfCompatibleComponents)
-                {
-                    //Get the values of the componentEntity (from the loop) for the specificationThatShouldBeConsideredFromTheSearchedType
-                    // + If there are no value/s -> the combination component_id <-> specification_that_should_be_considered_from_the_searched_component_type ( that is
-                    //read by the rule ) this means that the component does not have this specification which automatically means not compatible
-                    // + If there are values, then we have to check if these values are the same as the ones from the specification map that is above
-                    List<String> allTheValuesTheComponentHasForTheConsideredSpecification = componentSpecificationListRepository.findValuesByComponentAndSpecification(componentEntity.getComponentId(),specificationForTheSearchedComponents.getId());
-                    //if there are no values -> this means component is not compatible
-                    if(allTheValuesTheComponentHasForTheConsideredSpecification.isEmpty())
-                    {
-                        compatibleComponentsSoFar.remove(componentEntity);
-                        continue;
-                    }
-                    //Check if any of the specification values of the component (JACKIE) match any of the specification values of the current component(from the loop)
-                    // + If yes, this means they are compatible
-                    // + If not, this means they are not compatible
-                    boolean matchFound = specMap.entrySet().stream()
-                            .anyMatch(entry -> {
-                                // Get the list of values from the map for the current main component for the specification defined by the rule
-                                List<String> valuesForTheSpecificationFromTheRuleForTheMainComponent = entry.getValue();
-
-                                // Check if any value in the list overlaps with the provided list
-                                return valuesForTheSpecificationFromTheRuleForTheMainComponent.stream().anyMatch(allTheValuesTheComponentHasForTheConsideredSpecification::contains);
-                            });
-                    if(!matchFound)
-                    {
-                        compatibleComponentsSoFar.remove(componentEntity);
-                        continue;
-                    }
-
-                }
-            }
-
+            specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
+            allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
         }
+        //Scenario <searched_component_type,provided_component_type>
+        else {
+            specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
+            allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
+
+            specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
+            allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
+        }
+
+        //Get all specifications records for the selected component and specification_type
+        List<Component_SpecificationList> specificationsForTheSelectedComponent = componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(providedComponentId, specificationForTheMainComponent);
+
+        //A map containing the specification type entity and all the values that the provided component has for this specification
+        // (In this case it will be only 1 specification type and many values (List<String>) -> only the one specification from the rule in the automatic compatibility
+        Map<SpecificationTypeEntity, List<String>> specMap = specificationsForTheSelectedComponent.stream()
+                .collect(Collectors.groupingBy(
+                        Component_SpecificationList::getSpecificationType,
+                        Collectors.mapping(Component_SpecificationList::getValue, Collectors.toList())));
+
+        //Check if there is a specification type in the map that does not have attached values it's the data provider fault, but we can not establish the compatibility of this item,
+        // so we neglect it and move to the next ones (agreement with client) if A and B have compatibility rule with specification C and D AND E and F, but A has only C and no D,
+        //we should consider only D
+        boolean hasEmptyOrMissingKey = specMap.entrySet().stream()
+                .anyMatch(entry -> entry.getKey() == null || entry.getValue() == null || entry.getValue().isEmpty());
+
+        if (hasEmptyOrMissingKey || specMap.isEmpty()) {
+            return null;
+        }
+
+        //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
+        //to be compatible with the selected component
+        allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
+
+        //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
+        //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
+        if (indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
+            //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+            Map<Long, List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration, searchedComponentTypeId);
+            Page<ComponentEntity> page = null;
+            //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty()) {
+                //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
+                page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
+
+            }
+            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+            else {
+                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                page = componentRepository.findComponentsByTypeAndSpecificationsAndPurpose(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), firstEntry.getKey(), firstEntry.getValue(), pageable);
+            }
+            //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
+            //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
+            List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
+
+            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty()) {
+                throw new ObjectNotFound("Compatible components from searched component type were not found");
+            }
+            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 11) {
+                thereIsNextPage = false;
+            }
+            //if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 10)
+            compatibleComponentsSoFar.addAll(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification);
+
+        } else {
+
+            //We need a copy of the list, because we need it to loop trough it, otherwise if we loop trought the original 'compatibleComponentsSoFar' list and try to remove items
+            //while looping, it will give us an error
+            List<ComponentEntity> copyOfCompatibleComponents = new ArrayList<>(compatibleComponentsSoFar);
+            //Filter the compatible components that we have so far based on the new rules from the loop
+            for (ComponentEntity componentEntity : copyOfCompatibleComponents) {
+                //Get the values of the componentEntity (from the loop) for the specificationThatShouldBeConsideredFromTheSearchedType
+                // + If there are no value/s -> the combination component_id <-> specification_that_should_be_considered_from_the_searched_component_type ( that is
+                //read by the rule ) this means that the component does not have this specification which automatically means not compatible
+                // + If there are values, then we have to check if these values are the same as the ones from the specification map that is above
+                List<String> allTheValuesTheComponentHasForTheConsideredSpecification = componentSpecificationListRepository.findValuesByComponentAndSpecification(componentEntity.getComponentId(), specificationForTheSearchedComponents.getId());
+                //if there are no values -> this means component is not compatible
+                if (allTheValuesTheComponentHasForTheConsideredSpecification.isEmpty()) {
+                    compatibleComponentsSoFar.remove(componentEntity);
+                    continue;
+                }
+                //Check if any of the specification values of the component (JACKIE) match any of the specification values of the current component(from the loop)
+                // + If yes, this means they are compatible
+                // + If not, this means they are not compatible
+                boolean matchFound = specMap.entrySet().stream()
+                        .anyMatch(entry -> {
+                            // Get the list of values from the map for the current main component for the specification defined by the rule
+                            List<String> valuesForTheSpecificationFromTheRuleForTheMainComponent = entry.getValue();
+
+                            // Check if any value in the list overlaps with the provided list
+                            return valuesForTheSpecificationFromTheRuleForTheMainComponent.stream().anyMatch(allTheValuesTheComponentHasForTheConsideredSpecification::contains);
+                        });
+                if (!matchFound) {
+                    compatibleComponentsSoFar.remove(componentEntity);
+                    continue;
+                }
+
+            }
+        }
+        return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), thereIsNextPage);
+    }
+
+    public boolean isManualCompatibility(AutomaticCompatibilityEntity automaticCompatibilityEntity) {
+        return  automaticCompatibilityEntity.getRuleId().getValueOfFirstSpecification() != null || automaticCompatibilityEntity.getRuleId().getValueOfSecondSpecification() != null;
+    }
+
+    private FilterComponentsResult filterComponentsBasedOnRule(List<AutomaticCompatibilityEntity> allAutomaticCompatibilityRulesBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration)
+    {
+            FilterComponentsResult filteredResults = null;
+            for (AutomaticCompatibilityEntity automaticCompatibility : allAutomaticCompatibilityRulesBetweenTwoComponentTypes) {
+                boolean isManualCompatibility = isManualCompatibility(automaticCompatibility);
+                if (isManualCompatibility) {
+                    filteredResults = handleManualCompatibilityBetweenSpecifications(automaticCompatibility, providedComponentId, searchedComponentTypeId, indexOfProvidedComponent, compatibleComponentsSoFar, pageable, thereIsNextPage, typeOfConfiguration);
+                    thereIsNextPage = filteredResults.getThereIsNextPage();
+                    compatibleComponentsSoFar = filteredResults.getComponents();
+                } else {
+                    filteredResults = handleAutomaticCompatibilityBetweenSpecifications(automaticCompatibility, providedComponentId, providedComponentComponentTypeId, searchedComponentTypeId, indexOfProvidedComponent, compatibleComponentsSoFar, pageable, thereIsNextPage, typeOfConfiguration);
+                    thereIsNextPage = filteredResults.getThereIsNextPage();
+                    compatibleComponentsSoFar = filteredResults.getComponents();
+                }
+            }
+
         return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), thereIsNextPage);
     }
 
@@ -904,207 +640,5 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         }
     }
 
-//
-//    public List<ComponentEntity> getCompatibleItemsBetweenAComponentAndComponentType(Long foundComponentId,Long foundComponentTypeFromComponentFromRequest, Long foundComponentTypeByIdFromRequestId)
-//    {
-//        //Get all the automatic compatibility records and rules there are between the component type of the first component and the component type that is passed in the request
-//        List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(foundComponentTypeFromComponentFromRequest, foundComponentTypeByIdFromRequestId);
-//
-//        //if there are no rules, all components from the two component types should be considered compatible
-//        if(allCompatibilityRecordsBetweenTwoComponentTypes.isEmpty()) {
-//            List<ComponentEntity> allComponentsFromGivenComponentType = componentRepository.findFirst10ByComponentType_Id(foundComponentTypeByIdFromRequestId);
-//            if(allComponentsFromGivenComponentType.isEmpty())
-//            {
-//                throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
-//            }
-//            return allComponentsFromGivenComponentType;
-//        }
-//
-//        CompatibilityResult compatibilityResult = GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(allCompatibilityRecordsBetweenTwoComponentTypes,foundComponentId,foundComponentTypeFromComponentFromRequest,foundComponentTypeByIdFromRequestId);
-//
-//        //This map will store all specifications that should be considered from the first component side and the corresponding values
-//        Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide = compatibilityResult.getSpecificationsMap();
-//        //This list store all components from the selected component type that are compatible with the first component considering each rule separately (later all of them will be considered)
-//        List<ComponentEntity> allCompatibleComponentsBeforeFiltering = compatibilityResult.getCompatibleComponents();
-//
-//        List<ComponentEntity> allComponentsEntity = CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(allCompatibleComponentsBeforeFiltering,allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide);
-//
-//        return allComponentsEntity;
-//    }
-//
-//
-//
-//
-//
-//    //OK
-//    private CompatibilityResult GetComponentsFromSearchedComponentTypeThatHaveSpecificationsNeededForCompatibilityWithGivenComponent(List<AutomaticCompatibilityEntity> allCompatibilityRecordsBetweenTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId)
-//    {
-//        List<ComponentEntity> allCompatibleComponentsBeforeFiltering = new ArrayList<>();
-//        List<SpecificationTypeEntity> allSpecificationForTheFirstComponent = new ArrayList<>();
-//        List<SpecificationTypeEntity> allSpecificationForTheSearchedComponents = new ArrayList<>();
-//        Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide = new HashMap<>();
-//
-//        //Loop all the automatic compatibilities in order to find the rules and the specifications to consider for each component type
-//        for (AutomaticCompatibilityEntity automaticCompatibility : allCompatibilityRecordsBetweenTwoComponentTypes) {
-//            SpecificationTypeEntity specificationForTheMainComponent;
-//            SpecificationTypeEntity specificationForTheSearchedComponents;
-//
-//            //The compatibility table works with couples <component_type_1,component_type_2>
-//            //This case has two scenarios <component_type_1,component_type_2> and <component_type_2,component_type_1>
-//
-//            //Scenario <provided_component_type,searched_component_type>
-//            if(automaticCompatibility.getComponent1Id().getId() == providedComponentComponentTypeId) {
-//                //Find the specifications to consider for each rule
-//                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-//                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
-//
-//                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-//                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
-//            }
-//            //Scenario <searched_component_type,provided_component_type>
-//            else {
-//                specificationForTheMainComponent = automaticCompatibility.getRuleId().getSpecificationToConsider2Id().getSpecificationType();
-//                allSpecificationForTheFirstComponent.add(specificationForTheMainComponent);
-//
-//                specificationForTheSearchedComponents = automaticCompatibility.getRuleId().getSpecificationToConsider1Id().getSpecificationType();
-//                allSpecificationForTheSearchedComponents.add(specificationForTheSearchedComponents);
-//            }
-//
-//            //Get all specifications records for the selected component and specification_type
-//            List<Component_SpecificationList> specificationsForTheSelectedComponent = componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(providedComponentId, specificationForTheMainComponent);
-//
-//            //A map containing the specification type entity and all the values that the provided component has for this specification
-//            // (In this case it will be only 1 specification type and many values (List<String>) -> only the one specification from the rule in the automatic compatibility
-//            Map<SpecificationTypeEntity, List<String>> specMap = specificationsForTheSelectedComponent.stream()
-//                    .collect(Collectors.groupingBy(
-//                            Component_SpecificationList::getSpecificationType,
-//                            Collectors.mapping(Component_SpecificationList::getValue, Collectors.toList())));
-//
-//            //Check if there is a specification type in the map that does not have attached values it's the data provider fault, but we can not establish the compatibility of this item,
-//            // so we neglect it and move to the next ones (agreement with client) if A and B have compatibility rule with specification C and D AND E and F, but A has only C and no D,
-//            //we should consider only D
-//            boolean hasEmptyOrMissingKey = specMap.entrySet().stream()
-//                    .anyMatch(entry -> entry.getKey() == null || entry.getValue() == null || entry.getValue().isEmpty());
-//
-//            if (hasEmptyOrMissingKey || specMap.isEmpty()) {
-//                continue;
-//            }
-//
-//            //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
-//            //to be compatible with the selected component
-//            allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
-//
-//
-//            //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-//            //List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue());
-//            Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId,  specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
-//            List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
-//
-//            allCompatibleComponentsBeforeFiltering.addAll(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification);
-//        }
-//        return CompatibilityResult.builder()
-//                .specificationsMap(allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide)
-//                .compatibleComponents(allCompatibleComponentsBeforeFiltering)
-//                .build();
-//    }
-//
-//    //Old
-//    private List<ComponentEntity> CheckCompatibilityBetweenSelectedComponentAndAListOfOtherComponentsFromADifferentComponentType(List<ComponentEntity> allCompatibleComponentsBeforeFiltering,Map<SpecificationTypeEntity, List<String>> allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide)
-//    {
-//        List<ComponentEntity> allComponentsEntity = new ArrayList<>();
-//        //some components are duplicated in the allCompatibleComponentsBeforeFiltering list, so now we map only the unique ones
-//        Set<ComponentEntity> uniqueComponentEntities = new HashSet<>(allCompatibleComponentsBeforeFiltering);
-//
-//        for(ComponentEntity componentEntity : uniqueComponentEntities) {
-//            List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
-//            Map<SpecificationTypeEntity, List<String>> mapOfUniqueSpecificationsForItemAndItsValues = new HashMap<>();
-//
-//            for (Component_SpecificationList specificationForTheSelectedComponent : allSpecificationsForComponent)
-//            {
-//                SpecificationTypeEntity specType = specificationForTheSelectedComponent.getSpecificationType();
-//                String value = specificationForTheSelectedComponent.getValue();
-//
-//                //Check if there are already any values for the specification type in the dictionary
-//                List<String> valuesList = mapOfUniqueSpecificationsForItemAndItsValues.get(specType);
-//
-//                //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-//                if (valuesList == null) {
-//                    valuesList = new ArrayList<>();
-//                    valuesList.add(value);
-//                    mapOfUniqueSpecificationsForItemAndItsValues.put(specType, valuesList);
-//
-//                }
-//                //otherwise just add the value
-//                else {
-//                    valuesList.add(value);
-//                }
-//            }
-//
-//            boolean atLeastOneMatches = false;
-//
-//            //Loop trough all the specifications for the component and see if there are any matching the those that will be considered for
-//            // the compatibility and if yes to check if the values that are compatible with the first component can be found as values
-//            // in the specification of the component values [ex. motherboard and ram are defined as compatible by the clock speed and the DDR values and
-//            //the motherboard supports clock speed of 2000 and the ram has a clock speed of 2000, but if the motherboard supports DDR5 and the ram has
-//            //DDR4 they are not compatible. this loop below goes trough all the specifications of the component type, checks which are considered in the
-//            //rules for the compatibility between the two component types (all the specifications considered are mapped in the
-//            // allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide map) and checks if the values that the components have are supported by the first
-//            //component.
-//
-//            //outerLoop:
-//            for (Map.Entry<SpecificationTypeEntity, List<String>> entry : mapOfUniqueSpecificationsForItemAndItsValues.entrySet()) {
-//                SpecificationTypeEntity specification = entry.getKey();
-//                List<String> values = entry.getValue();
-//                if (allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.containsKey(specification)) {
-//                    atLeastOneMatches = false;
-//
-//                    // Retrieve the list of expected values for this specification type
-//                    List<String> expectedValues =
-//                            allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.get(specification);
-//
-//                    if(!expectedValues.isEmpty()) {
-//                        for (String value : values) {
-//                            if (expectedValues.contains(value)) {
-//                                atLeastOneMatches = true;
-//                                break; // Found a match, no need to check further
-//                            }
-//                        }
-//                        if (!atLeastOneMatches) {
-//                            break;
-//
-//                        }
-//                    }
-//
-//                }
-//            }
-//
-//            if(atLeastOneMatches) {
-//                Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
-//
-//                //Loop over all the specification of a component type THIS IS NEEDED ONLY FOR THE CONVERTER
-//                for (Component_SpecificationList specificationList : allSpecificationsForComponent) {
-//                    SpecificationTypeEntity specType = specificationList.getSpecificationType();
-//                    String value = specificationList.getValue();
-//
-//                    //Check if there are already any values for the specification type in the dictionary
-//                    List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
-//
-//                    //If there aren't, then add the specification type and the list of values (one by one) to the dictionary
-//                    if (valuesList == null) {
-//                        valuesList = new ArrayList<>();
-//                        valuesList.add(value);
-//                        dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
-//
-//                    }
-//                    else {
-//                        valuesList.add(value);
-//                    }
-//                }
-//                allComponentsEntity.add(componentEntity);
-//            }
-//
-//        }
-//        return  allComponentsEntity;
-//    }
 }
 
