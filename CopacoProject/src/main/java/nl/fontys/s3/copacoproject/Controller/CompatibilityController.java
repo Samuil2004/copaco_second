@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.dto.*;
+import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import nl.fontys.s3.copacoproject.domain.Component;
 import org.springframework.http.HttpStatus;
@@ -28,10 +29,17 @@ public class CompatibilityController {
         return new ResponseEntity<>(allCompatibilityTypes, HttpStatus.OK);
 
     }
-    @PostMapping("/automatic")
+    @PostMapping("/createAutomaticCompatibility")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createAutomaticCompatibility(@RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
         CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/createManualCompatibility")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<Void> createManualCompatibility(@RequestBody @Valid CreateManualCompatibilityDtoRequest request) {
+        CreateManualCompatibilityDtoResponse response = compatibilityManager.createManualCompatibility(request);
         return ResponseEntity.noContent().build();
     }
 
@@ -51,7 +59,7 @@ public class CompatibilityController {
 
     }
 
-    @GetMapping("/getAllComponentsFromAGivenComponentTypeAndSpecification")
+    @GetMapping("/configurator")
     public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsFromAGivenComponentTypeAndSpecification(
             @RequestParam("firstComponentId") Long firstComponentId,
             @RequestParam(value = "secondComponentId", required = false) Long secondComponentId,
@@ -63,9 +71,6 @@ public class CompatibilityController {
             @RequestParam("searchedComponentsType") Long searchedComponentsType,
             @RequestParam("pageNumber") Integer pageNumber,
             @RequestParam("typeOfConfiguration") String typeOfConfiguration
-
-
-
             ){
         GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
                 .firstComponentId(firstComponentId)
