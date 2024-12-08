@@ -639,6 +639,5 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             return null;
         }
     }
-
 }
 
