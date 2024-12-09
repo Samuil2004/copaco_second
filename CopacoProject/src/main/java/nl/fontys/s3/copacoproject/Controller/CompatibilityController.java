@@ -32,7 +32,9 @@ public class CompatibilityController {
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createAutomaticCompatibility(@RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
         CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
+
         return ResponseEntity.noContent().build();
+
     }
 
     @GetMapping("/automaticCompatibility/{automaticCompatibilityId}")
@@ -40,15 +42,12 @@ public class CompatibilityController {
         GetAutomaticCompatibilityByIdResponse automaticCompatibility = compatibilityManager.automaticCompatibilityByCompatibilityId(automaticCompatibilityId);
 
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
-
     }
 
     @GetMapping("/allAutomaticCompatibilitiesByGivenComponentTypeId/{componentTypeId}")
     public ResponseEntity<List<GetAutomaticCompatibilityByIdResponse>> getAllAutomaticCompatibilitiesForAComponentType(@PathVariable("componentTypeId") Long automaticCompatibilityId){
         List<GetAutomaticCompatibilityByIdResponse> automaticCompatibility = compatibilityManager.allCompatibilitiesForComponentTypeByComponentTypeId(automaticCompatibilityId);
-
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
-
     }
 
     @GetMapping("/getAllComponentsFromAGivenComponentTypeAndSpecification")

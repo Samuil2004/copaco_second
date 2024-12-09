@@ -63,6 +63,7 @@ public class SpecificationTypeController {
 
     //Authentication disabled for this one
     @GetMapping("findIdByComponentTypeIdAndSpecificationTypeId/{componentTypeId}/{specificationTypeId}")
+    @RolesAllowed({"ADMIN}"})
     public Long findIdByComponentTypeIdAndSpecificationTypeId(@PathVariable Long componentTypeId, @PathVariable Long specificationTypeId){
         Long response = specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
         return response;
