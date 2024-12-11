@@ -16,6 +16,7 @@ public class Template {
     private Category category;
     private String name;
     private Brand brand;
+    private String configurationType;
     private String imageUrl;
     private Map<ComponentType, Integer> components; //integer for order of importance
 }

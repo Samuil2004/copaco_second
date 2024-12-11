@@ -51,7 +51,11 @@ public class TemplateManagerImpl implements TemplateManager {
     public void createTemplate(CreateTemplateRequest request) {
         // Retrieve related entities
         Category category = categoryManager.findCategoryById(request.getCategoryId());
+
         Brand brand = brandManager.getBrandById(request.getBrandId());
+        if(!brandRepository.existsById(request.getBrandId())) {
+            throw new InvalidInputException("This brand does not exist");
+        }
 
         if(category == null || brand == null || request.getComponentTypes().isEmpty()) {
             throw new InvalidParameterException("Inputs not valid");
@@ -70,6 +74,7 @@ public class TemplateManagerImpl implements TemplateManager {
                 .brand(brand)
                 .name(request.getName())
                 .category(category)
+                .configurationType(request.getConfigurationType())
                 .imageUrl(request.getImageUrl())
                 .build();
 
@@ -79,9 +84,6 @@ public class TemplateManagerImpl implements TemplateManager {
         //save list of componentTypes in template
         for (ComponentTypeItemInTemplate item : request.getComponentTypes()) {
             ComponentTypeEntity componentTypeEntity = entityManager.find(ComponentTypeEntity.class, item.getComponentTypeId());
-//            if(componentTypeEntity == null) {
-//                throw new InvalidParameterException("Component type not found");
-//            }
             ComponentTypeList_Template listItem = ComponentTypeList_Template.builder()
                     .template(templateEntity)
                     .componentType(componentTypeEntity)
@@ -160,7 +162,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
     @Override
     public int getNumberOfTemplates(Long categoryId) {
-        CategoryEntity categoryEntity = null;
+        CategoryEntity categoryEntity;
         if (categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
                 throw new ObjectNotFound("Category not found");
@@ -240,7 +242,7 @@ public class TemplateManagerImpl implements TemplateManager {
             ComponentTypeEntity componentTypeEntity = componentTypeRepository.findComponentTypeEntityById(item.getComponentTypeId());
             ComponentTypeList_Template_CPK componentInTemplateId = new ComponentTypeList_Template_CPK(templateEntity, componentTypeEntity);
 
-            ComponentTypeList_Template orderedItemInTemplate = new ComponentTypeList_Template();
+            ComponentTypeList_Template orderedItemInTemplate;
             if(componentTypeListRepository.existsById(componentInTemplateId)){
                 orderedItemInTemplate = componentTypeListRepository.findComponentTypeList_TemplateByTemplateAndComponentType(componentInTemplateId.getTemplate(), componentInTemplateId.getComponentType());
             }

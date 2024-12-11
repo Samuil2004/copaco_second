@@ -31,9 +31,6 @@ public class TemplateController {
         catch (InvalidParameterException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
     }
 
     @GetMapping("/{id}")
@@ -44,9 +41,6 @@ public class TemplateController {
         }
         catch(ObjectNotFound e){
             return ResponseEntity.notFound().build();
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -59,20 +53,12 @@ public class TemplateController {
         catch(ObjectNotFound e){
             return ResponseEntity.notFound().build();
         }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
     }
 
     @GetMapping()
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Template>> getTemplates() {
-        try{
-            return ResponseEntity.ok(templateManager.getTemplates());
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok(templateManager.getTemplates());
     }
 
     @GetMapping("/filtered")
@@ -102,9 +88,6 @@ public class TemplateController {
         }
         catch(ObjectNotFound e) {
             return ResponseEntity.notFound().build();
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
         }
     }
 
