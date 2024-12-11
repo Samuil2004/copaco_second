@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.BrandManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
+import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
@@ -21,6 +22,10 @@ import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
 import nl.fontys.s3.copacoproject.persistence.entity.primaryKeys.ComponentTypeList_Template_CPK;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
@@ -127,6 +132,48 @@ public class TemplateManagerImpl implements TemplateManager {
         }
 
     }
+    @Override
+    public List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, long categoryId) {
+        CategoryEntity categoryEntity = null;
+        if (categoryId > 0) {
+            if (!categoryRepository.existsById(categoryId)) {
+                throw new ObjectNotFound("Category not found");
+            }
+            categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
+        }
+
+        Pageable pageable = PageRequest.of(currentPage, itemsPerPage, Sort.by("id").descending());
+        Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategory(categoryEntity, pageable);
+
+        if (templateEntitiesPage.isEmpty()) {
+            throw new ObjectNotFound("There are no templates");
+        }
+
+        List<Template> templates = new ArrayList<>();
+        for (TemplateEntity templateEntity : templateEntitiesPage) {
+            List<ComponentTypeList_Template> componentEntities = templateRepository.findComponentTypeListByTemplateId(templateEntity.getId());
+            templates.add(TemplateConverter.convertFromEntityToBase(templateEntity, componentEntities));
+        }
+
+        return templates;
+    }
+
+    @Override
+    public int getNumberOfTemplates(Long categoryId) {
+        CategoryEntity categoryEntity = null;
+        if (categoryId > 0) {
+            if (!categoryRepository.existsById(categoryId)) {
+                throw new ObjectNotFound("Category not found");
+            }
+            categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
+        }
+        else{
+            throw new InvalidInputException("Invalid category id");
+        }
+
+        return templateRepository.countTemplateEntitiesByCategory(categoryEntity);
+    }
+
 
     @Override
     public List<Template> getTemplates() {

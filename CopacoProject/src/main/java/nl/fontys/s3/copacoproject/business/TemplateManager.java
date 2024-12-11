@@ -12,5 +12,7 @@ public interface TemplateManager {
     Template getTemplateById(long id);
     List<Template> getTemplates();
     List<Template> getTemplatesByName(String name);
+    List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, long categoryId);
+    int getNumberOfTemplates(Long categoryId);
     void updateTemplate(long templateId, UpdateTemplateRequest request);
 }
