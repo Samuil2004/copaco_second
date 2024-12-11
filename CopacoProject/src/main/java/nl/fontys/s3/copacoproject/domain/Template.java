@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
+import java.util.List;
 
 @Builder
 @Data
@@ -18,5 +18,5 @@ public class Template {
     private Brand brand;
     private String configurationType;
     private String imageUrl;
-    private Map<ComponentType, Integer> components; //integer for order of importance
+    private List<ComponentType> components;
 }

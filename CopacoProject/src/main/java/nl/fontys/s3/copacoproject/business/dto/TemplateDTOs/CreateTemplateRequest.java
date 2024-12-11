@@ -20,5 +20,5 @@ public class CreateTemplateRequest {
     private long brandId;
     private String imageUrl;
     @NotNull
-    private List<ComponentTypeItemInTemplate> componentTypes;
+    private List<Long> componentTypes;
 }
