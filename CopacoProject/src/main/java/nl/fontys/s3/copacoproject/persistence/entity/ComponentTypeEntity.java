@@ -28,10 +28,10 @@ public class ComponentTypeEntity {
     private String componentTypeImageUrl;
 
     @JoinColumn(name="category_id", referencedColumnName = "id")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private CategoryEntity category;
 
-    @OneToMany(mappedBy = "componentType")
+    @OneToMany(mappedBy = "componentType", fetch = FetchType.LAZY)
     private List<SpecficationTypeList_ComponentTypeEntity> specifications;
 }

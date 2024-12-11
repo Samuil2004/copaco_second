@@ -22,4 +22,5 @@ public class GetAutomaticCompatibilityResponse {
     private String brand;
     private Double price;
     private Map<SpecificationType, List<String>> componentSpecifications;
+    private Boolean thereIsNextPage;
 }

@@ -1,12 +1,12 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
 import nl.fontys.s3.copacoproject.business.SpecificationType_ComponentType;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.SpecificationsManager;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.*;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ import java.util.List;
 public class SpecificationTypeController {
     private final SpecificationTypeManager specificationTypeManager;
     private final SpecificationType_ComponentType specificationType_ComponentType;
-
+    private final SpecificationsManager specificationsManager;
 
     @GetMapping
     @RolesAllowed({"ADMIN", "CUSTOMER"})
@@ -68,6 +68,26 @@ public class SpecificationTypeController {
         Long response = specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
         return response;
     }
+
+    @GetMapping("/getDistinctConfigurationTypes")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<GetDistinctConfigurationTypesResponse> getDistinctConfigurationTypes(){
+        GetDistinctConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @GetMapping("/getDistinctConfigurationTypesInCategory")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<GetDistinctConfigurationTypesInCategoryResponse> getDistinctConfigurationTypesInCategory(
+            @RequestParam("categoryId") Long categoryId) {
+        GetDistinctConfigurationTypesInCategoryRequest request =  GetDistinctConfigurationTypesInCategoryRequest.builder().categoryId(categoryId).build();
+        GetDistinctConfigurationTypesInCategoryResponse response = specificationsManager.getDistinctConfigurationTypesInCategory(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+
 
 
 }

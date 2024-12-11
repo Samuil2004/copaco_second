@@ -21,12 +21,14 @@ public class AutomaticCompatibilityEntity {
     private long id;
 
     @JoinColumn(name="component1_id", referencedColumnName = "id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity component1Id;
 
     @JoinColumn(name="component2_id", referencedColumnName = "id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity component2Id;
 

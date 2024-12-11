@@ -3,12 +3,15 @@ package nl.fontys.s3.copacoproject.business.impl;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
+import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.CompatibilityTypeConverter;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
+import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
+import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
@@ -43,10 +46,6 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
         Optional<ComponentTypeEntity> componentType2 = componentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getComponentType2Id());
 
         if(componentType1.isPresent() && componentType2.isPresent()) {
-
-//            SpecficationTypeList_ComponentTypeEntity sp1 = specificationTypeList_ComponentTypeRepository.findByComponentTypeAndSpecificationType(componentType1.get().getId(),createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
-//            SpecficationTypeList_ComponentTypeEntity sp2 = specificationTypeList_ComponentTypeRepository.findByComponentTypeAndSpecificationType(componentType2.get().getId(),createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
-
             Optional<SpecficationTypeList_ComponentTypeEntity> sp1 = specificationTypeList_ComponentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
             Optional<SpecficationTypeList_ComponentTypeEntity> sp2 = specificationTypeList_ComponentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
 
@@ -55,6 +54,11 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                 throw new ObjectNotFound("Specification not found");
             }
 
+            List<RuleEntity> foundRulesForThisCombinationOfSpecifications = ruleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdId(sp1.get().getId(), sp2.get().getId());
+            if(!foundRulesForThisCombinationOfSpecifications.isEmpty())
+            {
+                throw new ObjectExistsAlreadyException("Rules for selected specifications already exist");
+            }
             RuleEntity ruleEntity = RuleEntity.builder()
                     .specificationToConsider1Id(sp1.get())
                     .specificationToConsider2Id(sp2.get())
@@ -70,6 +74,64 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
             AutomaticCompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(automaticCompatibilityEntity);
             return CreateAutomaticCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
+        }
+
+        throw new ObjectNotFound("ERROR SAVING AUTOMATIC COMPATIBILITY");
+    }
+
+    @Override
+    public CreateManualCompatibilityDtoResponse createManualCompatibility(CreateManualCompatibilityDtoRequest createManualCompatibilityDtoRequest) {
+        if(createManualCompatibilityDtoRequest.getComponentType1Id().equals(createManualCompatibilityDtoRequest.getComponentType2Id())){
+            throw new CompatibilityError("Component types must be different");
+        }
+
+        Optional<ComponentTypeEntity> componentType1 = componentTypeRepository.findById(createManualCompatibilityDtoRequest.getComponentType1Id());
+        Optional<ComponentTypeEntity> componentType2 = componentTypeRepository.findById(createManualCompatibilityDtoRequest.getComponentType2Id());
+
+        if(componentType1.isPresent() && componentType2.isPresent()) {
+            Optional<SpecficationTypeList_ComponentTypeEntity> sp1 = specificationTypeList_ComponentTypeRepository.findById(createManualCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
+            Optional<SpecficationTypeList_ComponentTypeEntity> sp2 = specificationTypeList_ComponentTypeRepository.findById(createManualCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
+
+            if(sp1.isEmpty() || sp2.isEmpty())
+            {
+                throw new ObjectNotFound("Specification not found");
+            }
+
+            List<RuleEntity> foundRulesForThisCombinationOfSpecifications = ruleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdId(sp1.get().getId(), sp2.get().getId());
+            if(!foundRulesForThisCombinationOfSpecifications.isEmpty())
+            {
+                boolean alreadyExistsAutomaticRuleForThisSpecification = foundRulesForThisCombinationOfSpecifications.stream()
+                        .anyMatch(rule -> rule.getValueOfFirstSpecification() == null);
+
+                if(alreadyExistsAutomaticRuleForThisSpecification) {
+                    throw new ObjectExistsAlreadyException("Automatic compatibility rule for this specifications already exist");
+                }
+                //In case there it already exists a rule for this specification value, it should be updated instead of added
+                boolean alreadyExistsARuleForThisSpecification = foundRulesForThisCombinationOfSpecifications.stream()
+                        .anyMatch(rule -> createManualCompatibilityDtoRequest.getValueForTheFirstSpecification().equals(rule.getValueOfFirstSpecification()));
+
+                if(alreadyExistsARuleForThisSpecification) {
+                    throw new ObjectExistsAlreadyException("Rules for selected specifications already exist");
+                }
+
+            }
+            RuleEntity ruleEntity = RuleEntity.builder()
+                    .specificationToConsider1Id(sp1.get())
+                    .specificationToConsider2Id(sp2.get())
+                    .valueOfFirstSpecification(createManualCompatibilityDtoRequest.getValueForTheFirstSpecification())
+                    .valueOfSecondSpecification(String.join(",",createManualCompatibilityDtoRequest.getValuesForTheSecondSpecification()))
+                    .build();
+
+            RuleEntity returnedRuleEntity = ruleEntityRepository.save(ruleEntity);
+
+            AutomaticCompatibilityEntity automaticCompatibilityEntity = AutomaticCompatibilityEntity.builder()
+                    .component1Id(componentType1.get())
+                    .component2Id(componentType2.get())
+                    .ruleId(returnedRuleEntity)
+                    .build();
+
+            AutomaticCompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(automaticCompatibilityEntity);
+            return CreateManualCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
         throw new ObjectNotFound("ERROR SAVING AUTOMATIC COMPATIBILITY");
