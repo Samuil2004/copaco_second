@@ -141,9 +141,9 @@ public class TemplateManagerImpl implements TemplateManager {
 
     }
     @Override
-    public List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, long categoryId) {
+    public List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
         CategoryEntity categoryEntity = null;
-        if (categoryId > 0) {
+        if (categoryId != null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
                 throw new ObjectNotFound("Category not found");
             }
@@ -151,7 +151,7 @@ public class TemplateManagerImpl implements TemplateManager {
         }
 
         Pageable pageable = PageRequest.of(currentPage, itemsPerPage, Sort.by("id").descending());
-        Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategory(categoryEntity, pageable);
+        Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, pageable);
 
         if (templateEntitiesPage.isEmpty()) {
             throw new ObjectNotFound("There are no templates");
@@ -167,19 +167,16 @@ public class TemplateManagerImpl implements TemplateManager {
     }
 
     @Override
-    public int getNumberOfTemplates(Long categoryId) {
-        CategoryEntity categoryEntity;
-        if (categoryId > 0) {
+    public int getNumberOfTemplates(Long categoryId, String configurationType) {
+        CategoryEntity categoryEntity = null;
+        if (categoryId!=null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
                 throw new ObjectNotFound("Category not found");
             }
             categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
         }
-        else{
-            throw new InvalidInputException("Invalid category id");
-        }
 
-        return templateRepository.countTemplateEntitiesByCategory(categoryEntity);
+        return templateRepository.countTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType);
     }
 
 

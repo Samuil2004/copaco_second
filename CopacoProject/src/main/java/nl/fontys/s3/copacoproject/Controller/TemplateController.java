@@ -66,16 +66,18 @@ public class TemplateController {
     public ResponseEntity<List<Template>> getFilteredTemplates(
             @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
             @RequestParam(value = "currentPage", defaultValue = "0") int currentPage,
-            @RequestParam(value = "categoryId", defaultValue = "0") long categoryId) {
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "configurationType", required = false) String configurationType) {
 
-        List<Template> filteredTemplates = templateManager.getFilteredTemplates(itemsPerPage, currentPage, categoryId);
+        List<Template> filteredTemplates = templateManager.getFilteredTemplates(itemsPerPage, currentPage, categoryId, configurationType);
         return ResponseEntity.ok(filteredTemplates);
     }
 
     @GetMapping("/countItems")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<Integer> getNumberOfTemplates(@RequestParam(value = "categoryId", defaultValue = "0") long categoryId) {
-        int numberOfTemplates = templateManager.getNumberOfTemplates(categoryId);
+    public ResponseEntity<Integer> getNumberOfTemplates(@RequestParam(value = "categoryId", required = false) Long categoryId,
+                                                        @RequestParam(value = "configurationType", required = false) String configurationType) {
+        int numberOfTemplates = templateManager.getNumberOfTemplates(categoryId, configurationType);
         return ResponseEntity.ok().body(numberOfTemplates);
     }
 
