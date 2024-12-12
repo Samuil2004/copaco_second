@@ -13,7 +13,6 @@ import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.converters.BrandConverter;
 import nl.fontys.s3.copacoproject.business.converters.CategoryConverter;
 import nl.fontys.s3.copacoproject.business.converters.TemplateConverter;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.ComponentTypeItemInTemplate;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Brand;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,24 +50,26 @@ public class TemplateManagerImpl implements TemplateManager {
         // Retrieve related entities
         Category category = categoryManager.findCategoryById(request.getCategoryId());
         Brand brand = brandManager.getBrandById(request.getBrandId());
-
+        if(!brandRepository.existsById(request.getBrandId())) {
+            throw new InvalidInputException("This brand does not exist");
+        }
         if(category == null || brand == null || request.getComponentTypes().isEmpty()) {
-            throw new InvalidParameterException("Inputs not valid");
+            throw new InvalidInputException("Inputs not valid");
         }
         if(templateRepository.existsTemplateEntityByNameAndBrandAndCategory(request.getName(), request.getBrandId(), request.getCategoryId())) {
-            throw new InvalidParameterException("Template already exists");
+            throw new InvalidInputException("Template already exists");
         }
-        for(ComponentTypeItemInTemplate item : request.getComponentTypes()){
-            if(!componentTypeRepository.existsById(item.getComponentTypeId())){
-                throw new InvalidParameterException("Component type not found");
+        for(Long itemId : request.getComponentTypes()){
+            if(!componentTypeRepository.existsById(itemId)){
+                throw new InvalidInputException("Component type not found");
             }
         }
-
         // Create and save template
         Template template = Template.builder()
                 .brand(brand)
                 .name(request.getName())
                 .category(category)
+                .configurationType(request.getConfigurationType())
                 .imageUrl(request.getImageUrl())
                 .build();
 
@@ -77,26 +77,34 @@ public class TemplateManagerImpl implements TemplateManager {
         templateEntity = templateRepository.save(templateEntity);
 
         //save list of componentTypes in template
-        for (ComponentTypeItemInTemplate item : request.getComponentTypes()) {
-            ComponentTypeEntity componentTypeEntity = entityManager.find(ComponentTypeEntity.class, item.getComponentTypeId());
-//            if(componentTypeEntity == null) {
-//                throw new InvalidParameterException("Component type not found");
-//            }
-            ComponentTypeList_Template listItem = ComponentTypeList_Template.builder()
-                    .template(templateEntity)
-                    .componentType(componentTypeEntity)
-                    .orderOfImportance(item.getOrderOfImportance())
-                    .build();
-
-            saveComponentTypeListTemplate(listItem);
-        }
+        saveComponentTypeListTemplate(request.getComponentTypes(), templateEntity);
     }
 
     // Transactional method to save ComponentTypeList_Template
     @Transactional
-    public void saveComponentTypeListTemplate(ComponentTypeList_Template listItem) {
-        componentTypeListRepository.save(listItem);
+    public void saveComponentTypeListTemplate(List<Long> componentTypeList, TemplateEntity templateEntity) {
+        for (Long itemId : componentTypeList) {
+            ComponentTypeEntity componentTypeEntity = entityManager.find(ComponentTypeEntity.class, itemId);
+
+            // Check if the category matches
+            if (!componentTypeEntity.getCategory().equals(templateEntity.getCategory())) {
+                throw new InvalidInputException("Category does not match");
+            }
+
+            // Check if configurationType matches
+            String templateConfigType = templateEntity.getConfigurationType();
+            validateConfigurationTypeMatch(templateConfigType, componentTypeEntity);
+
+            // Create and save the ComponentTypeList_Template entity
+            ComponentTypeList_Template listItem = ComponentTypeList_Template.builder()
+                    .template(templateEntity)
+                    .componentType(componentTypeEntity)
+                    .build();
+
+            componentTypeListRepository.save(listItem);
+        }
     }
+
 
 
     @Override
@@ -133,9 +141,9 @@ public class TemplateManagerImpl implements TemplateManager {
 
     }
     @Override
-    public List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, long categoryId) {
+    public List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
         CategoryEntity categoryEntity = null;
-        if (categoryId > 0) {
+        if (categoryId != null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
                 throw new ObjectNotFound("Category not found");
             }
@@ -143,7 +151,7 @@ public class TemplateManagerImpl implements TemplateManager {
         }
 
         Pageable pageable = PageRequest.of(currentPage, itemsPerPage, Sort.by("id").descending());
-        Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategory(categoryEntity, pageable);
+        Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, pageable);
 
         if (templateEntitiesPage.isEmpty()) {
             throw new ObjectNotFound("There are no templates");
@@ -159,19 +167,16 @@ public class TemplateManagerImpl implements TemplateManager {
     }
 
     @Override
-    public int getNumberOfTemplates(Long categoryId) {
+    public int getNumberOfTemplates(Long categoryId, String configurationType) {
         CategoryEntity categoryEntity = null;
-        if (categoryId > 0) {
+        if (categoryId!=null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
                 throw new ObjectNotFound("Category not found");
             }
             categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
         }
-        else{
-            throw new InvalidInputException("Invalid category id");
-        }
 
-        return templateRepository.countTemplateEntitiesByCategory(categoryEntity);
+        return templateRepository.countTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType);
     }
 
 
@@ -187,20 +192,21 @@ public class TemplateManagerImpl implements TemplateManager {
     }
 
     @Override
+    @Transactional
     public void updateTemplate(long templateId, UpdateTemplateRequest request) {
         TemplateEntity templateEntity = templateRepository.findTemplateEntityById(templateId);
         if(templateEntity == null) {
-            throw new ObjectNotFound("Template not found");
+            throw new InvalidInputException("Template not found");
         }
         if(!categoryRepository.existsById(request.getCategoryId()) || !brandRepository.existsById(request.getBrandId())) {
-            throw new InvalidParameterException("Inputs not valid");
+            throw new InvalidInputException("Inputs not valid");
         }
         Category category = categoryManager.findCategoryById(request.getCategoryId());
         Brand brand = brandManager.getBrandById(request.getBrandId());
 
-        for(ComponentTypeItemInTemplate item : request.getComponentTypes()){
-            if(!componentTypeRepository.existsById(item.getComponentTypeId())){
-                throw new InvalidParameterException("Component type not found");
+        for(Long itemId : request.getComponentTypes()){
+            if(!componentTypeRepository.existsById(itemId)){
+                throw new InvalidInputException("Component type not found");
             }
         }
         if(templateRepository.existsTemplateEntityForUpdate(templateId ,request.getName(), request.getBrandId(), request.getCategoryId())) {
@@ -219,39 +225,66 @@ public class TemplateManagerImpl implements TemplateManager {
         templateRepository.save(templateEntity);
     }
 
-    private void updateTemplateComponents( TemplateEntity templateEntity, List<ComponentTypeItemInTemplate> componentTypes) {
-        //delete removed items from template
+    private void updateTemplateComponents(TemplateEntity templateEntity, List<Long> componentTypes) {
+        deleteRemovedComponents(templateEntity, componentTypes);
+        saveOrUpdateComponents(templateEntity, componentTypes);
+    }
+
+    private void deleteRemovedComponents(TemplateEntity templateEntity, List<Long> updatedComponentTypeIds) {
         List<ComponentTypeList_Template> existingComponentTypesInTemplate =
                 componentTypeListRepository.findComponentTypeList_TemplatesByTemplate(templateEntity);
-
-        Set<Long> updatedComponentTypeIds = componentTypes.stream()
-                .map(ComponentTypeItemInTemplate::getComponentTypeId)
-                .collect(Collectors.toSet());
 
         List<ComponentTypeList_Template> itemsToDelete = existingComponentTypesInTemplate.stream()
                 .filter(existing -> !updatedComponentTypeIds.contains(existing.getComponentType().getId()))
                 .toList();
 
         componentTypeListRepository.deleteAll(itemsToDelete);
+    }
 
+    private void saveOrUpdateComponents(TemplateEntity templateEntity, List<Long> componentTypes) {
+        String templateConfigType = templateEntity.getConfigurationType();
 
-        //save updates in order of importance / add new component types in template
-        for(ComponentTypeItemInTemplate item : componentTypes) {
-            ComponentTypeEntity componentTypeEntity = componentTypeRepository.findComponentTypeEntityById(item.getComponentTypeId());
+        for (Long itemId : componentTypes) {
+            ComponentTypeEntity componentTypeEntity = componentTypeRepository.findComponentTypeEntityById(itemId);
+
+            validateCategoryMatch(templateEntity, componentTypeEntity);
+            validateConfigurationTypeMatch(templateConfigType, componentTypeEntity);
+
             ComponentTypeList_Template_CPK componentInTemplateId = new ComponentTypeList_Template_CPK(templateEntity, componentTypeEntity);
+            saveOrUpdateComponentTypeListTemplate(componentInTemplateId, templateEntity, componentTypeEntity);
+        }
+    }
 
-            ComponentTypeList_Template orderedItemInTemplate = new ComponentTypeList_Template();
-            if(componentTypeListRepository.existsById(componentInTemplateId)){
-                orderedItemInTemplate = componentTypeListRepository.findComponentTypeList_TemplateByTemplateAndComponentType(componentInTemplateId.getTemplate(), componentInTemplateId.getComponentType());
-            }
-            else{
-                orderedItemInTemplate = ComponentTypeList_Template.builder()
-                        .orderOfImportance(item.getOrderOfImportance())
-                        .componentType(componentTypeEntity)
-                        .template(templateEntity)
-                        .build();
-                componentTypeListRepository.save(orderedItemInTemplate);
+    private void validateCategoryMatch(TemplateEntity templateEntity, ComponentTypeEntity componentTypeEntity) {
+        if (!componentTypeEntity.getCategory().equals(templateEntity.getCategory())) {
+            throw new InvalidInputException("Category does not match");
+        }
+    }
+
+    private void validateConfigurationTypeMatch(String templateConfigType, ComponentTypeEntity componentTypeEntity) {
+        String componentConfigTypes = componentTypeEntity.getConfigurationType();
+        if (templateConfigType != null && componentConfigTypes != null) {
+            Set<String> componentConfigTypeSet = Arrays.stream(componentConfigTypes.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+            if (!componentConfigTypeSet.contains(templateConfigType)) {
+                throw new InvalidInputException("Configuration type does not match");
             }
         }
     }
+
+    private void saveOrUpdateComponentTypeListTemplate(ComponentTypeList_Template_CPK componentInTemplateId, TemplateEntity templateEntity, ComponentTypeEntity componentTypeEntity) {
+        if (componentTypeListRepository.existsById(componentInTemplateId)) {
+            ComponentTypeList_Template itemInTemplate = componentTypeListRepository.findComponentTypeList_TemplateByTemplateAndComponentType(
+                    componentInTemplateId.getTemplate(), componentInTemplateId.getComponentType());
+            componentTypeListRepository.save(itemInTemplate);
+        } else {
+            ComponentTypeList_Template orderedItemInTemplate = ComponentTypeList_Template.builder()
+                    .componentType(componentTypeEntity)
+                    .template(templateEntity)
+                    .build();
+            componentTypeListRepository.save(orderedItemInTemplate);
+        }
+    }
+
 }

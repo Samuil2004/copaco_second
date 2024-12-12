@@ -23,5 +23,5 @@ public class UpdateTemplateRequest {
     @NotBlank
     private String imageUrl;
     @NotNull
-    private List<ComponentTypeItemInTemplate> componentTypes;
+    private List<Long> componentTypes;
 }

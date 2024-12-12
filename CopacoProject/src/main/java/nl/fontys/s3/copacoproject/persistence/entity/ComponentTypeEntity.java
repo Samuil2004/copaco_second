@@ -32,6 +32,9 @@ public class ComponentTypeEntity {
     @NotNull
     private CategoryEntity category;
 
+    @Column(name="configuration_type")
+    private String configurationType;
+
     @OneToMany(mappedBy = "componentType", fetch = FetchType.LAZY)
     private List<SpecficationTypeList_ComponentTypeEntity> specifications;
 }

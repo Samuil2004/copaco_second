@@ -1,18 +1,15 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.RequiredArgsConstructor;
-import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistinctComponentTypesByTypeOfConfigurationRequest;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistinctComponentTypesByTypeOfConfigurationResponse;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
-import nl.fontys.s3.copacoproject.persistence.SpecificationTypeComponentTypeRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
-import nl.fontys.s3.copacoproject.persistence.SpecificationTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,6 @@
 package nl.fontys.s3.copacoproject.persistence.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,9 +25,4 @@ public class ComponentTypeList_Template {
     @JoinColumn(name="component_type")
     @ManyToOne
     private ComponentTypeEntity componentType;
-
-    @Column(name="order_of_importance")
-    @NotNull
-    @Min(1)
-    private int orderOfImportance;
 }

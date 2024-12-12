@@ -19,9 +19,11 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     SELECT t
     FROM TemplateEntity t
     WHERE (:category IS NULL OR t.category = :category)
+      AND (:configurationType IS NULL OR :configurationType = '' OR t.configurationType LIKE %:configurationType%)
     """)
-    Page<TemplateEntity> findTemplateEntitiesByCategory(
+    Page<TemplateEntity> findTemplateEntitiesByCategoryAndConfigurationType(
             @Param("category") CategoryEntity category,
+            @Param("configurationType") String configurationType,
             Pageable pageable);
 
     @Query("SELECT CASE WHEN COUNT(te) > 0 THEN true ELSE false END FROM TemplateEntity te " +
@@ -41,8 +43,10 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query("""
     SELECT COUNT(t)
     FROM TemplateEntity t
-    WHERE (:category IS NULL OR t.category = :category)""")
-    int countTemplateEntitiesByCategory(@Nullable @Param("category") CategoryEntity category);
+    WHERE ((:category IS NULL OR t.category = :category)
+    AND (:configurationType IS NULL OR :configurationType = '' OR t.configurationType LIKE %:configurationType%))""")
+    int countTemplateEntitiesByCategoryAndConfigurationType(@Nullable @Param("category") CategoryEntity category,
+                                                            @Nullable @Param("configurationType") String configurationType);
 
 
 

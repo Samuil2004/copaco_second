@@ -14,10 +14,11 @@ import java.util.List;
 public class CreateTemplateRequest {
     @NotNull
     private long categoryId;
+    private String configurationType;
     @NotBlank
     private String name;
     private long brandId;
     private String imageUrl;
     @NotNull
-    private List<ComponentTypeItemInTemplate> componentTypes;
+    private List<Long> componentTypes;
 }

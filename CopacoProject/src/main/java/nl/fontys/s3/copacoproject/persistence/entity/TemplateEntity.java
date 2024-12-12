@@ -34,6 +34,10 @@ public class TemplateEntity {
     @NotNull
     private BrandEntity brand;
 
+    @Column(name = "configuration_type")
+    @NotNull
+    private String configurationType;
+
     @Column(name = "image_url")
     private String imageURL;
 }
