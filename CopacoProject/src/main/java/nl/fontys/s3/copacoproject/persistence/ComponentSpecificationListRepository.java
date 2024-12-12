@@ -47,4 +47,26 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             "JOIN c.componentType ct " +
             "WHERE ct.category.id = :categoryId AND cs.specificationType.id = 1070")
     List<String> getDistinctConfigurationTypesInCategory(@Param("categoryId") Long categoryId);
+
+
+    @Query("SELECT cs.value " +
+            "FROM Component_SpecificationList cs " +
+            "WHERE cs.componentId.componentId = :componentId " +
+            "AND cs.specificationType.id = :specificationTypeId")
+    List<String> findValuesBySpecificationTypeIdAndComponentId(
+            @Param("componentId") Long componentId,
+            @Param("specificationTypeId") Long specificationTypeId);
+
+
+    //the following query checks if a component satisfies a rule for a given component id, specification and expected values
+    @Query("SELECT CASE WHEN COUNT(cs) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM Component_SpecificationList cs " +
+            "WHERE cs.componentId.componentId = :componentId " +
+            "  AND cs.specificationType.id = :specificationTypeId " +
+            "  AND cs.value IN :values")
+    boolean existsByComponentIdAndSpecificationTypeIdAndValueIn(
+            @Param("componentId") Long componentId,
+            @Param("specificationTypeId") Long specificationTypeId,
+            @Param("values") List<String> values);
+
 }
