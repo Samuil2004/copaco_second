@@ -36,4 +36,7 @@ public class AutomaticCompatibilityEntity {
     @ManyToOne
     @NotNull
     private RuleEntity ruleId;
+
+    @Column(name = "configuration_type")
+    private String configurationType;
 }

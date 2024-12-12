@@ -31,4 +31,6 @@ public class RuleEntity {
     @Column(name = "valueOfSecondSpecification", nullable = true)
     private String valueOfSecondSpecification;
 
+
+
 }
