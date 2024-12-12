@@ -150,7 +150,7 @@ public class TemplateManagerImpl implements TemplateManager {
             categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
         }
 
-        Pageable pageable = PageRequest.of(currentPage, itemsPerPage, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
         Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, pageable);
 
         if (templateEntitiesPage.isEmpty()) {
