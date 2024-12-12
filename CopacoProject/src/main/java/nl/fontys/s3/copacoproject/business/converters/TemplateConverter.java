@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
+import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeList_Template;
 import nl.fontys.s3.copacoproject.persistence.entity.TemplateEntity;
@@ -27,6 +28,18 @@ public final class TemplateConverter {
                 .category(CategoryConverter.convertFromBaseToEntity(template.getCategory()))
                 .configurationType(template.getConfigurationType())
                 .imageURL(template.getImageUrl())
+                .build();
+    }
+
+    public static TemplateObjectResponse convertFromEntityToResponse(TemplateEntity templateEntity, List<String> componentTypes) {
+        return TemplateObjectResponse.builder()
+                .templateId(templateEntity.getId())
+                .brand(BrandConverter.convertFromEntityToBase(templateEntity.getBrand()))
+                .category(CategoryConverter.convertFromEntityToBase(templateEntity.getCategory()))
+                .imageUrl(templateEntity.getImageURL())
+                .name(templateEntity.getName())
+                .components(componentTypes)
+                .configurationType(templateEntity.getConfigurationType())
                 .build();
     }
 }
