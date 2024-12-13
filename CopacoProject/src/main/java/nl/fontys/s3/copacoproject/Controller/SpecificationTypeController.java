@@ -43,6 +43,16 @@ public class SpecificationTypeController {
         return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentTypeId(componentTypeId, currentPage, itemsPerPage));
     }
 
+    @GetMapping("values/{specificationTypeId}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<String>> getSpecificationTypeValuesByComponentTypeId(
+            @PathVariable Long specificationTypeId,
+            @RequestParam Long componentTypeId,
+            @RequestParam (defaultValue = "1") @Min(1) int currentPage,
+            @RequestParam (defaultValue = "10", required = false) int itemsPerPage){
+        return ResponseEntity.status(HttpStatus.OK).body(specificationsManager.getSpecificationValuesOfSpecificationTypeByComponentType(componentTypeId, specificationTypeId, currentPage, itemsPerPage));
+    }
+
     @PostMapping
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<CreateSpecificationTypeResponse> createSpecificationType(@RequestBody CreateSpecificationTypeRequest request){

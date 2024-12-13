@@ -9,5 +9,5 @@ import java.util.List;
 public interface SpecificationsManager {
     GetDistinctConfigurationTypesResponse getDistinctConfigurationTypes();
     GetDistinctConfigurationTypesInCategoryResponse getDistinctConfigurationTypesInCategory(GetDistinctConfigurationTypesInCategoryRequest request);
-
+    List<String> getSpecificationValuesOfSpecificationTypeByComponentType(Long componentTypeId, Long specificationTypeId, int currentPage, int itemsPerPage);
 }
