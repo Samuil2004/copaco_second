@@ -832,7 +832,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
 
 
-    private FilterComponentsResult handleManualCompatibilityBetweenSpecifications(Long searchedComponentTypeId,List<ComponentEntity> compatibleComponentsSoFar,List<SpecificationTypeAndValuesForIt> specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
+    private FilterComponentsResult handleManualCompatibilityBetweenSpecifications(Long searchedComponentTypeId,List<ComponentEntity> compatibleComponentsSoFar,SpecificationTypeAndValuesForIt specificationIdAndValuesToBeConsideredForSearchedComponentType) {
 
         //We need a copy of the list, because we need it to loop trough it, otherwise if we loop trought the original 'compatibleComponentsSoFar' list and try to remove items
         //while looping, it will give us an error
@@ -841,18 +841,18 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         for (ComponentEntity componentEntity : copyOfCompatibleComponents) {
 
             //Loop all the specifications that should be satisfied by the component and check if it satisfies them
-            for(SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
+            //for(SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
                 //The specificationTypeValuesForIt object contains the id of the relation between a component type and a specification type, so we need to get the specification type
-                Long specificationTypeId = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(searchedComponentTypeId,specificationTypeAndValuesForIt.getSpecificationId());
-                List<String> valuesList = Arrays.asList(specificationTypeAndValuesForIt.getValuesToBeConsideredForThisSpecification().split("\\s*,\\s*"));
+                Long specificationTypeId = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(searchedComponentTypeId,specificationIdAndValuesToBeConsideredForSearchedComponentType.getSpecification2Id());
+                List<String> valuesList = Arrays.asList(specificationIdAndValuesToBeConsideredForSearchedComponentType.getValueOfSecondSpecification().split("\\s*,\\s*"));
 
                 boolean componentSatisfiesRule = componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(componentEntity.getComponentId(),specificationTypeId,valuesList);
                 if(!componentSatisfiesRule)
                 {
                     compatibleComponentsSoFar.remove(componentEntity);
-                    break;
+                    //continue;
                 }
-            }
+            //}
         }
 
         return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), null);
@@ -1031,7 +1031,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         //Filter the compatible components that we have so far based on the new rules from the loop
         for (ComponentEntity componentEntity : copyOfCompatibleComponents) {
 
-            Long specificationTypeId = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(searchedComponentTypeId, specificationToBeConsidered.getSpecificationId());
+            Long specificationTypeId = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(searchedComponentTypeId, specificationToBeConsidered.getSpecification2Id());
             boolean componentSatisfiesRule = componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(componentEntity.getComponentId(), specificationTypeId, valuesToBeConsideredFromTheProvidedComponent);
             if (!componentSatisfiesRule) {
                 compatibleComponentsSoFar.remove(componentEntity);
@@ -1042,39 +1042,32 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), null);
     }
 
-//    private FilterComponentsResult handleFirstOrEmptyCompatibleComponents(Long searchedComponentTypeId,List<ComponentEntity> compatibleComponentsSoFar,List<String> valuesToBeConsideredFromTheProvidedComponent,SpecificationTypeAndValuesForIt specificationToBeConsidered,String typeOfConfiguration)
-//    {
-//            //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
-//            Map<Long, List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration, searchedComponentTypeId);
-//            Page<ComponentEntity> page = null;
-//            //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
-//            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty()) {
-//                //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-//                page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
-//
-//            }
-//            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
-//            else {
-//                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
-//                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
-//                page = componentRepository.findComponentsByTypeAndSpecificationsAndPurpose(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), firstEntry.getKey(), firstEntry.getValue(), pageable);
-//            }
-//            //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
-//            //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
-//            List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
-//
-//            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty()) {
-//                throw new ObjectNotFound("Compatible components from searched component type were not found");
-//            }
-//            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 11) {
-//                thereIsNextPage = false;
-//            }
-//            //if(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 10)
-//            compatibleComponentsSoFar.addAll(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification);
-//
-//
-//        return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), null);
-//    }
+    private FilterComponentsResult handleFirstOrEmptyCompatibleComponents(Long searchedComponentTypeId,Long specificationToConsider,List<String> valuesToConsider,String typeOfConfiguration,Pageable pageable)
+    {
+            //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+            Map<Long, List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration, searchedComponentTypeId);
+            Page<ComponentEntity> page = null;
+            //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty()) {
+                //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
+                page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationToConsider,valuesToConsider, pageable);
+
+            }
+            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+            else {
+                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next(); //This is always only one entry
+                page = componentRepository.findComponentsByTypeAndSpecificationsAndPurpose(searchedComponentTypeId, specificationToConsider, valuesToConsider, firstEntry.getKey(), firstEntry.getValue(), pageable);
+            }
+            //The code below gets all components that are part of a searched component type (id) and own a given specification type (id) and have a value for this specification that is part of the given list of values
+            //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
+            List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
+
+            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty()) {
+                throw new ObjectNotFound("Compatible components from searched component type were not found");
+            }
+        return new FilterComponentsResult(new ArrayList<>(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification), null);
+    }
 
     private FilterComponentsResult filterComponentsBasedOnRule(List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration)
     {
@@ -1084,46 +1077,58 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //In the specificationId we are given the relation id between a component type and specification type, with this query we get the specificationType id out of the relationId
             specificationTypeId = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(providedComponentComponentTypeId,specificationId);
             //Get all values the provided component has for the specification
-            List<String> allSpecificationsTheProvidedComponentHasForTheSpecification = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(providedComponentComponentTypeId,specificationId);
+            List<String> allSpecificationsTheProvidedComponentHasForTheSpecification = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(providedComponentId,specificationTypeId);
             //If there aren't any, it means that it is not compatible
             if(allSpecificationsTheProvidedComponentHasForTheSpecification.isEmpty()){
                 throw new ObjectNotFound("Compatible components from searched component type were not found");
             }
             //Get a list of objects each containing a specification2_id and value_of_second_specification for the searched component type, by provided component type 1 and 2 and specificationId (relation between component type and specification) for the first component and the values (Those objects can be for both manual and automatic compatibility)
-            List<SpecificationTypeAndValuesForIt> specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType = automaticCompatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration,specificationId,allSpecificationsTheProvidedComponentHasForTheSpecification);
+            //* Lets assume that for specification type 1, the first component has values (DDR4-SDRAM and DDR5-SDRAM)
+            //** If we have (1,10,”DDR4-SDRAM”,”small”) and (1,10,”DDR5-SDRAM”,”big”) in the rule table in the db if we select them as two separate items of type
+            //SpecificationTypeAndValuesForIt and store them in a list, when the loop happens even if the searched components type has a specification value of
+            //“small” for specification type id 10, it will be firstly selected, but then removed, because of the next record which will be checking for “big”
+            //and since “small” is not in “big” it will say that it’s not compatible, that is why the list of SpecificationTypeAndValuesForIt detects the
+            // same ids for the second component specification (10) and get its values at once like (10-> “small, big”)
+            List<Object[]> response = automaticCompatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration,specificationId,allSpecificationsTheProvidedComponentHasForTheSpecification);
+            List<SpecificationTypeAndValuesForIt> specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType = response.stream()
+                    .map(result -> new SpecificationTypeAndValuesForIt(
+                            ((Number) result[0]).longValue(),  // Cast to appropriate type
+                            (String) result[1]
+                    ))
+                    .collect(Collectors.toList());
+
             //If the list is empty, this means that eventhough the component has the specification, the values it has for this specification is not compatible with any other specification types, which means not compatible
             if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.isEmpty()){
                 throw new ObjectNotFound("Compatible components from searched component type were not found");
             }
-            if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.get(0).getValuesToBeConsideredForThisSpecification().isBlank())
-            {
-                //Automatic Compatibility
-                filteredResults = handleAutomaticCompatibilityBetweenSpecifications(searchedComponentTypeId,compatibleComponentsSoFar,allSpecificationsTheProvidedComponentHasForTheSpecification,specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.get(0));
-                compatibleComponentsSoFar = filteredResults.getComponents();
-            }
-            else {
-                //Manual Compatibility
-                filteredResults = handleManualCompatibilityBetweenSpecifications(searchedComponentTypeId,compatibleComponentsSoFar,specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType );
-                compatibleComponentsSoFar = filteredResults.getComponents();
+
+            //Loop trough the list of specifications (it might be the case that one specification for component type 1 appears in an automatic and manual compatibility (ex: rule entity table: 1,2,null,null  | 1,7,"sdf","sdf,sdf,sdf")
+            for(SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
+                if(compatibleComponentsSoFar.isEmpty())
+                {
+                    Long specificationTypeToConsider = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(searchedComponentTypeId, specificationTypeAndValuesForIt.getSpecification2Id());
+                    List<String> valuesToConsider = new ArrayList<>();
+                    if(specificationTypeAndValuesForIt.getValueOfSecondSpecification() != null) {
+                        valuesToConsider = Arrays.asList(specificationTypeAndValuesForIt.getValueOfSecondSpecification().split("\\s*,\\s*"));
+                    }
+                    else {
+                        valuesToConsider = allSpecificationsTheProvidedComponentHasForTheSpecification;
+                    }
+                    filteredResults = handleFirstOrEmptyCompatibleComponents(searchedComponentTypeId,specificationTypeToConsider,valuesToConsider,typeOfConfiguration,pageable);                    compatibleComponentsSoFar = filteredResults.getComponents();
+                    compatibleComponentsSoFar = filteredResults.getComponents();
+                }
+                else if (specificationTypeAndValuesForIt.getValueOfSecondSpecification() == null) {
+                    //Automatic Compatibility
+                    filteredResults = handleAutomaticCompatibilityBetweenSpecifications(searchedComponentTypeId, compatibleComponentsSoFar, allSpecificationsTheProvidedComponentHasForTheSpecification, specificationTypeAndValuesForIt);
+                    compatibleComponentsSoFar = filteredResults.getComponents();
+                } else {
+                    //Manual Compatibility
+                    filteredResults = handleManualCompatibilityBetweenSpecifications(searchedComponentTypeId, compatibleComponentsSoFar, specificationTypeAndValuesForIt);
+                    compatibleComponentsSoFar = filteredResults.getComponents();
+                }
             }
 
         }
-
-
-
-//        FilterComponentsResult filteredResults = null;
-//        for (AutomaticCompatibilityEntity automaticCompatibility : allAutomaticCompatibilityRulesBetweenTwoComponentTypes) {
-//            boolean isManualCompatibility = isManualCompatibility(automaticCompatibility);
-//            if (isManualCompatibility) {
-//                filteredResults = handleManualCompatibilityBetweenSpecifications(automaticCompatibility, providedComponentId, searchedComponentTypeId, indexOfProvidedComponent, compatibleComponentsSoFar, pageable, thereIsNextPage, typeOfConfiguration);
-//                thereIsNextPage = filteredResults.getThereIsNextPage();
-//                compatibleComponentsSoFar = filteredResults.getComponents();
-//            } else {
-//                filteredResults = handleAutomaticCompatibilityBetweenSpecifications(automaticCompatibility, providedComponentId, providedComponentComponentTypeId, searchedComponentTypeId, indexOfProvidedComponent, compatibleComponentsSoFar, pageable, thereIsNextPage, typeOfConfiguration);
-//                thereIsNextPage = filteredResults.getThereIsNextPage();
-//                compatibleComponentsSoFar = filteredResults.getComponents();
-//            }
-//        }
         if(compatibleComponentsSoFar.size()<11)
         {
             thereIsNextPage = false;

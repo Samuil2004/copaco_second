@@ -10,6 +10,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SpecificationTypeAndValuesForIt {
-    private Long specificationId;
-    private String valuesToBeConsideredForThisSpecification;
+    private Long specification2Id;
+    private String valueOfSecondSpecification;
 }
