@@ -6,8 +6,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface AutomaticCompatibilityRepository extends JpaRepository<AutomaticCompatibilityEntity, Long> {
-    List<AutomaticCompatibilityEntity> findByComponent1Id_IdOrComponent2Id_Id(Long component1Id, Long component2Id);
+public interface AutomaticCompatibilityRepository extends JpaRepository<CompatibilityEntity, Long> {
+    List<CompatibilityEntity> findByComponent1Id_IdOrComponent2Id_Id(Long component1Id, Long component2Id);
 
     //Old
 //    @Query("SELECT c FROM AutomaticCompatibilityEntity c " +
@@ -19,10 +19,10 @@ public interface AutomaticCompatibilityRepository extends JpaRepository<Automati
 
     //New
 
-    @Query("SELECT c FROM AutomaticCompatibilityEntity c " +
+    @Query("SELECT c FROM CompatibilityEntity c " +
             "WHERE (c.component1Id.id = :component1Id AND c.component2Id.id = :component2Id) " +
             "   OR (c.component1Id.id = :component2Id AND c.component2Id.id = :component1Id)")
-    List<AutomaticCompatibilityEntity> findCompatibilityRecordsBetweenTwoComponentTypeIds(
+    List<CompatibilityEntity> findCompatibilityRecordsBetweenTwoComponentTypeIds(
             @Param("component1Id") Long component1Id,
             @Param("component2Id") Long component2Id);
 

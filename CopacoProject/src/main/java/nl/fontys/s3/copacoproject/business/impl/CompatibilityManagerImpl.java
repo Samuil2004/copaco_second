@@ -46,6 +46,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
         Optional<ComponentTypeEntity> componentType2 = componentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getComponentType2Id());
 
         if(componentType1.isPresent() && componentType2.isPresent()) {
+            //find the required specificationType of each componentType
             Optional<SpecficationTypeList_ComponentTypeEntity> sp1 = specificationTypeList_ComponentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component1());
             Optional<SpecficationTypeList_ComponentTypeEntity> sp2 = specificationTypeList_ComponentTypeRepository.findById(createAutomaticCompatibilityDtoRequest.getSpecificationToConsiderId_from_component2());
 
@@ -54,25 +55,27 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                 throw new ObjectNotFound("Specification not found");
             }
 
-            List<RuleEntity> foundRulesForThisCombinationOfSpecifications = ruleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdId(sp1.get().getId(), sp2.get().getId());
+            List<RuleEntity> foundRulesForThisCombinationOfSpecifications = ruleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationType(sp1.get().getId(), sp2.get().getId(), createAutomaticCompatibilityDtoRequest.getConfigurationType());
             if(!foundRulesForThisCombinationOfSpecifications.isEmpty())
             {
-                throw new ObjectExistsAlreadyException("Rules for selected specifications already exist");
+                throw new ObjectExistsAlreadyException("Rules for selected specifications already exist in this configuration type");
             }
             RuleEntity ruleEntity = RuleEntity.builder()
                     .specificationToConsider1Id(sp1.get())
                     .specificationToConsider2Id(sp2.get())
+                    .configurationType(createAutomaticCompatibilityDtoRequest.getConfigurationType())
                     .build();
 
             RuleEntity returnedRuleEntity = ruleEntityRepository.save(ruleEntity);
 
-            AutomaticCompatibilityEntity automaticCompatibilityEntity = AutomaticCompatibilityEntity.builder()
+            CompatibilityEntity compatibilityEntity = CompatibilityEntity.builder()
                     .component1Id(componentType1.get())
                     .component2Id(componentType2.get())
                     .ruleId(returnedRuleEntity)
+                    .configurationType(createAutomaticCompatibilityDtoRequest.getConfigurationType())
                     .build();
 
-            AutomaticCompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(automaticCompatibilityEntity);
+            CompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(compatibilityEntity);
             return CreateAutomaticCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
@@ -124,13 +127,13 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
             RuleEntity returnedRuleEntity = ruleEntityRepository.save(ruleEntity);
 
-            AutomaticCompatibilityEntity automaticCompatibilityEntity = AutomaticCompatibilityEntity.builder()
+            CompatibilityEntity compatibilityEntity = CompatibilityEntity.builder()
                     .component1Id(componentType1.get())
                     .component2Id(componentType2.get())
                     .ruleId(returnedRuleEntity)
                     .build();
 
-            AutomaticCompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(automaticCompatibilityEntity);
+            CompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(compatibilityEntity);
             return CreateManualCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
@@ -139,45 +142,45 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
     @Override
     public GetAutomaticCompatibilityByIdResponse automaticCompatibilityByCompatibilityId(Long automaticCompatibilityId) {
-        Optional<AutomaticCompatibilityEntity> automaticCompatibilityEntityOptional = automaticCompatibilityRepository.findById(automaticCompatibilityId);
+        Optional<CompatibilityEntity> automaticCompatibilityEntityOptional = automaticCompatibilityRepository.findById(automaticCompatibilityId);
         if(automaticCompatibilityEntityOptional.isPresent()) {
-            AutomaticCompatibilityEntity automaticCompatibilityEntity = automaticCompatibilityEntityOptional.get();
-            ComponentType componentTypeBase1 = ComponentTypeConverter.convertFromEntityToBase(automaticCompatibilityEntity.getComponent1Id());
-            ComponentType componentTypeBase2 = ComponentTypeConverter.convertFromEntityToBase(automaticCompatibilityEntity.getComponent2Id());
+            CompatibilityEntity compatibilityEntity = automaticCompatibilityEntityOptional.get();
+            ComponentType componentTypeBase1 = ComponentTypeConverter.convertFromEntityToBase(compatibilityEntity.getComponent1Id());
+            ComponentType componentTypeBase2 = ComponentTypeConverter.convertFromEntityToBase(compatibilityEntity.getComponent2Id());
 
             SpecificationType specificationType1 = SpecificationType.builder()
-                    .specificationTypeId(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getId())
-                    .specificationTypeName(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getSpecificationTypeName())
+                    .specificationTypeId(compatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getId())
+                    .specificationTypeName(compatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getSpecificationTypeName())
                     .build();
 
             SpecificationType specificationType2 = SpecificationType.builder()
-                    .specificationTypeId(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getId())
-                    .specificationTypeName(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getSpecificationTypeName())
+                    .specificationTypeId(compatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getId())
+                    .specificationTypeName(compatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getSpecificationTypeName())
                     .build();
 
 
             SpecificationType_ComponentType specification1 = SpecificationType_ComponentType.builder()
-                    .id(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider1Id().getId())
+                    .id(compatibilityEntity.getRuleId().getSpecificationToConsider1Id().getId())
                     .componentType(componentTypeBase1)
                     .specificationType(specificationType1)
                     .build();
 
             SpecificationType_ComponentType specification2 = SpecificationType_ComponentType.builder()
-                    .id(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider2Id().getId())
+                    .id(compatibilityEntity.getRuleId().getSpecificationToConsider2Id().getId())
                     .componentType(componentTypeBase2)
                     .specificationType(specificationType2)
                     .build();
 
             Rule ruleBase = Rule.builder()
-                    .id(automaticCompatibilityEntity.getRuleId().getId())
+                    .id(compatibilityEntity.getRuleId().getId())
                     .specificationToConsider1Id(specification1)
                     .specificationToConsider2Id(specification2)
                     .build();
 
             AutomaticCompatibility automaticCompatibility = AutomaticCompatibility.builder()
-                    .id(automaticCompatibilityEntity.getId())
-                    .component1Id(automaticCompatibilityEntity.getComponent1Id().getId())
-                    .component2Id(automaticCompatibilityEntity.getComponent2Id().getId())
+                    .id(compatibilityEntity.getId())
+                    .component1Id(compatibilityEntity.getComponent1Id().getId())
+                    .component2Id(compatibilityEntity.getComponent2Id().getId())
                     .rule(ruleBase)
                     .build();
 
@@ -197,45 +200,45 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
     @Override
     public List<GetAutomaticCompatibilityByIdResponse> allCompatibilitiesForComponentTypeByComponentTypeId(Long componentTypeId) {
-        List<AutomaticCompatibilityEntity> automaticCompatibilities = automaticCompatibilityRepository.findByComponent1Id_IdOrComponent2Id_Id(componentTypeId, componentTypeId);
+        List<CompatibilityEntity> automaticCompatibilities = automaticCompatibilityRepository.findByComponent1Id_IdOrComponent2Id_Id(componentTypeId, componentTypeId);
         List<GetAutomaticCompatibilityByIdResponse> listOFCompatibilityBetweenComponentTypesByGivenId = new ArrayList<>();
-        for (AutomaticCompatibilityEntity automaticCompatibilityEntity : automaticCompatibilities) {
-            ComponentType componentTypeBase1 = ComponentTypeConverter.convertFromEntityToBase(automaticCompatibilityEntity.getComponent1Id());
-            ComponentType componentTypeBase2 = ComponentTypeConverter.convertFromEntityToBase(automaticCompatibilityEntity.getComponent2Id());
+        for (CompatibilityEntity compatibilityEntity : automaticCompatibilities) {
+            ComponentType componentTypeBase1 = ComponentTypeConverter.convertFromEntityToBase(compatibilityEntity.getComponent1Id());
+            ComponentType componentTypeBase2 = ComponentTypeConverter.convertFromEntityToBase(compatibilityEntity.getComponent2Id());
 
             SpecificationType specificationType1 = SpecificationType.builder()
-                    .specificationTypeId(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getId())
-                    .specificationTypeName(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getSpecificationTypeName())
+                    .specificationTypeId(compatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getId())
+                    .specificationTypeName(compatibilityEntity.getRuleId().getSpecificationToConsider1Id().getSpecificationType().getSpecificationTypeName())
                     .build();
 
             SpecificationType specificationType2 = SpecificationType.builder()
-                    .specificationTypeId(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getId())
-                    .specificationTypeName(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getSpecificationTypeName())
+                    .specificationTypeId(compatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getId())
+                    .specificationTypeName(compatibilityEntity.getRuleId().getSpecificationToConsider2Id().getSpecificationType().getSpecificationTypeName())
                     .build();
 
 
             SpecificationType_ComponentType specification1 = SpecificationType_ComponentType.builder()
-                    .id(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider1Id().getId())
+                    .id(compatibilityEntity.getRuleId().getSpecificationToConsider1Id().getId())
                     .componentType(componentTypeBase1)
                     .specificationType(specificationType1)
                     .build();
 
             SpecificationType_ComponentType specification2 = SpecificationType_ComponentType.builder()
-                    .id(automaticCompatibilityEntity.getRuleId().getSpecificationToConsider2Id().getId())
+                    .id(compatibilityEntity.getRuleId().getSpecificationToConsider2Id().getId())
                     .componentType(componentTypeBase2)
                     .specificationType(specificationType2)
                     .build();
 
             Rule ruleBase = Rule.builder()
-                    .id(automaticCompatibilityEntity.getRuleId().getId())
+                    .id(compatibilityEntity.getRuleId().getId())
                     .specificationToConsider1Id(specification1)
                     .specificationToConsider2Id(specification2)
                     .build();
 
             AutomaticCompatibility automaticCompatibility = AutomaticCompatibility.builder()
-                    .id(automaticCompatibilityEntity.getId())
-                    .component1Id(automaticCompatibilityEntity.getComponent1Id().getId())
-                    .component2Id(automaticCompatibilityEntity.getComponent2Id().getId())
+                    .id(compatibilityEntity.getId())
+                    .component1Id(compatibilityEntity.getComponent1Id().getId())
+                    .component2Id(compatibilityEntity.getComponent2Id().getId())
                     .rule(ruleBase)
                     .build();
 
