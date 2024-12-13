@@ -36,5 +36,7 @@ public class CreateManualCompatibilityDtoRequest {
     @NotNull(message = "At least one value should be provided")
     private List<@NotBlank(message = "Value can not be blank") String> valuesForTheSecondSpecification;
 
+    @NotBlank(message = "Configuration type cannot be blank")
+    private String configurationType;
 
 }

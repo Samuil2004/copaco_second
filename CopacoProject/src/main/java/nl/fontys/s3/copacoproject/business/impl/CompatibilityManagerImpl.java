@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public class CompatibilityManagerImpl implements CompatibilityManager {
     private final CompatibilityTypeEntityRepository compatibilityTypeEntityRepository;
-    private final AutomaticCompatibilityRepository automaticCompatibilityRepository;
+    private final CompatibilityRepository compatibilityRepository;
     private final SpecificationTypeList_ComponentTypeRepository specificationTypeList_ComponentTypeRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final RuleEntityRepository ruleEntityRepository;
@@ -75,7 +75,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .configurationType(createAutomaticCompatibilityDtoRequest.getConfigurationType())
                     .build();
 
-            CompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(compatibilityEntity);
+            CompatibilityEntity returnedEntity =  compatibilityRepository.save(compatibilityEntity);
             return CreateAutomaticCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
@@ -100,21 +100,21 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                 throw new ObjectNotFound("Specification not found");
             }
 
-            List<RuleEntity> foundRulesForThisCombinationOfSpecifications = ruleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdId(sp1.get().getId(), sp2.get().getId());
+            List<RuleEntity> foundRulesForThisCombinationOfSpecifications = ruleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationType(sp1.get().getId(), sp2.get().getId(), createManualCompatibilityDtoRequest.getConfigurationType());
             if(!foundRulesForThisCombinationOfSpecifications.isEmpty())
             {
                 boolean alreadyExistsAutomaticRuleForThisSpecification = foundRulesForThisCombinationOfSpecifications.stream()
                         .anyMatch(rule -> rule.getValueOfFirstSpecification() == null);
 
                 if(alreadyExistsAutomaticRuleForThisSpecification) {
-                    throw new ObjectExistsAlreadyException("Automatic compatibility rule for this specifications already exist");
+                    throw new ObjectExistsAlreadyException("Automatic compatibility rule for this specifications already exist in this configuration type");
                 }
                 //In case there it already exists a rule for this specification value, it should be updated instead of added
                 boolean alreadyExistsARuleForThisSpecification = foundRulesForThisCombinationOfSpecifications.stream()
                         .anyMatch(rule -> createManualCompatibilityDtoRequest.getValueForTheFirstSpecification().equals(rule.getValueOfFirstSpecification()));
 
                 if(alreadyExistsARuleForThisSpecification) {
-                    throw new ObjectExistsAlreadyException("Rules for selected specifications already exist");
+                    throw new ObjectExistsAlreadyException("Rules for selected specifications already exist in this configuration type");
                 }
 
             }
@@ -123,6 +123,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .specificationToConsider2Id(sp2.get())
                     .valueOfFirstSpecification(createManualCompatibilityDtoRequest.getValueForTheFirstSpecification())
                     .valueOfSecondSpecification(String.join(",",createManualCompatibilityDtoRequest.getValuesForTheSecondSpecification()))
+                    .configurationType(createManualCompatibilityDtoRequest.getConfigurationType())
                     .build();
 
             RuleEntity returnedRuleEntity = ruleEntityRepository.save(ruleEntity);
@@ -131,9 +132,10 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .component1Id(componentType1.get())
                     .component2Id(componentType2.get())
                     .ruleId(returnedRuleEntity)
+                    .configurationType(createManualCompatibilityDtoRequest.getConfigurationType())
                     .build();
 
-            CompatibilityEntity returnedEntity =  automaticCompatibilityRepository.save(compatibilityEntity);
+            CompatibilityEntity returnedEntity =  compatibilityRepository.save(compatibilityEntity);
             return CreateManualCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
@@ -142,7 +144,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
     @Override
     public GetAutomaticCompatibilityByIdResponse automaticCompatibilityByCompatibilityId(Long automaticCompatibilityId) {
-        Optional<CompatibilityEntity> automaticCompatibilityEntityOptional = automaticCompatibilityRepository.findById(automaticCompatibilityId);
+        Optional<CompatibilityEntity> automaticCompatibilityEntityOptional = compatibilityRepository.findById(automaticCompatibilityId);
         if(automaticCompatibilityEntityOptional.isPresent()) {
             CompatibilityEntity compatibilityEntity = automaticCompatibilityEntityOptional.get();
             ComponentType componentTypeBase1 = ComponentTypeConverter.convertFromEntityToBase(compatibilityEntity.getComponent1Id());
@@ -200,7 +202,7 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
 
     @Override
     public List<GetAutomaticCompatibilityByIdResponse> allCompatibilitiesForComponentTypeByComponentTypeId(Long componentTypeId) {
-        List<CompatibilityEntity> automaticCompatibilities = automaticCompatibilityRepository.findByComponent1Id_IdOrComponent2Id_Id(componentTypeId, componentTypeId);
+        List<CompatibilityEntity> automaticCompatibilities = compatibilityRepository.findByComponent1Id_IdOrComponent2Id_Id(componentTypeId, componentTypeId);
         List<GetAutomaticCompatibilityByIdResponse> listOFCompatibilityBetweenComponentTypesByGivenId = new ArrayList<>();
         for (CompatibilityEntity compatibilityEntity : automaticCompatibilities) {
             ComponentType componentTypeBase1 = ComponentTypeConverter.convertFromEntityToBase(compatibilityEntity.getComponent1Id());

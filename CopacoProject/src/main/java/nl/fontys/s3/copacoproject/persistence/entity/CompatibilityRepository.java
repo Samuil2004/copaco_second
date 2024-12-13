@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface AutomaticCompatibilityRepository extends JpaRepository<CompatibilityEntity, Long> {
+public interface CompatibilityRepository extends JpaRepository<CompatibilityEntity, Long> {
     List<CompatibilityEntity> findByComponent1Id_IdOrComponent2Id_Id(Long component1Id, Long component2Id);
 
     //Old

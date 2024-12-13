@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenComponents {
-    private final AutomaticCompatibilityRepository automaticCompatibilityRepository;
+    private final CompatibilityRepository compatibilityRepository;
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
@@ -86,7 +86,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                         throw new CompatibilityError("Once a component is selected, other components from the same category can not be searched.");
                     }
                     //Find all automatic compatibility records between the component type of current component id (Component type of JACKIE) from the loop and the searched component type (ROCKIE)
-                    List<CompatibilityEntity> allAutomaticCompatibilityRulesBetweenTwoComponentTypes = automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId());
+                    List<CompatibilityEntity> allAutomaticCompatibilityRulesBetweenTwoComponentTypes = compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId());
 
                     if (allAutomaticCompatibilityRulesBetweenTwoComponentTypes.isEmpty()) {
                         //If there is no automatic compatibility, and it is the first component from the request, get the first ten components from the searched category and consider them as compatible (since there is no rule)
