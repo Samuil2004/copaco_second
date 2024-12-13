@@ -1,7 +1,7 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
 import nl.fontys.s3.copacoproject.business.SpecificationType_ComponentType;
@@ -32,15 +32,15 @@ public class SpecificationTypeController {
     @GetMapping("componentId/{componentId}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<SpecificationType>> getSpecificationTypesByComponentId(@PathVariable long componentId){
-        try{
-            return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentId(componentId));
-        }
-        catch(IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentId(componentId));
+    }
+
+    @GetMapping("componentTypeId/{componentTypeId}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<SpecificationType>> getSpecificationTypesByComponentTypeId(@PathVariable Long componentTypeId,
+                                                                                          @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
+                                                                                          @RequestParam(value = "currentPage", defaultValue = "1") @Min(value = 1, message = "Page numbering starts from 1") int currentPage){
+        return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentTypeId(componentTypeId, currentPage, itemsPerPage));
     }
 
     @PostMapping
@@ -65,8 +65,7 @@ public class SpecificationTypeController {
     @GetMapping("findIdByComponentTypeIdAndSpecificationTypeId/{componentTypeId}/{specificationTypeId}")
     @RolesAllowed({"ADMIN}"})
     public Long findIdByComponentTypeIdAndSpecificationTypeId(@PathVariable Long componentTypeId, @PathVariable Long specificationTypeId){
-        Long response = specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
-        return response;
+        return specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
     }
 
     @GetMapping("/getDistinctConfigurationTypes")
