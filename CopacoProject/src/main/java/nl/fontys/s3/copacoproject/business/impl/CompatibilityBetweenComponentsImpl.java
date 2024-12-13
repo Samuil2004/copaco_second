@@ -731,7 +731,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //JACKIE -> each component that has been chosen
             //ROCKIE -> searched component type
             List<Long> notNullIds = checkIfGivenIdsExistInDatabase(request);
-
             //List<ComponentEntity> compatibleComponentsEntity = new ArrayList<>();
             boolean searchedComponentTypeExists = componentTypeRepository.existsById(request.getSearchedComponentTypeId());
             if (!searchedComponentTypeExists) {
@@ -739,8 +738,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             }
 
             //List<ComponentEntity> filteredComponentsSoFar = new ArrayList<>();
-
+            int loopCounter = 0;
             while (filteredComponentsAfterLooping.size() < 10 && thereIsNextPage) {
+                loopCounter = 0;
                 //Loop over the given selected component ids (those that are already selected by the user) (all JACKIES)
                 for (Long componentId : notNullIds) {
 
@@ -809,15 +809,23 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     //If it is the first component -> consider the rules and get the compatible component (based on the rule) from the searched component type
                     //If it is NOT the first component -> consider the rules and filter the compatible components that we have so far
                     FilterComponentsResult filteredComponents = filterComponentsBasedOnRule(allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes, componentId, componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(), notNullIds.indexOf(componentId), filteredComponentsSoFar,pageable,thereIsNextPage,typeOfConfiguration);
-//                    if (filteredComponents.getComponents().isEmpty()) {
-//                        throw new ObjectNotFound("There aren't compatible components");
-//                    }
+
                     filteredComponentsSoFar.clear();
                     filteredComponentsSoFar.addAll(filteredComponents.getComponents());
                     thereIsNextPage = filteredComponents.getThereIsNextPage();
+
+                    if (filteredComponents.getComponents().isEmpty()) {
+                        break;
+                    }
+                    //loopCounter = loopCounter + 1;
+                    loopCounter++;
+
                 }
-                filteredComponentsAfterLooping.addAll(filteredComponentsSoFar);
-                filteredComponentsSoFar.clear();
+                if(loopCounter == notNullIds.size()) {
+                    filteredComponentsAfterLooping.addAll(filteredComponentsSoFar);
+                    filteredComponentsSoFar.clear();
+                }
+                //filteredComponentsSoFar.clear();
 
                 pageable = PageRequest.of(pageable.getPageNumber() + 1, 11);
             }
@@ -1042,7 +1050,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), null);
     }
 
-    private FilterComponentsResult handleFirstOrEmptyCompatibleComponents(Long searchedComponentTypeId,Long specificationToConsider,List<String> valuesToConsider,String typeOfConfiguration,Pageable pageable)
+    private FilterComponentsResult handleFirstOrEmptyCompatibleComponents(Long searchedComponentTypeId,Long specificationToConsider,List<String> valuesToConsider,String typeOfConfiguration,Pageable pageable,Boolean thereIsNextPage)
     {
             //Get the specification "meant for" (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
             Map<Long, List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration, searchedComponentTypeId);
@@ -1063,14 +1071,21 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //Page<ComponentEntity> page = componentRepository.findComponentsByTypeAndSpecification(searchedComponentTypeId, specificationForTheSearchedComponents.getId(), specMap.entrySet().iterator().next().getValue(), pageable);
             List<ComponentEntity> allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification = page.getContent();
 
-            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty()) {
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+            //!!!! DO NOT DELETE
+//            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.isEmpty()) {
+//                throw new ObjectNotFound("Compatible components from searched component type were not found");
+//            }
+            if (allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification.size() < 11)
+            {
+                thereIsNextPage = false;
             }
-        return new FilterComponentsResult(new ArrayList<>(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification), null);
+        return new FilterComponentsResult(new ArrayList<>(allComponentsThatArePartOfTheFirstComponentTypeAndHaveTheChosenSpecification), thereIsNextPage);
     }
 
     private FilterComponentsResult filterComponentsBasedOnRule(List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId,Integer indexOfProvidedComponent,List<ComponentEntity> compatibleComponentsSoFar, Pageable pageable,Boolean thereIsNextPage,String typeOfConfiguration)
     {
+
+        boolean shouldBreak = false; //Flag so that nested loop can break also the parent loop
         FilterComponentsResult filteredResults = null;
         Long specificationTypeId = null;
         for(Long specificationId : allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes){
@@ -1114,8 +1129,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     else {
                         valuesToConsider = allSpecificationsTheProvidedComponentHasForTheSpecification;
                     }
-                    filteredResults = handleFirstOrEmptyCompatibleComponents(searchedComponentTypeId,specificationTypeToConsider,valuesToConsider,typeOfConfiguration,pageable);                    compatibleComponentsSoFar = filteredResults.getComponents();
+                    filteredResults = handleFirstOrEmptyCompatibleComponents(searchedComponentTypeId,specificationTypeToConsider,valuesToConsider,typeOfConfiguration,pageable,thereIsNextPage);                    compatibleComponentsSoFar = filteredResults.getComponents();
                     compatibleComponentsSoFar = filteredResults.getComponents();
+                    thereIsNextPage = filteredResults.getThereIsNextPage();
                 }
                 else if (specificationTypeAndValuesForIt.getValueOfSecondSpecification() == null) {
                     //Automatic Compatibility
@@ -1126,13 +1142,22 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     filteredResults = handleManualCompatibilityBetweenSpecifications(searchedComponentTypeId, compatibleComponentsSoFar, specificationTypeAndValuesForIt);
                     compatibleComponentsSoFar = filteredResults.getComponents();
                 }
-            }
 
+                if(compatibleComponentsSoFar.isEmpty()) {
+                    shouldBreak = true;
+                    return new FilterComponentsResult(new ArrayList<>(), thereIsNextPage);
+
+                    //break;
+                }
+            }
+            if (shouldBreak) {
+                break;
+            }
         }
-        if(compatibleComponentsSoFar.size()<11)
-        {
-            thereIsNextPage = false;
-        }
+//        if(compatibleComponentsSoFar.size()<11)
+//        {
+//            thereIsNextPage = false;
+//        }
         return new FilterComponentsResult(new ArrayList<>(compatibleComponentsSoFar), thereIsNextPage);
     }
 
