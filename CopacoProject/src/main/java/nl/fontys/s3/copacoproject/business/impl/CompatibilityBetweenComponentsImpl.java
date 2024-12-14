@@ -1349,6 +1349,42 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                         }
                         //If there are no automatic compatibility rule, and it is the last component id, then go down to the check for number of items in the list and the return statements
                         if (notNullIds.indexOf(componentId) == notNullIds.size() - 1) {
+                            if(foundComponentsThatSatisfyAllFilters.isEmpty())
+                            {
+                                //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
+
+                                //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+                                Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
+                                //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+                                if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+                                {
+                                    //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+                                    foundComponentsThatSatisfyAllFilters = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
+                                }
+                                //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+                                else
+                                {
+                                    //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                                    Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                                    foundComponentsThatSatisfyAllFilters = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),pageable);
+                                }
+                                //If there is a map returned - use it
+                                //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
+
+                                //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+                                //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
+                                if (foundComponentsThatSatisfyAllFilters.isEmpty()) {
+                                    throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
+                                }
+                                //If there are 11 components, this means that there is at least 1 component for the next page
+                                if (foundComponentsThatSatisfyAllFilters.size() == 11) {
+                                    thereIsNextPage = true;
+                                } else {
+                                    thereIsNextPage = false;
+                                }
+                                return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+
+                            }
                             break;
                         }
                         continue;
