@@ -58,6 +58,14 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             @Param("specificationTypeId") Long specificationTypeId);
 
 
+    @Query("SELECT cs.value " +
+            "FROM Component_SpecificationList cs " +
+            "JOIN SpecficationTypeList_ComponentTypeEntity ctst on ctst.specificationType.id = cs.specificationType.id "+
+            "WHERE ctst.id = :componentTypeSpecificationTypeRelation  and cs.componentId.componentId = :componentId ")
+    List<String> findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(
+            @Param("componentTypeSpecificationTypeRelation") Long componentTypeSpecificationTypeRelation,
+            @Param("componentId") Long componentId);
+
     //the following query checks if a component satisfies a rule for a given component id, specification and expected values
     @Query("SELECT CASE WHEN COUNT(cs) > 0 THEN TRUE ELSE FALSE END " +
             "FROM Component_SpecificationList cs " +

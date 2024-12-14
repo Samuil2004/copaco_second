@@ -110,6 +110,28 @@ List<Object[]> findSpecification2IdsAndValuesOfSecondSpecification(
         @Param("valueOfFirstSpecifications") List<String> valueOfFirstSpecifications
 );
 
+    @Query(value = """
+        SELECT 
+             ctst.specification_type_id AS specification2Id,
+            STRING_AGG(r.value_of_second_specification, ', ') AS valueOfSecondSpecification
+        FROM [Automatic_compatibility] ac
+        JOIN [Rule_entity] r ON ac.rule_id = r.id
+        JOIN specfication_type_component_type ctst on ctst.id = r.specification2_id
+                             
+        WHERE ac.component1_id = :component1Id
+          AND ac.component2_id = :component2Id
+          AND ac.configuration_type = :configurationType
+          AND r.specification1_id = :specification1Id
+          AND (r.value_of_first_specification IN :valueOfFirstSpecifications OR r.value_of_first_specification IS NULL)
+        GROUP BY ctst.specification_type_id
+        """, nativeQuery = true)
+    List<Object[]> findSpecification2IdsAndValuesOfSecondSpecification2(
+            @Param("component1Id") Long component1Id,
+            @Param("component2Id") Long component2Id,
+            @Param("configurationType") String configurationType,
+            @Param("specification1Id") Long specification1Id,
+            @Param("valueOfFirstSpecifications") List<String> valueOfFirstSpecifications
+    );
 }
 
 

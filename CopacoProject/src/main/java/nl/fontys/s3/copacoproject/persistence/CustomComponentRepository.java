@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 
 public interface CustomComponentRepository{
-    List<ComponentEntity> getComponentsWithSpecifications(List<SpecificationTypeAndValuesForIt> specifications, Pageable pageable);
-
+    List<ComponentEntity> findMatchingComponents(Long componentTypeId, Map<Long, List<String>> specificationConditions);
 }

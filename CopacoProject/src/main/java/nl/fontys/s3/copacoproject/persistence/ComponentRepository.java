@@ -1,19 +1,29 @@
 package nl.fontys.s3.copacoproject.persistence;
+import java.util.*;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
+import nl.fontys.s3.copacoproject.persistence.entity.Component_SpecificationList;
 import nl.fontys.s3.copacoproject.persistence.entity.supportingEntities.SpecificationTypeAndValuesForIt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+
 @Repository
-public interface ComponentRepository extends JpaRepository<ComponentEntity,Long> {
+public interface ComponentRepository extends JpaRepository<ComponentEntity, Long>, JpaSpecificationExecutor<ComponentEntity> {
 
     @Query("SELECT c FROM ComponentEntity c " +
             "JOIN Component_SpecificationList cs ON cs.componentId = c " +
@@ -81,14 +91,12 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity,Long>
 
     List<ComponentEntity> findByComponentType_Id(Long componentTypeId, Pageable pageable);
 
-    @Query("""
-    SELECT DISTINCT c
-    FROM ComponentEntity c
-    JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
-    WHERE c.componentType.id = :componentTypeId
-      AND cs.specificationType.id = :specificationTypeId
-      AND cs.value IN :values
-""")
+    @Query("SELECT DISTINCT c " +
+    "FROM ComponentEntity c " +
+    "JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId " +
+    "WHERE c.componentType.id = :componentTypeId " +
+      "AND cs.specificationType.id = :specificationTypeId " +
+      "AND cs.value IN :values ")
     List<ComponentEntity> findComponentsByGivenComponentTypeAndSpecificationForMeantFor(
             @Param("componentTypeId") Long componentTypeId,
             @Param("specificationTypeId") Long specificationTypeId,
@@ -99,6 +107,106 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity,Long>
     @Query("SELECT c.componentType.id FROM ComponentEntity c WHERE c.componentId = :componentId")
     Long findComponentTypeIdByComponentId(@Param("componentId") Long componentId);
 
+//    static Specification<ComponentEntity> dynamicSpecification(
+//            Long componentTypeId,
+//            Map<Long, List<String>> specificationConditions
+//    ) {
+//        return (root, query, criteriaBuilder) -> {
+//            // Ensure distinct results
+//            query.distinct(true);
+//
+//            // List to hold all predicates
+//            List<Predicate> predicates = new ArrayList<>();
+//
+//            predicates.add(criteriaBuilder.equal(root.get("componentType").get("id"), componentTypeId));
+//
+//            // Dynamically join and filter specifications
+//            for (Map.Entry<Long, List<String>> entry : specificationConditions.entrySet()) {
+//                // Create a join for each specification type
+//                Subquery<Long> subquery = query.subquery(Long.class);
+//                Root<Component_SpecificationList> specRoot = subquery.from(Component_SpecificationList.class);
+//
+//                // Correlated join between main query and subquery
+//                Predicate specTypePredicate = criteriaBuilder.equal(
+//                        specRoot.get("specificationType").get("id"),
+//                        entry.getKey()
+//                );
+//
+//                // Value predicate (either exact match or IN clause)
+//                Predicate valuePredicate = entry.getValue().size() == 1
+//                        ? criteriaBuilder.equal(specRoot.get("value"), entry.getValue().get(0))
+//                        : specRoot.get("value").in(entry.getValue());
+//
+//                // Correlation predicate
+//                Predicate correlationPredicate = criteriaBuilder.equal(
+//                        specRoot.get("componentId").get("componentId"),
+//                        root.get("componentId")
+//                );
+//
+//                // Combine predicates in subquery
+//                subquery.select(specRoot.get("componentId"))
+//                        .where(criteriaBuilder.and(specTypePredicate, valuePredicate, correlationPredicate));
+//
+//                // Add exists condition to main query
+//                predicates.add(criteriaBuilder.exists(subquery));
+//            }
+//
+//            // Convert predicates to array and return
+//            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+//        };
+//    }
+
+    static Specification<ComponentEntity> dynamicSpecification(
+            Long componentTypeId,
+            Map<Long, List<String>> specificationConditions) {
+
+        return (root, query, criteriaBuilder) -> {
+            // Start building the criteria query
+            query.distinct(true);  // Ensure distinct results
+
+            // Subquery for matching components
+            Subquery<Long> subquery = query.subquery(Long.class);
+            Root<Component_SpecificationList> subqueryRoot = subquery.from(Component_SpecificationList.class);
+            subquery.select(subqueryRoot.get("componentId").get("id")); // Select component_id in subquery
+
+            // Build predicates for WHERE clause dynamically
+            List<Predicate> orPredicates = new ArrayList<>();
+            for (Map.Entry<Long, List<String>> entry : specificationConditions.entrySet()) {
+                Long specificationTypeId = entry.getKey();
+                List<String> values = entry.getValue();
+
+                Predicate specTypePredicate = criteriaBuilder.equal(
+                        subqueryRoot.get("specificationType").get("id"), specificationTypeId);
+
+                Predicate valuePredicate;
+                if (values.size() == 1) {
+                    valuePredicate = criteriaBuilder.equal(subqueryRoot.get("value"), values.get(0));
+                } else {
+                    valuePredicate = subqueryRoot.get("value").in(values);
+                }
+
+                // Combine specification type and value predicates
+                orPredicates.add(criteriaBuilder.and(specTypePredicate, valuePredicate));
+            }
+
+            // Combine all OR predicates for the subquery
+            subquery.where(criteriaBuilder.or(orPredicates.toArray(new Predicate[0])));
+
+            // Group by component_id and add HAVING clause
+            subquery.groupBy(subqueryRoot.get("componentId").get("id"));
+            subquery.having(criteriaBuilder.equal(
+                    criteriaBuilder.countDistinct(subqueryRoot.get("specificationType").get("id")),
+                    specificationConditions.size()));
+
+            // Add the subquery to the main query
+            Predicate componentTypePredicate = criteriaBuilder.equal(
+                    root.get("componentType").get("id"), componentTypeId);
+            Predicate componentInSubqueryPredicate = criteriaBuilder.in(root.get("id")).value(subquery);
+
+            // Combine both predicates (component type and the subquery)
+            return criteriaBuilder.and(componentTypePredicate, componentInSubqueryPredicate);
+        };
+    }
 
 
 }
