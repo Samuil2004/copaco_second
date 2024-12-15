@@ -4,6 +4,7 @@ import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRe
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
+import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 
@@ -20,4 +21,5 @@ public interface CompatibilityManager {
     GetAutomaticCompatibilityByIdResponse automaticCompatibilityByCompatibilityId(Long automaticCompatibilityId);
     //This method returns a list of all compatibilities a component type has (with the other component types)
     List<GetAutomaticCompatibilityByIdResponse> allCompatibilitiesForComponentTypeByComponentTypeId(Long componentTypeId);
+    List<RuleResponse> getRulesByCategoryAndConfigurationType(String compatibilityType, int currentPage, int itemsPerPage);
 }

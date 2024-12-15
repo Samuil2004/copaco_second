@@ -11,10 +11,14 @@ import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRe
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
+import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -254,6 +258,12 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
             listOFCompatibilityBetweenComponentTypesByGivenId.add(response);
         }
         return listOFCompatibilityBetweenComponentTypesByGivenId;
+    }
+
+    @Override
+    public List<RuleResponse> getRulesByCategoryAndConfigurationType(String compatibilityType, int currentPage, int itemsPerPage) {
+        Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
+        return compatibilityRepository.findRulesByConfigurationType(compatibilityType, pageable).getContent();
     }
 
 }
