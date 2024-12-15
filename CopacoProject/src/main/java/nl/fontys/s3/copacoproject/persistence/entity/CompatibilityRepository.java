@@ -56,7 +56,7 @@ public interface CompatibilityRepository extends JpaRepository<CompatibilityEnti
     JOIN s1InCompType.specificationType s1
     JOIN r.specificationToConsider2Id s2InCompType
     JOIN s2InCompType.specificationType s2
-    WHERE c.configurationType = :configurationType
+    WHERE ( :configurationType IS NULL OR :configurationType = '' OR c.configurationType LIKE %:configurationType%)
     """)
     Page<RuleResponse> findRulesByConfigurationType(@Param("configurationType") String configurationType, Pageable pageable);
 
