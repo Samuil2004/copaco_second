@@ -1476,17 +1476,35 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.isEmpty()){
                 throw new ObjectNotFound("Compatible components from searched component type were not found");
             }
-            //Loop trough the list of specifications (it might be the case that one specification for component type 1 appears in an automatic and manual compatibility (ex: rule entity table: 1,2,null,null  | 1,7,"sdf","sdf,sdf,sdf")
-            for(SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
-                if (specificationTypeAndValuesForIt.getValueOfSecondSpecification() == null) {
-                    //Automatic Compatibility
-                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationTypeAndValuesForIt.getSpecification2Id(),allSpecificationsTheProvidedComponentHasForTheSpecification);
+            for (SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
+                Long specificationIdToBeConsideredForSecondSpecification = specificationTypeAndValuesForIt.getSpecification2Id();
+                String valuesToBeConsideredForTheSearchedComponent = specificationTypeAndValuesForIt.getValueOfSecondSpecification();
 
+                List<String> newValuesToConsider;
+                if (valuesToBeConsideredForTheSearchedComponent == null) {
+                    // Automatic Compatibility
+                    newValuesToConsider = allSpecificationsTheProvidedComponentHasForTheSpecification;
                 } else {
-                    //Manual Compatibility
-                    List<String> valuesToConsider = Arrays.asList(specificationTypeAndValuesForIt.getValueOfSecondSpecification().split("\\s*,\\s*"));
-                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationTypeAndValuesForIt.getSpecification2Id(),valuesToConsider);
+                    // Manual Compatibility
+                    newValuesToConsider = Arrays.asList(valuesToBeConsideredForTheSearchedComponent.split("\\s*,\\s*"));
+                }
+                //This code does the following -> if we have component from component type 1 that has a rule for compatibility with component 4 (1,5,"2300","1,2,3,4") and this is already in the map
+                //and now we have another component from component type 2 that has a rule for compatibility with component type 4 (7,5,"2300","4,5,6") and we are looking for component from component
+                //type 4, for specification 5 we should consider only value "4" because all other values will make either the first or the second component incompatible with the searched one
+                if (specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.containsKey(specificationIdToBeConsideredForSecondSpecification)) {
 
+                    List<String> existingValues = specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.get(specificationIdToBeConsideredForSecondSpecification);
+
+                    // Find common values between existing and new values
+                    List<String> commonValues = existingValues.stream()
+                            .filter(newValuesToConsider::contains)
+                            .collect(Collectors.toList());
+
+                    // Update the map with only the common values
+                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationIdToBeConsideredForSecondSpecification, commonValues);
+                } else {
+                    // Insert new values into the map
+                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationIdToBeConsideredForSecondSpecification, newValuesToConsider);
                 }
             }
         }
