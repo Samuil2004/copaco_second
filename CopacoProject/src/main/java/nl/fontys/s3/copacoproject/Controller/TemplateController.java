@@ -2,13 +2,16 @@ package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
+import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.Template;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TemplateController {
     private final TemplateManager templateManager;
+    private final ComponentTypeManager componentTypeManager;
 
     @PostMapping()
     @RolesAllowed({"ADMIN"})
@@ -106,5 +110,12 @@ public class TemplateController {
         catch(InvalidParameterException | ObjectExistsAlreadyException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/{templateId}/componentTypes")
+    @RolesAllowed({"ADMIN","CUSTOMER"})
+    public ResponseEntity<List<ComponentTypeResponse>> getComponentTypesByTemplateId (@PathVariable Long templateId){
+        List<ComponentTypeResponse> componentTypes = componentTypeManager.getComponentTypesByTemplateId(templateId);
+        return ResponseEntity.status(HttpStatus.OK).body(componentTypes);
     }
 }
