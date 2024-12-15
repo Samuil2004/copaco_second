@@ -1291,6 +1291,21 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 throw new ObjectNotFound("Component type not found");
             }
 
+            //Handle PSU
+            if(request.getSearchedComponentTypeId() == 5)
+            {
+                List<ComponentEntity> foundPowerSupplies = handlePowerSupply(notNullIds,typeOfConfiguration,pageable);
+                if(foundPowerSupplies.isEmpty())
+                {
+                    throw new ObjectNotFound("Compatible components from searched component type were not found");
+                }
+                if(foundPowerSupplies.size() < 11)
+                {
+                    thereIsNextPage = false;
+                }
+                return buildResponse(foundPowerSupplies.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+            }
+
                 //Loop over the given selected component ids (those that are already selected by the user) (all JACKIES)
                 for (Long componentId : notNullIds) {
 
@@ -1415,6 +1430,44 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
     }
 
+    private List<ComponentEntity> handlePowerSupply(List<Long> notNullIds,String configurationType,Pageable pageable) {
+        double totalPowerConsumption = 0;
+        double gpuCpuConsumptionFor12thRail = 0;
+
+        for (Long componentId : notNullIds) {
+            Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
+            Map<String,Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeIdOfProvidedComponent);
+            Iterator<Map.Entry<String, Long>> iterator = idOrValueToBeConsidered.entrySet().iterator();
+            Map.Entry<String, Long> firstEntry = iterator.next();
+            //Double valueForPowerConsumption;
+            Double valueForPowerConsumption;
+            if(Objects.equals(firstEntry.getKey(), "id"))
+            {
+                valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,firstEntry.getValue());
+                if(valueForPowerConsumption.isNaN())
+                {
+                    Map.Entry<String, Long> secondEntry = iterator.next();
+                    if(secondEntry != null)
+                    {
+                        valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,secondEntry.getValue());
+                    }
+                }
+            }
+            else {
+                valueForPowerConsumption = (double)idOrValueToBeConsidered.get("value");
+            }
+            if(valueForPowerConsumption.isNaN())
+            {
+                continue;
+            }
+            totalPowerConsumption += valueForPowerConsumption;
+            if(componentTypeIdOfProvidedComponent == 2 || componentTypeIdOfProvidedComponent == 3)
+            {
+                gpuCpuConsumptionFor12thRail += valueForPowerConsumption;
+            }
+        }
+        return componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
+    }
 
 
 
@@ -1486,7 +1539,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .brand(componentEntity.getBrand().getName())
                     .price(componentEntity.getComponentPrice())
-                    //.componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
+                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
@@ -1684,6 +1737,38 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         else {
             return null;
         }
+    }
+
+
+    private Map<String,Long> defineValuesForPowerConsumptionSpecifications(Long componentTypeId)
+    {
+        //The map should store a string (the string should be either id if the long is an id of a specification,
+        // or value, if we know concrete value (ex.motherboards power consumption that does not have a specification for the power consumption, but in general it should be around 50W))
+        Map<String,Long> specificationTypeId = new HashMap<>();
+        if (componentTypeId == 1L) {
+            specificationTypeId.put("id", 1120L);
+        } else if (componentTypeId == 2L) {
+            specificationTypeId.put("value", 50L);
+        } else if (componentTypeId == 3L) {
+            specificationTypeId.put("id", 937L);
+        } else if (componentTypeId == 4L) {
+            specificationTypeId.put("value", 10L);
+        } else if (componentTypeId == 7L) {
+            specificationTypeId.put("value", 10L);
+        } else if (componentTypeId == 8L) {
+            specificationTypeId.put("value", 10L);
+        } else if (componentTypeId == 9L) {
+            specificationTypeId.put("value", 30L);
+        } else if (componentTypeId == 10L) {
+            specificationTypeId.put("id", 1144L);
+            specificationTypeId.put("id2", 1145L);
+        } else if (componentTypeId == 11L) {
+            specificationTypeId.put("id", 1144L);
+            specificationTypeId.put("id2", 922L);
+        } else {
+            specificationTypeId.put("id", 1120L);
+        }
+        return specificationTypeId;
     }
 }
 

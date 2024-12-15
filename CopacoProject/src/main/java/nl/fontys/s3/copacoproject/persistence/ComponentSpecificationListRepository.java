@@ -53,7 +53,7 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             "FROM Component_SpecificationList cs " +
             "WHERE cs.componentId.componentId = :componentId " +
             "AND cs.specificationType.id = :specificationTypeId")
-    List<String> findValuesBySpecificationTypeIdAndComponentId(
+    Double findValuesBySpecificationTypeIdAndComponentId(
             @Param("componentId") Long componentId,
             @Param("specificationTypeId") Long specificationTypeId);
 
@@ -76,5 +76,8 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             @Param("componentId") Long componentId,
             @Param("specificationTypeId") Long specificationTypeId,
             @Param("values") List<String> values);
+
+
+
 
 }
