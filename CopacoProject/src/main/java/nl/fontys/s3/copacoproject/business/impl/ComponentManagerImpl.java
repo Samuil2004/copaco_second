@@ -2,6 +2,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentManager;
+import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
@@ -180,6 +181,10 @@ public class ComponentManagerImpl implements ComponentManager {
 
     @Override
     public List<SimpleComponentResponse> getComponentsByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, int currentPage) {
+        if(!componentTypeRepository.existsById(componentTypeId)){
+            throw new InvalidInputException("Component type does not exist");
+        }
+
         Pageable pageable = PageRequest.of(currentPage-1, 10, Sort.by("c.componentName").ascending());
         Page<ComponentEntity> entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, configurationType, pageable);
         List<SimpleComponentResponse> components = new ArrayList<>();
@@ -196,6 +201,9 @@ public class ComponentManagerImpl implements ComponentManager {
 
     @Override
     public Integer getComponentCountByComponentTypeAndConfigurationType(Long componentTypeId, String configurationTypeId) {
+        if(!componentTypeRepository.existsById(componentTypeId)){
+            throw new InvalidInputException("Component type does not exist");
+        }
         return componentRepository.countByComponentTypeAndConfigurationType(componentTypeId, configurationTypeId);
     }
 
