@@ -60,6 +60,7 @@ public class CompatibilityController {
     }
 
     @GetMapping("/filteredRules")
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<List<RuleResponse>> getRulesByCategoryAndConfigurationType(
             @RequestParam (value = "configurationType", required = false) String configurationType,
             @RequestParam (value = "currentPage", defaultValue = "1", required = false) @Min(1) int currentPage,
