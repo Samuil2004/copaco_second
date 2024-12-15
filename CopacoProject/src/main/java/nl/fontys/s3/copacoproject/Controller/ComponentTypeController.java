@@ -6,8 +6,6 @@ import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistinctComponentTypesByTypeOfConfigurationRequest;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistinctComponentTypesByTypeOfConfigurationResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetDistinctConfigurationTypesInCategoryRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetDistinctConfigurationTypesInCategoryResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
