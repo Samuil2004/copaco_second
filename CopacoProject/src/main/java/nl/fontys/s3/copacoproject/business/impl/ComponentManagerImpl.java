@@ -5,6 +5,7 @@ import nl.fontys.s3.copacoproject.business.ComponentManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
+import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse;
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.*;
@@ -12,6 +13,10 @@ import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.Component_SpecificationList;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -172,5 +177,27 @@ public class ComponentManagerImpl implements ComponentManager {
         }
         return allComponentsBase;
     }
+
+    @Override
+    public List<SimpleComponentResponse> getComponentsByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, int currentPage) {
+        Pageable pageable = PageRequest.of(currentPage-1, 10, Sort.by("c.componentName").ascending());
+        Page<ComponentEntity> entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, configurationType, pageable);
+        List<SimpleComponentResponse> components = new ArrayList<>();
+        for (ComponentEntity componentEntity : entities.getContent()) {
+            components.add(SimpleComponentResponse.builder()
+                    .componentId(componentEntity.getComponentId())
+                    .componentImageUrl(componentEntity.getComponentImageUrl())
+                    .componentName(componentEntity.getComponentName())
+                    .componentPrice(componentEntity.getComponentPrice())
+                    .build());
+        }
+        return components;
+    }
+
+    @Override
+    public Integer getComponentCountByComponentTypeAndConfigurationType(Long componentTypeId, String configurationTypeId) {
+        return componentRepository.countByComponentTypeAndConfigurationType(componentTypeId, configurationTypeId);
+    }
+
 
 }
