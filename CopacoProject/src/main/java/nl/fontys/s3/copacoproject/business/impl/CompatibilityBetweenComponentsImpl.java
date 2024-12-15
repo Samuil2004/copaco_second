@@ -1306,7 +1306,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 return buildResponse(foundPowerSupplies.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
             }
 
-                //Loop over the given selected component ids (those that are already selected by the user) (all JACKIES)
                 for (Long componentId : notNullIds) {
 
                     //Get the component type of the current component id from the loop
@@ -1314,105 +1313,39 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     if (Objects.equals(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId())) {
                         throw new CompatibilityError("Once a component is selected, other components from the same category can not be searched.");
                     }
+
                     //Get all distinct specification ids(from the rules table) that should be considered between the current component type and the searched component type
                     List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = automaticCompatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(),typeOfConfiguration);
 
-
                     if (allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes.isEmpty()) {
-                        //If there are no compatibility rules, and it is the first component from the request, get the first ten components from the searched category and consider them as compatible (since there is no rule)
-//                        if (notNullIds.size() == 1) {
                         if (notNullIds.indexOf(componentId) == 0) {
-
+                            //If there are no compatibility rules and there is only one componentId provided, return first ten components from the searched component type
                             if (notNullIds.size() == 1) {
-
-                                List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
-
-                                //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
-                                Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
-                                //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
-                                if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
-                                {
-                                    //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-                                    elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
-                                }
-                                //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
-                                else
-                                {
-                                    //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
-                                    Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
-                                    elevenComponentsFromTheSearchedComponentType = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),pageable);
-                                }
-                                //If there is a map returned - use it
-                                //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
-
-                                //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-                                //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
-                                if (elevenComponentsFromTheSearchedComponentType.isEmpty()) {
-                                    throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
-                                }
-                                //If there are 11 components, this means that there is at least 1 component for the next page
-                                if (elevenComponentsFromTheSearchedComponentType.size() == 11) {
-                                    thereIsNextPage = true;
-                                } else {
-                                    thereIsNextPage = false;
-                                }
-                                //If it is the only component in the request, immediately return the first ten components from the searched category
-                                //return only the first ten
-                                return buildResponse(elevenComponentsFromTheSearchedComponentType.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+                                return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
                             }
                             continue;
                         }
-                        //If there are no automatic compatibility rule, and it is the last component id, then go down to the check for number of items in the list and the return statements
                         if (notNullIds.indexOf(componentId) == notNullIds.size() - 1) {
+                            //If there are no compatibility rules, there are not foundComponents until now and it is the last provided component id, return first ten components from the searched component type
                             if(foundComponentsThatSatisfyAllFilters.isEmpty())
                             {
-                                //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
-
-                                //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
-                                Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
-                                //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
-                                if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
-                                {
-                                    //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-                                    foundComponentsThatSatisfyAllFilters = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
-                                }
-                                //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
-                                else
-                                {
-                                    //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
-                                    Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
-                                    foundComponentsThatSatisfyAllFilters = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),pageable);
-                                }
-                                //If there is a map returned - use it
-                                //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
-
-                                //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-                                //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
-                                if (foundComponentsThatSatisfyAllFilters.isEmpty()) {
-                                    throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
-                                }
-                                //If there are 11 components, this means that there is at least 1 component for the next page
-                                if (foundComponentsThatSatisfyAllFilters.size() == 11) {
-                                    thereIsNextPage = true;
-                                } else {
-                                    thereIsNextPage = false;
-                                }
-                                return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
-
+                                return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
                             }
                             break;
                         }
                         continue;
                     }
+                    //Get an updated map of rules that should be considered for the searched component type
                     Map<Long,List<String>> updatedIdsAndValues = addFilteringCriteriaForSearchedComponentBasedOnRuleBetweenProvidedComponentTypeAdnSearchedComponentType(allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,componentId,componentTypeIdOfProvidedComponent,request.getSearchedComponentTypeId(),specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,typeOfConfiguration);
                     specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = updatedIdsAndValues;
                 }
+                //Build a dynamic query including all filters for searching for components within the searched component type that satisfy all rules
             Specification<ComponentEntity> spec = ComponentRepository.dynamicSpecification(
                     request.getSearchedComponentTypeId(), specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues);
 
+                //Using the dynamic query, get the first ten components that satisfy the filters in the query
             Page<ComponentEntity> page = componentRepository.findAll(spec, pageable);
             foundComponentsThatSatisfyAllFilters = page.getContent();
-            //List<ComponentEntity> asdsada = componentRepository.findMatchingComponents(request.getSearchedComponentTypeId(), specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues);
             if(foundComponentsThatSatisfyAllFilters.isEmpty()){
                 throw new ObjectNotFound("Compatible components from searched component type were not found");
             }
@@ -1421,13 +1354,51 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 thereIsNextPage = false;
             }
 
-
         }finally {
             long endTime = System.nanoTime();
             long durationInMillis = (endTime - startTime) / 1_000_000;
             System.out.println("Method execution time: " + durationInMillis + " ms");
         }
         return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+    }
+
+    private List<GetAutomaticCompatibilityResponse> fetchComponentsWithoutFiltering(String typeOfConfiguration,GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request,Pageable pageable)
+    {
+        boolean thereIsNextPage = false;
+        List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
+
+        //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
+        Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
+        //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
+        if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+        {
+            //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+            elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
+        }
+        //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+        else
+        {
+            //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+            Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+            elevenComponentsFromTheSearchedComponentType = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),pageable);
+        }
+        //If there is a map returned - use it
+        //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
+
+        //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+        //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
+        if (elevenComponentsFromTheSearchedComponentType.isEmpty()) {
+            throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
+        }
+        //If there are 11 components, this means that there is at least 1 component for the next page
+        if (elevenComponentsFromTheSearchedComponentType.size() == 11) {
+            thereIsNextPage = true;
+        } else {
+            thereIsNextPage = false;
+        }
+        //If it is the only component in the request, immediately return the first ten components from the searched category
+        //return only the first ten
+        return buildResponse(elevenComponentsFromTheSearchedComponentType.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
     }
 
     private List<ComponentEntity> handlePowerSupply(List<Long> notNullIds,String configurationType,Pageable pageable) {
@@ -1444,7 +1415,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             if(Objects.equals(firstEntry.getKey(), "id"))
             {
                 valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,firstEntry.getValue());
-                if(valueForPowerConsumption.isNaN())
+                if(valueForPowerConsumption == null)
                 {
                     Map.Entry<String, Long> secondEntry = iterator.next();
                     if(secondEntry != null)
@@ -1456,7 +1427,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             else {
                 valueForPowerConsumption = (double)idOrValueToBeConsidered.get("value");
             }
-            if(valueForPowerConsumption.isNaN())
+            if(valueForPowerConsumption == null)
             {
                 continue;
             }
@@ -1476,9 +1447,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     {
         Long specificationTypeId = null;
         for(Long specificationId : allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes) {
-            //specificationTypeId = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(providedComponentComponentTypeId,specificationId);
-            //Get all values the provided component has for the specification
-//            List<String> allSpecificationsTheProvidedComponentHasForTheSpecification = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(providedComponentId,specificationTypeId);
 
             //Get all values the provided component has for the specification
             List<String> allSpecificationsTheProvidedComponentHasForTheSpecification = componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(specificationId,providedComponentId);
@@ -1510,16 +1478,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             }
             //Loop trough the list of specifications (it might be the case that one specification for component type 1 appears in an automatic and manual compatibility (ex: rule entity table: 1,2,null,null  | 1,7,"sdf","sdf,sdf,sdf")
             for(SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
-                //Long specificationTypeToConsider = specificationTypeComponentTypeRepository.findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId(searchedComponentTypeId, specificationTypeAndValuesForIt.getSpecification2Id());
                 if (specificationTypeAndValuesForIt.getValueOfSecondSpecification() == null) {
                     //Automatic Compatibility
-//                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationTypeToConsider,allSpecificationsTheProvidedComponentHasForTheSpecification);
                     specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationTypeAndValuesForIt.getSpecification2Id(),allSpecificationsTheProvidedComponentHasForTheSpecification);
 
                 } else {
                     //Manual Compatibility
                     List<String> valuesToConsider = Arrays.asList(specificationTypeAndValuesForIt.getValueOfSecondSpecification().split("\\s*,\\s*"));
-//                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationTypeToConsider,valuesToConsider);
                     specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationTypeAndValuesForIt.getSpecification2Id(),valuesToConsider);
 
                 }
@@ -1539,7 +1504,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .brand(componentEntity.getBrand().getName())
                     .price(componentEntity.getComponentPrice())
-                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
+                    //.componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
@@ -1595,13 +1560,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                    serverConfig.put(1073L, List.of("Server"));
                     break;
                 case "PC":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                    serverConfig.put(1073L, List.of("Workstation"));
                     break;
                 case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                    serverConfig.put(1073L, List.of("Workstation"));
                     break;
             }
             return serverConfig;
@@ -1744,7 +1709,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     {
         //The map should store a string (the string should be either id if the long is an id of a specification,
         // or value, if we know concrete value (ex.motherboards power consumption that does not have a specification for the power consumption, but in general it should be around 50W))
-        Map<String,Long> specificationTypeId = new HashMap<>();
+        Map<String,Long> specificationTypeId = new LinkedHashMap<>();
         if (componentTypeId == 1L) {
             specificationTypeId.put("id", 1120L);
         } else if (componentTypeId == 2L) {
