@@ -1329,6 +1329,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                             {
                                 return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
                             }
+
                             break;
                         }
                         continue;
