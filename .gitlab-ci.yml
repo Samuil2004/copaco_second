@@ -8,6 +8,8 @@ stages:
 
 build:
   stage: build
+  tags:
+    - copaco_runner
   script:
     - cd CopacoProject
     - chmod +x ./gradlew
@@ -16,6 +18,8 @@ build:
 
 test:
   stage: test
+  tags:
+    - copaco_runner
   script:
     - cd CopacoProject
     - chmod +x ./gradlew
@@ -23,6 +27,8 @@ test:
 
 sonarqube:
   stage: sonarqube
+  tags:
+    - copaco_runner
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
     GIT_DEPTH: "0"
