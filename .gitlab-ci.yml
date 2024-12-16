@@ -15,6 +15,7 @@ build:
 test:
   stage: test
   script:
+    - cd CopacoProject
     - ./gradlew test
 
 sonarqube:
