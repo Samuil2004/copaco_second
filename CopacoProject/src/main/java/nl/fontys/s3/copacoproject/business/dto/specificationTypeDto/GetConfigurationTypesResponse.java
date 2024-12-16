@@ -9,6 +9,6 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class GetDistinctConfigurationTypesResponse {
+public class GetConfigurationTypesResponse {
     private List<String> distinctConfigurationTypes;
 }

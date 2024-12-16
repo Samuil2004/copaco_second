@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Data
 @Builder
-public class GetCustomProductsByUserAndStatusRequest {
+public class GetCustomProductsByStatusRequest {
     @NotNull
     private int statusId;
 }

@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
@@ -48,10 +48,10 @@ class CompatibilityBetweenComponentsImplTest {
 
 
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestOneComponentOneSearched;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestTwoComponentOneSearched;
+    ConfiguratorRequest requestOneComponentOneSearched;
+    ConfiguratorRequest requestTwoComponentOneSearched;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithSameComponentAndComponentTypeIds;
+    ConfiguratorRequest requestWithSameComponentAndComponentTypeIds;
 
     List<CompatibilityEntity> automaticCompatibilityListBetweenComponent2AndComponentType4;
     List<CompatibilityEntity> automaticCompatibilityListBetweenComponent3AndComponentType4;
@@ -169,18 +169,18 @@ class CompatibilityBetweenComponentsImplTest {
 //                .build();
 //
 
-        requestOneComponentOneSearched = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestOneComponentOneSearched = ConfiguratorRequest.builder()
             .firstComponentId(2L)
             .searchedComponentTypeId(4L)
             .build();
 
-        requestTwoComponentOneSearched = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestTwoComponentOneSearched = ConfiguratorRequest.builder()
                 .firstComponentId(2L)
                 .secondComponentId(3L)
                 .searchedComponentTypeId(4L)
                 .build();
 
-        requestWithSameComponentAndComponentTypeIds = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithSameComponentAndComponentTypeIds = ConfiguratorRequest.builder()
                 .firstComponentId(2L)
                 .searchedComponentTypeId(2L)
                 .build();

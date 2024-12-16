@@ -8,6 +8,6 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class GetDistinctConfigurationTypesInCategoryResponse {
+public class GetConfTypesInCategResponse {
     private List<String> distinctConfigurationTypesInCategory;
 }

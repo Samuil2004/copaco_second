@@ -7,6 +7,6 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetDistinctComponentTypesByTypeOfConfigurationRequest {
+public class GetDistCompTypesByTyOfConfRequest {
     private String typeOfConfiguration;
 }

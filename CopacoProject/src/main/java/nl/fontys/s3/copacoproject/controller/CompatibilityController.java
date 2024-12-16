@@ -82,7 +82,7 @@ public class CompatibilityController {
             @RequestParam("pageNumber") Integer pageNumber,
             @RequestParam("typeOfConfiguration") String typeOfConfiguration
             ){
-        GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        ConfiguratorRequest request = ConfiguratorRequest.builder()
                 .firstComponentId(firstComponentId)
                 .secondComponentId(secondComponentId)
                 .thirdComponentId(thirdComponentId)

@@ -1225,7 +1225,7 @@ import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
@@ -1252,7 +1252,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
     private final SpecificationTypeComponentTypeRepository specificationTypeComponentTypeRepository;
 
-    private List<Long> checkIfGivenIdsExistInDatabase(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
         List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
                         request.getSecondComponentId(),
@@ -1274,7 +1274,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
     @Override
-    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(ConfiguratorRequest request)
     {
         boolean thereIsNextPage = true;
         Pageable pageable = PageRequest.of(request.getPageNumber(), 11);
@@ -1360,7 +1360,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
     }
 
-    private List<GetAutomaticCompatibilityResponse> fetchComponentsWithoutFiltering(String typeOfConfiguration,GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request,Pageable pageable)
+    private List<GetAutomaticCompatibilityResponse> fetchComponentsWithoutFiltering(String typeOfConfiguration, ConfiguratorRequest request, Pageable pageable)
     {
         boolean thereIsNextPage = false;
         List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
