@@ -337,7 +337,7 @@
 //        //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
 //        //to be compatible with the selected component
 //        allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
-//
+
 //        //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
 //        //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
 //        if (indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
