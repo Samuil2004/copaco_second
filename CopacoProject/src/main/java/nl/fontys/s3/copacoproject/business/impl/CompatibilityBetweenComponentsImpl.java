@@ -1221,10 +1221,8 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
-import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
 import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
@@ -1248,7 +1246,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenComponents {
-    private final AutomaticCompatibilityRepository automaticCompatibilityRepository;
+    private final CompatibilityRepository compatibilityRepository;
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
@@ -1315,7 +1313,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     }
 
                     //Get all distinct specification ids(from the rules table) that should be considered between the current component type and the searched component type
-                    List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = automaticCompatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(),typeOfConfiguration);
+                    List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(),typeOfConfiguration);
 
                     if (allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes.isEmpty()) {
                         if (notNullIds.indexOf(componentId) == 0) {
@@ -1463,7 +1461,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //and since “small” is not in “big” it will say that it’s not compatible, that is why the list of SpecificationTypeAndValuesForIt detects the
             // same ids for the second component specification (10) and get its values at once like (10-> “small, big”)
 //            List<Object[]> response = automaticCompatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration,specificationId,allSpecificationsTheProvidedComponentHasForTheSpecification);
-            List<Object[]> response = automaticCompatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration,specificationId,allSpecificationsTheProvidedComponentHasForTheSpecification);
+            List<Object[]> response = compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration,specificationId,allSpecificationsTheProvidedComponentHasForTheSpecification);
 
             List<SpecificationTypeAndValuesForIt> specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType = response.stream()
                     .map(result -> new SpecificationTypeAndValuesForIt(
