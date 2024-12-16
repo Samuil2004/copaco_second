@@ -12,7 +12,6 @@ public final class TemplateConverter {
         return Template.builder()
                 .templateId(entity.getId())
                 .name(entity.getName())
-                .brand(BrandConverter.convertFromEntityToBase(entity.getBrand()))
                 .category(CategoryConverter.convertFromEntityToBase(entity.getCategory()))
                 .configurationType(entity.getConfigurationType())
                 .imageUrl(entity.getImageURL())
@@ -24,7 +23,6 @@ public final class TemplateConverter {
         return TemplateEntity.builder()
                 .id(template.getTemplateId())
                 .name(template.getName())
-                .brand(BrandConverter.convertFromBaseToEntity(template.getBrand()))
                 .category(CategoryConverter.convertFromBaseToEntity(template.getCategory()))
                 .configurationType(template.getConfigurationType())
                 .imageURL(template.getImageUrl())
@@ -34,7 +32,6 @@ public final class TemplateConverter {
     public static TemplateObjectResponse convertFromEntityToResponse(TemplateEntity templateEntity, List<String> componentTypes) {
         return TemplateObjectResponse.builder()
                 .templateId(templateEntity.getId())
-                .brand(BrandConverter.convertFromEntityToBase(templateEntity.getBrand()))
                 .category(CategoryConverter.convertFromEntityToBase(templateEntity.getCategory()))
                 .imageUrl(templateEntity.getImageURL())
                 .name(templateEntity.getName())

@@ -19,4 +19,8 @@ public interface SpecificationTypeRepository extends JpaRepository<Specification
             "WHERE s.componentType.id = :componentTypeId")
     Page<SpecificationTypeEntity> findSpecificationTypeEntitiesByComponentTypeId(@Param("componentTypeId") Long componentTypeId,
                                                                                  Pageable pageable);
+    @Query("SELECT COUNT(s) " +
+            "FROM SpecficationTypeList_ComponentTypeEntity s " +
+            "WHERE s.componentType.id = :componentTypeId")
+    int countSpecificationTypesByComponentTypeId(Long componentTypeId);
 }

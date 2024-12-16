@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeInCustomResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
@@ -48,6 +49,13 @@ public final class ComponentTypeConverter {
                 .componentTypeImageUrl(base.getComponentTypeImageUrl())
                 .configurationType(configurationTypeString)
                 .category(CategoryConverter.convertFromBaseToEntity(base.getCategory()))
+                .build();
+    }
+
+    public static ComponentTypeInCustomResponse convertFromBaseToResponse(ComponentType component) {
+        return ComponentTypeInCustomResponse.builder()
+                .name(component.getComponentTypeName())
+                .id(component.getComponentTypeId())
                 .build();
     }
 }

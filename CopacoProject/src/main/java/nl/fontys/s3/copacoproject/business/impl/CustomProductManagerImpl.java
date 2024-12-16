@@ -9,6 +9,7 @@ import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.Exceptions.UnauthorizedException;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.converters.StatusConverter;
+import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
 import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.enums.Status;
@@ -72,9 +73,13 @@ public class CustomProductManagerImpl implements CustomProductManager {
         Page<CustomProductEntity> productEntities = customProductRepository.findCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity, pageable);
         for(CustomProductEntity productEntity : productEntities) {
             List<Component> components = getComponentsOfCustomProductEntity(productEntity);
+            List<ComponentInConfigurationResponse> componentsResponse = new ArrayList<>();
+            for(Component component : components) {
+                componentsResponse.add(ComponentConverter.convertFromBaseToResponse(component));
+            }
             customProducts.add(CustomProductResponse.builder()
                     .customProductId(productEntity.getId())
-                    .componentsIncluded(components)
+                    .componentsIncluded(componentsResponse)
                     .statusId(status.getValue())
                     .userId(userId)
                     .templateId(productEntity.getTemplate().getId())

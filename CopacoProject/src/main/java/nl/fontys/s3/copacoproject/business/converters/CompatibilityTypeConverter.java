@@ -1,9 +1,6 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
-import nl.fontys.s3.copacoproject.domain.Brand;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
-import nl.fontys.s3.copacoproject.domain.ComponentType;
-import nl.fontys.s3.copacoproject.persistence.entity.BrandEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.CompatibilityTypeEntity;
 
 public final class CompatibilityTypeConverter {

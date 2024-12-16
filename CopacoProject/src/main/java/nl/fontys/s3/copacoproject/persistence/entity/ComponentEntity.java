@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.List;
 
 @Builder
 @Data
@@ -34,10 +33,6 @@ public class ComponentEntity{
     @NotNull
     @Length(max = 256)
     private String componentImageUrl;
-
-    @JoinColumn(name="brand_id")
-    @ManyToOne
-    private BrandEntity brand;
 
     @Column(name="price")
     private Double componentPrice;

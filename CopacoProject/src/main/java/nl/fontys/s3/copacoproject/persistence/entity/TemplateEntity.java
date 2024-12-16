@@ -29,11 +29,6 @@ public class TemplateEntity {
     @NotNull
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "brand_id", referencedColumnName = "id")
-    @NotNull
-    private BrandEntity brand;
-
     @Column(name = "configuration_type")
     @NotNull
     private String configurationType;

@@ -18,8 +18,6 @@ public class UpdateTemplateRequest {
     private long categoryId;
     @NotBlank
     private String name;
-    @NotNull
-    private long brandId;
     @NotBlank
     private String imageUrl;
     @NotNull
