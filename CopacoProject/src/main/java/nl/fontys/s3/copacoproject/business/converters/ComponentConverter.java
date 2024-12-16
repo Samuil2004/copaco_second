@@ -1,10 +1,9 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
+import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 
 import java.util.*;
@@ -41,6 +40,16 @@ public final class ComponentConverter {
                 .brand(BrandConverter.convertFromBaseToEntity(component.getBrand()))
                 .componentPrice(component.getComponentPrice())
                 //.componentImageUrl(component.getComponentImageUrl())
+                .build();
+    }
+
+    public static ComponentInConfigurationResponse convertFromBaseToResponse(Component component){
+        return ComponentInConfigurationResponse.builder()
+                .componentId(component.getComponentId())
+                .componentImageUrl(component.getComponentImageUrl())
+                .componentName(component.getComponentName())
+                .componentPrice(component.getComponentPrice())
+                .componentType(ComponentTypeConverter.convertFromBaseToResponse(component.getComponentType()))
                 .build();
     }
 }
