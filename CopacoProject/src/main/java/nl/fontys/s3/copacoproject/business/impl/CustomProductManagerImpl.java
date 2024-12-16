@@ -68,7 +68,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
                 .build();
         UserEntity userEntity = userRepository.findUserEntityById(userId);
 
-        Pageable pageable = PageRequest.of(currentPage, itemsPerPage, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
         Page<CustomProductEntity> productEntities = customProductRepository.findCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity, pageable);
         for(CustomProductEntity productEntity : productEntities) {
             List<Component> components = getComponentsOfCustomProductEntity(productEntity);
