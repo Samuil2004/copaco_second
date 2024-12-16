@@ -1332,6 +1332,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                             break;
 
 
+
                         }
                         continue;
                     }
