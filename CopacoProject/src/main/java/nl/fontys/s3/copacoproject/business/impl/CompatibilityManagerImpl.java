@@ -69,8 +69,9 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .specificationToConsider2Id(sp2.get())
                     .configurationType(createAutomaticCompatibilityDtoRequest.getConfigurationType())
                     .build();
-
+            RuleEntity reverseRule = createReverseRule(ruleEntity);
             RuleEntity returnedRuleEntity = ruleEntityRepository.save(ruleEntity);
+            ruleEntityRepository.save(reverseRule);
 
             CompatibilityEntity compatibilityEntity = CompatibilityEntity.builder()
                     .component1Id(componentType1.get())
@@ -78,12 +79,30 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .ruleId(returnedRuleEntity)
                     .configurationType(createAutomaticCompatibilityDtoRequest.getConfigurationType())
                     .build();
+            CompatibilityEntity reverseEntity = createReverseEntity(compatibilityEntity, reverseRule);
 
             CompatibilityEntity returnedEntity =  compatibilityRepository.save(compatibilityEntity);
+            compatibilityRepository.save(reverseEntity);
             return CreateAutomaticCompatibilityDtoResponse.builder().automaticCompatibility(returnedEntity).build();
         }
 
         throw new ObjectNotFound("ERROR SAVING AUTOMATIC COMPATIBILITY");
+    }
+    private CompatibilityEntity createReverseEntity(CompatibilityEntity compatibilityEntity, RuleEntity ruleEntity) {
+        return CompatibilityEntity.builder()
+                .component1Id(compatibilityEntity.getComponent2Id())
+                .component2Id(compatibilityEntity.getComponent1Id())
+                .ruleId(ruleEntity)
+                .configurationType(compatibilityEntity.getConfigurationType())
+                .build();
+    }
+
+    private RuleEntity createReverseRule(RuleEntity ruleEntity) {
+        return RuleEntity.builder()
+                .specificationToConsider1Id(ruleEntity.getSpecificationToConsider2Id())
+                .specificationToConsider2Id(ruleEntity.getSpecificationToConsider1Id())
+                .configurationType(ruleEntity.getConfigurationType())
+                .build();
     }
 
     @Override
