@@ -1,15 +1,15 @@
 package nl.fontys.s3.copacoproject.Controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
-import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
-import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.*;
+import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
+import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
-import nl.fontys.s3.copacoproject.domain.Component;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +30,19 @@ public class CompatibilityController {
         return new ResponseEntity<>(allCompatibilityTypes, HttpStatus.OK);
 
     }
-    @PostMapping("/automatic")
+    @PostMapping("/createAutomaticCompatibility")
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createAutomaticCompatibility(@RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
         CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
+
+        return ResponseEntity.noContent().build();
+
+    }
+
+    @PostMapping("/createManualCompatibility")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<Void> createManualCompatibility(@RequestBody @Valid CreateManualCompatibilityDtoRequest request) {
+        CreateManualCompatibilityDtoResponse response = compatibilityManager.createManualCompatibility(request);
         return ResponseEntity.noContent().build();
     }
 
@@ -41,19 +51,26 @@ public class CompatibilityController {
         GetAutomaticCompatibilityByIdResponse automaticCompatibility = compatibilityManager.automaticCompatibilityByCompatibilityId(automaticCompatibilityId);
 
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
-
     }
 
     @GetMapping("/allAutomaticCompatibilitiesByGivenComponentTypeId/{componentTypeId}")
     public ResponseEntity<List<GetAutomaticCompatibilityByIdResponse>> getAllAutomaticCompatibilitiesForAComponentType(@PathVariable("componentTypeId") Long automaticCompatibilityId){
         List<GetAutomaticCompatibilityByIdResponse> automaticCompatibility = compatibilityManager.allCompatibilitiesForComponentTypeByComponentTypeId(automaticCompatibilityId);
-
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
-
     }
 
-    @GetMapping("/getAllComponentsFromAGivenComponentTypeAndSpecification")
-    public ResponseEntity<List<Component>> getAllComponentsFromAGivenComponentTypeAndSpecification(
+    @GetMapping("/filteredRules")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<List<RuleResponse>> getRulesByCategoryAndConfigurationType(
+            @RequestParam (value = "configurationType", required = false) String configurationType,
+            @RequestParam (value = "currentPage", defaultValue = "1", required = false) @Min(1) int currentPage,
+            @RequestParam (value = "itemsPerPage", defaultValue = "10") int itemsPerPage){
+        List<RuleResponse> rules = compatibilityManager.getRulesByCategoryAndConfigurationType(configurationType, currentPage, itemsPerPage);
+        return new ResponseEntity<>(rules, HttpStatus.OK);
+    }
+
+    @GetMapping("/configurator")
+    public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsFromAGivenComponentTypeAndSpecification(
             @RequestParam("firstComponentId") Long firstComponentId,
             @RequestParam(value = "secondComponentId", required = false) Long secondComponentId,
             @RequestParam(value = "thirdComponentId", required = false) Long thirdComponentId,
@@ -61,9 +78,10 @@ public class CompatibilityController {
             @RequestParam(value = "fifthComponentId", required = false) Long fifthComponentId,
             @RequestParam(value = "sixthComponentId", required = false) Long sixthComponentId,
             @RequestParam(value = "seventhComponentId", required = false) Long seventhComponentId,
-            @RequestParam("searchedComponentsType") Long searchedComponentsType
-
-    ){
+            @RequestParam("searchedComponentsType") Long searchedComponentsType,
+            @RequestParam("pageNumber") Integer pageNumber,
+            @RequestParam("typeOfConfiguration") String typeOfConfiguration
+            ){
         GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
                 .firstComponentId(firstComponentId)
                 .secondComponentId(secondComponentId)
@@ -73,8 +91,10 @@ public class CompatibilityController {
                 .sixthComponentId(sixthComponentId)
                 .seventhComponentId(seventhComponentId)
                 .searchedComponentTypeId(searchedComponentsType)
+                .pageNumber(pageNumber)
+                .typeOfConfiguration(typeOfConfiguration)
                 .build();
-        List<Component> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
+        List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
 
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
 

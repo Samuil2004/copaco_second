@@ -1,11 +1,12 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.SpecificationType_ComponentType;
+import nl.fontys.s3.copacoproject.business.SpecificationsManager;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.*;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SpecificationTypeController {
     private final SpecificationTypeManager specificationTypeManager;
+    private final SpecificationType_ComponentType specificationType_ComponentType;
+    private final SpecificationsManager specificationsManager;
 
     @GetMapping
     @RolesAllowed({"ADMIN", "CUSTOMER"})
@@ -29,15 +32,25 @@ public class SpecificationTypeController {
     @GetMapping("componentId/{componentId}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<SpecificationType>> getSpecificationTypesByComponentId(@PathVariable long componentId){
-        try{
-            return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentId(componentId));
-        }
-        catch(IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentId(componentId));
+    }
+
+    @GetMapping("componentTypeId/{componentTypeId}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<SpecificationType>> getSpecificationTypesByComponentTypeId(@PathVariable Long componentTypeId,
+                                                                                          @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
+                                                                                          @RequestParam(value = "currentPage", defaultValue = "1") @Min(value = 1, message = "Page numbering starts from 1") int currentPage){
+        return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentTypeId(componentTypeId, currentPage, itemsPerPage));
+    }
+
+    @GetMapping("values/{specificationTypeId}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<String>> getSpecificationTypeValuesByComponentTypeId(
+            @PathVariable Long specificationTypeId,
+            @RequestParam Long componentTypeId,
+            @RequestParam (defaultValue = "1") @Min(1) int currentPage,
+            @RequestParam (defaultValue = "10", required = false) int itemsPerPage){
+        return ResponseEntity.status(HttpStatus.OK).body(specificationsManager.getSpecificationValuesOfSpecificationTypeByComponentType(componentTypeId, specificationTypeId, currentPage, itemsPerPage));
     }
 
     @PostMapping
@@ -58,5 +71,28 @@ public class SpecificationTypeController {
             return new ResponseEntity<>(specificationType, HttpStatus.OK);
     }
 
+    //Authentication disabled for this one
+    @GetMapping("findIdByComponentTypeIdAndSpecificationTypeId/{componentTypeId}/{specificationTypeId}")
+    @RolesAllowed({"ADMIN"})
+    public Long findIdByComponentTypeIdAndSpecificationTypeId(@PathVariable Long componentTypeId, @PathVariable Long specificationTypeId){
+        return specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
+    }
+
+    @GetMapping("/getDistinctConfigurationTypes")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<GetDistinctConfigurationTypesResponse> getDistinctConfigurationTypes(){
+        GetDistinctConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @GetMapping("/getDistinctConfigurationTypesInCategory")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<GetDistinctConfigurationTypesInCategoryResponse> getDistinctConfigurationTypesInCategory(
+            @RequestParam("categoryId") Long categoryId) {
+        GetDistinctConfigurationTypesInCategoryRequest request =  GetDistinctConfigurationTypesInCategoryRequest.builder().categoryId(categoryId).build();
+        GetDistinctConfigurationTypesInCategoryResponse response = specificationsManager.getDistinctConfigurationTypesInCategory(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }

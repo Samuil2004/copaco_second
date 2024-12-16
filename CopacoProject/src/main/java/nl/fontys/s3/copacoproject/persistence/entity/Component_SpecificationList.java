@@ -15,14 +15,13 @@ import lombok.NoArgsConstructor;
 @Table(name="Component_Specification")
 public class Component_SpecificationList {
 
-    //when saving new data make validation ex: component id 3 + specification id 5 only have 1 value
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
     @JoinColumn(name="component_id", referencedColumnName = "id")
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     private ComponentEntity componentId;
 
     @JoinColumn(name="specification_type_id", referencedColumnName = "id")

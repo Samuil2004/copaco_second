@@ -15,6 +15,7 @@ public class ComponentType
     private String componentTypeName;
     private String componentTypeImageUrl;
     private Category category;
+    private List<String> configurationTypes;
     private List<SpecificationType> specificationTypeList;
     //private List<CompatibilityType> compatibilityTypeList;
 

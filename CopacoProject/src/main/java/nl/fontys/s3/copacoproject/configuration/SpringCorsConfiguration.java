@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class SprintCrossConfiguration {
+public class SpringCorsConfiguration {
     @Bean
     public WebMvcConfigurer corsConfigurer(@Value("${cors.allowedOrigins}") String[] allowedOrigins) {
         return new WebMvcConfigurer() {
@@ -18,8 +18,8 @@ public class SprintCrossConfiguration {
                 registry.addMapping("/**")
                         .allowedOrigins(allowedOrigins) // Accepts multiple origins
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Explicitly allow these methods
-                        .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(true); // Allow cookies and other credentials
+                        .allowedHeaders("*"); // Allow all headers
+//                        .allowCredentials(true); // Allow cookies and other credentials
             }
         };
     }

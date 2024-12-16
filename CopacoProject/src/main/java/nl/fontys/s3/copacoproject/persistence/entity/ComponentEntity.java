@@ -25,7 +25,8 @@ public class ComponentEntity{
     private String componentName;
 
     @JoinColumn(name="component_type_id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity componentType;
 
@@ -40,7 +41,4 @@ public class ComponentEntity{
 
     @Column(name="price")
     private Double componentPrice;
-
-    //@OneToMany(mappedBy = "componentId", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Component_SpecificationList> specifications;
 }

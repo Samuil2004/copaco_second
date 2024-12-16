@@ -2,12 +2,16 @@ package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
+import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.Template;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TemplateController {
     private final TemplateManager templateManager;
+    private final ComponentTypeManager componentTypeManager;
 
     @PostMapping()
     @RolesAllowed({"ADMIN"})
@@ -31,22 +36,16 @@ public class TemplateController {
         catch (InvalidParameterException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
     }
 
     @GetMapping("/{id}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<Template> getTemplateById(@PathVariable("id") long id) {
+    public ResponseEntity<TemplateObjectResponse> getTemplateById(@PathVariable("id") long id) {
         try{
             return ResponseEntity.ok(templateManager.getTemplateById(id));
         }
         catch(ObjectNotFound e){
             return ResponseEntity.notFound().build();
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -59,20 +58,32 @@ public class TemplateController {
         catch(ObjectNotFound e){
             return ResponseEntity.notFound().build();
         }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
     }
 
     @GetMapping()
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Template>> getTemplates() {
-        try{
-            return ResponseEntity.ok(templateManager.getTemplates());
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok(templateManager.getTemplates());
+    }
+
+    @GetMapping("/filtered")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<TemplateObjectResponse>> getFilteredTemplates(
+            @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
+            @RequestParam(value = "currentPage", defaultValue = "0") int currentPage,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "configurationType", required = false) String configurationType) {
+
+        List<TemplateObjectResponse> filteredTemplates = templateManager.getFilteredTemplates(itemsPerPage, currentPage, categoryId, configurationType);
+        return ResponseEntity.ok(filteredTemplates);
+    }
+
+    @GetMapping("/countItems")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<Integer> getNumberOfTemplates(@RequestParam(value = "categoryId", required = false) Long categoryId,
+                                                        @RequestParam(value = "configurationType", required = false) String configurationType) {
+        int numberOfTemplates = templateManager.getNumberOfTemplates(categoryId, configurationType);
+        return ResponseEntity.ok().body(numberOfTemplates);
     }
 
     @DeleteMapping("/{id}")
@@ -84,9 +95,6 @@ public class TemplateController {
         }
         catch(ObjectNotFound e) {
             return ResponseEntity.notFound().build();
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -102,5 +110,12 @@ public class TemplateController {
         catch(InvalidParameterException | ObjectExistsAlreadyException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/{templateId}/componentTypes")
+    @RolesAllowed({"ADMIN","CUSTOMER"})
+    public ResponseEntity<List<ComponentTypeResponse>> getComponentTypesByTemplateId (@PathVariable Long templateId){
+        List<ComponentTypeResponse> componentTypes = componentTypeManager.getComponentTypesByTemplateId(templateId);
+        return ResponseEntity.status(HttpStatus.OK).body(componentTypes);
     }
 }

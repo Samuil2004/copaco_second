@@ -12,4 +12,5 @@ public class AutomaticCompatibility {
     private long component1Id;
     private long component2Id;
     private Rule rule;
+    private String configurationType;
 }

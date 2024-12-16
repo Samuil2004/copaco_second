@@ -17,7 +17,7 @@ public class CustomProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @JoinColumn(name="user_id", referencedColumnName = "id")
     @ManyToOne

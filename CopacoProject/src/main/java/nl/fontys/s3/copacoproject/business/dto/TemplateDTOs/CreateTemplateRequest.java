@@ -2,22 +2,23 @@ package nl.fontys.s3.copacoproject.business.dto.TemplateDTOs;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @AllArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateTemplateRequest {
     @NotNull
     private long categoryId;
+    private String configurationType;
     @NotBlank
     private String name;
     private long brandId;
     private String imageUrl;
     @NotNull
-    private List<ComponentTypeItemInTemplate> componentTypes;
+    private List<Long> componentTypes;
 }
