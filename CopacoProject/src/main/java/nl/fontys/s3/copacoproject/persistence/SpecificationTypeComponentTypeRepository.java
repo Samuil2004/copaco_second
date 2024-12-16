@@ -17,4 +17,12 @@ public interface SpecificationTypeComponentTypeRepository extends JpaRepository<
     Long findIdByComponentTypeIdAndSpecificationTypeId(@Param("componentTypeId") Long componentTypeId,
                                                        @Param("specificationTypeId") Long specificationTypeId);
 
+
+    @Query("SELECT e.specificationType.id FROM SpecficationTypeList_ComponentTypeEntity e " +
+            "WHERE e.componentType.id = :componentTypeId " +
+            "AND e.id = :relationId")
+    Long findSpecificationTypeIdByComponentTypeIdAndComponentTypeSpecificationRelationId
+            (@Param("componentTypeId") Long componentTypeId,
+            @Param("relationId") Long relationId);
+
 }

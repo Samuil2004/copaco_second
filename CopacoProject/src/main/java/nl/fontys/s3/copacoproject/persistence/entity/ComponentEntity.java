@@ -41,7 +41,4 @@ public class ComponentEntity{
 
     @Column(name="price")
     private Double componentPrice;
-
-    //@OneToMany(mappedBy = "componentId", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Component_SpecificationList> specifications;
 }
