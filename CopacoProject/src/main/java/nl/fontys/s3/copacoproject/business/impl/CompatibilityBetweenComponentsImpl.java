@@ -1277,7 +1277,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     public List<GetAutomaticCompatibilityResponse> automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
     {
         boolean thereIsNextPage = true;
-        Pageable pageable = PageRequest.of(request.getPageNumber(), 11);
+        Pageable pageable = PageRequest.of(request.getPageNumber(), 10);
+        Pageable checkNextPageSinceComponent = PageRequest.of((request.getPageNumber()+1)*10, 1);
+
         String typeOfConfiguration = request.getTypeOfConfiguration();
         List<ComponentEntity> foundComponentsThatSatisfyAllFilters = new ArrayList<>();
         long startTime = System.nanoTime();
@@ -1292,16 +1294,14 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //Handle PSU
             if(request.getSearchedComponentTypeId() == 5)
             {
-                List<ComponentEntity> foundPowerSupplies = handlePowerSupply(notNullIds,typeOfConfiguration,pageable);
-                if(foundPowerSupplies.isEmpty())
-                {
-                    throw new ObjectNotFound("Compatible components from searched component type were not found");
-                }
-                if(foundPowerSupplies.size() < 11)
-                {
-                    thereIsNextPage = false;
-                }
-                return buildResponse(foundPowerSupplies.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+                FilterComponentsResult foundPowerSupplies = handlePowerSupply(notNullIds,typeOfConfiguration,pageable,checkNextPageSinceComponent);
+                List<ComponentEntity> foundPSUs = foundPowerSupplies.getComponents();
+
+//                if(foundPowerSupplies.size() < 11)
+//                {
+//                    thereIsNextPage = false;
+//                }
+                return buildResponse(foundPSUs,foundPowerSupplies.getThereIsNextPage());
             }
 
                 for (Long componentId : notNullIds) {
@@ -1319,7 +1319,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                         if (notNullIds.indexOf(componentId) == 0) {
                             //If there are no compatibility rules and there is only one componentId provided, return first ten components from the searched component type
                             if (notNullIds.size() == 1) {
-                                return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
+                                FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
+                                return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
+
                             }
                             continue;
                         }
@@ -1327,7 +1329,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                             //If there are no compatibility rules, there are not foundComponents until now and it is the last provided component id, return first ten components from the searched component type
                             if(foundComponentsThatSatisfyAllFilters.isEmpty())
                             {
-                                return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
+                                FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
+                                return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
+
+                                //return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
                             }
                             break;
                         }
@@ -1347,9 +1352,19 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             if(foundComponentsThatSatisfyAllFilters.isEmpty()){
                 throw new ObjectNotFound("Compatible components from searched component type were not found");
             }
-            if(foundComponentsThatSatisfyAllFilters.size() < 11)
+            if(foundComponentsThatSatisfyAllFilters.size() < 10)
             {
                 thereIsNextPage = false;
+            }
+            else {
+                Page<ComponentEntity> checkForNextPage = componentRepository.findAll(spec,checkNextPageSinceComponent);
+                if(checkForNextPage.getContent().size() == 1)
+                {
+                    thereIsNextPage = true;
+                }
+                else {
+                    thereIsNextPage = false;
+                }
             }
 
         }finally {
@@ -1360,7 +1375,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
     }
 
-    private List<GetAutomaticCompatibilityResponse> fetchComponentsWithoutFiltering(String typeOfConfiguration,GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request,Pageable pageable)
+    private FilterComponentsResult fetchComponentsWithoutFiltering(String typeOfConfiguration,GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request,Pageable pageable,Pageable checkNextPageSinceComponent)
     {
         boolean thereIsNextPage = false;
         List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
@@ -1389,20 +1404,46 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
         }
         //If there are 11 components, this means that there is at least 1 component for the next page
-        if (elevenComponentsFromTheSearchedComponentType.size() == 11) {
-            thereIsNextPage = true;
-        } else {
+//        if (elevenComponentsFromTheSearchedComponentType.size() == 11) {
+//            thereIsNextPage = true;
+//        } else {
+//            thereIsNextPage = false;
+//        }
+        if(elevenComponentsFromTheSearchedComponentType.size() < 10)
+        {
             thereIsNextPage = false;
+        }
+        else {
+            List<ComponentEntity> nextPageCheck = new ArrayList<>();
+            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+            {
+                //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+                nextPageCheck = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), checkNextPageSinceComponent);
+            }
+            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+            else
+            {
+                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                nextPageCheck = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),checkNextPageSinceComponent);
+            }
+            if(nextPageCheck.size() == 1)
+            {
+                thereIsNextPage = true;
+            }
+            else {
+                thereIsNextPage = false;
+            }
         }
         //If it is the only component in the request, immediately return the first ten components from the searched category
         //return only the first ten
-        return buildResponse(elevenComponentsFromTheSearchedComponentType.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+        return FilterComponentsResult.builder().components(elevenComponentsFromTheSearchedComponentType).thereIsNextPage(thereIsNextPage).build();
     }
 
-    private List<ComponentEntity> handlePowerSupply(List<Long> notNullIds,String configurationType,Pageable pageable) {
+    private FilterComponentsResult handlePowerSupply(List<Long> notNullIds,String configurationType,Pageable pageable,Pageable checkNextPageSinceComponent) {
         double totalPowerConsumption = 0;
         double gpuCpuConsumptionFor12thRail = 0;
-
+        boolean thereIsNextPage;
         for (Long componentId : notNullIds) {
             Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
             Map<String,Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeIdOfProvidedComponent);
@@ -1435,7 +1476,27 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 gpuCpuConsumptionFor12thRail += valueForPowerConsumption;
             }
         }
-        return componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
+        List<ComponentEntity> foundPSUs = componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
+        if(foundPSUs.isEmpty())
+        {
+            throw new ObjectNotFound("PSUs that can handle the power consumption were not found");
+        }
+        if(foundPSUs.size() < 10)
+        {
+            thereIsNextPage = false;
+        }
+        else {
+            List<ComponentEntity> nextPageCheck = componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,checkNextPageSinceComponent);
+            if(nextPageCheck.size() == 1)
+            {
+                thereIsNextPage = true;
+            }
+            else {
+                thereIsNextPage = false;
+            }
+        }
+        return FilterComponentsResult.builder().components(foundPSUs).thereIsNextPage(thereIsNextPage).build();
+        //return componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
     }
 
 
@@ -1519,7 +1580,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     //.componentTypeName(componentEntity.getComponentType().getComponentTypeName())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .price(componentEntity.getComponentPrice())
-                    //.componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
+                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
