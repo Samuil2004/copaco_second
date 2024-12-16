@@ -2,13 +2,14 @@ package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.dto.*;
+import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
-import nl.fontys.s3.copacoproject.domain.Component;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +57,16 @@ public class CompatibilityController {
     public ResponseEntity<List<GetAutomaticCompatibilityByIdResponse>> getAllAutomaticCompatibilitiesForAComponentType(@PathVariable("componentTypeId") Long automaticCompatibilityId){
         List<GetAutomaticCompatibilityByIdResponse> automaticCompatibility = compatibilityManager.allCompatibilitiesForComponentTypeByComponentTypeId(automaticCompatibilityId);
         return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
+    }
+
+    @GetMapping("/filteredRules")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<List<RuleResponse>> getRulesByCategoryAndConfigurationType(
+            @RequestParam (value = "configurationType", required = false) String configurationType,
+            @RequestParam (value = "currentPage", defaultValue = "1", required = false) @Min(1) int currentPage,
+            @RequestParam (value = "itemsPerPage", defaultValue = "10") int itemsPerPage){
+        List<RuleResponse> rules = compatibilityManager.getRulesByCategoryAndConfigurationType(configurationType, currentPage, itemsPerPage);
+        return new ResponseEntity<>(rules, HttpStatus.OK);
     }
 
     @GetMapping("/configurator")

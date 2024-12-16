@@ -2,7 +2,6 @@ package nl.fontys.s3.copacoproject.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JoinFormula;
 
 @Builder
 @Getter
@@ -30,5 +29,8 @@ public class RuleEntity {
 
     @Column(name = "valueOfSecondSpecification", nullable = true)
     private String valueOfSecondSpecification;
+
+    @Column(name = "configuration_type", nullable = true)
+    private String configurationType;
 
 }

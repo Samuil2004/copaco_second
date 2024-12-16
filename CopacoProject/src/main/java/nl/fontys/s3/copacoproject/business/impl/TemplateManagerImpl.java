@@ -14,6 +14,7 @@ import nl.fontys.s3.copacoproject.business.converters.BrandConverter;
 import nl.fontys.s3.copacoproject.business.converters.CategoryConverter;
 import nl.fontys.s3.copacoproject.business.converters.TemplateConverter;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Brand;
 import nl.fontys.s3.copacoproject.domain.Category;
@@ -117,12 +118,16 @@ public class TemplateManagerImpl implements TemplateManager {
         else throw new ObjectNotFound("Template not found");
     }
     @Override
-    public Template getTemplateById(long id) {
+    public TemplateObjectResponse getTemplateById(long id) {
         if(!templateRepository.existsById(id)) {
             throw new ObjectNotFound("This template does not exist");
         }
         List<ComponentTypeList_Template> componentEntities = templateRepository.findComponentTypeListByTemplateId(id);
-        return TemplateConverter.convertFromEntityToBase(templateRepository.findTemplateEntityById(id), componentEntities);
+        List<String> componentTypes = new ArrayList<>();
+        for(ComponentTypeList_Template componentEntity : componentEntities){
+            componentTypes.add(componentEntity.getComponentType().getComponentTypeName());
+        }
+        return TemplateConverter.convertFromEntityToResponse(templateRepository.findTemplateEntityById(id), componentTypes);
     }
     @Override
     public List<Template> getTemplatesByName(String name) {
@@ -141,7 +146,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
     }
     @Override
-    public List<Template> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
+    public List<TemplateObjectResponse> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
         CategoryEntity categoryEntity = null;
         if (categoryId != null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
@@ -157,10 +162,14 @@ public class TemplateManagerImpl implements TemplateManager {
             throw new ObjectNotFound("There are no templates");
         }
 
-        List<Template> templates = new ArrayList<>();
+        List<TemplateObjectResponse> templates = new ArrayList<>();
         for (TemplateEntity templateEntity : templateEntitiesPage) {
             List<ComponentTypeList_Template> componentEntities = templateRepository.findComponentTypeListByTemplateId(templateEntity.getId());
-            templates.add(TemplateConverter.convertFromEntityToBase(templateEntity, componentEntities));
+            List<String> componentTypes = new ArrayList<>();
+            for (ComponentTypeList_Template componentTypeList_Template : componentEntities) {
+                componentTypes.add(componentTypeList_Template.getComponentType().getComponentTypeName());
+            }
+            templates.add(TemplateConverter.convertFromEntityToResponse(templateEntity, componentTypes));
         }
 
         return templates;

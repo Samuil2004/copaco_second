@@ -18,9 +18,15 @@ public interface RuleEntityRepository extends JpaRepository<RuleEntity, Long> {
             @Param("specification2Id") Long specification2Id,
             @Param("values") List<String> values);
 
-    List<RuleEntity> findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdId(
+    /*List<RuleEntity> findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdId(
             Long specification1Id,
             Long specification2Id
+    );*/
+
+    List<RuleEntity> findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationType(
+            Long specification1Id,
+            Long specification2Id,
+            String configurationType
     );
 
 }

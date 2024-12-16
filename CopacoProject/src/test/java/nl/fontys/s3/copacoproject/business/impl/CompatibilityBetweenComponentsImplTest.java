@@ -28,7 +28,7 @@ class CompatibilityBetweenComponentsImplTest {
     CompatibilityBetweenComponentsImpl compatibilityBetweenComponents;
 
   @Mock
-    AutomaticCompatibilityRepository automaticCompatibilityRepository;
+  CompatibilityRepository compatibilityRepository;
 
     @Mock
     ComponentRepository componentRepository;
@@ -53,12 +53,12 @@ class CompatibilityBetweenComponentsImplTest {
 
     GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithSameComponentAndComponentTypeIds;
 
-    List<AutomaticCompatibilityEntity> automaticCompatibilityListBetweenComponent2AndComponentType4;
-    List<AutomaticCompatibilityEntity> automaticCompatibilityListBetweenComponent3AndComponentType4;
+    List<CompatibilityEntity> automaticCompatibilityListBetweenComponent2AndComponentType4;
+    List<CompatibilityEntity> automaticCompatibilityListBetweenComponent3AndComponentType4;
 
-    AutomaticCompatibilityEntity automaticCompatibility1;
-    AutomaticCompatibilityEntity automaticCompatibility2;
-    AutomaticCompatibilityEntity automaticCompatibility3;
+    CompatibilityEntity automaticCompatibility1;
+    CompatibilityEntity automaticCompatibility2;
+    CompatibilityEntity automaticCompatibility3;
 
     ComponentTypeEntity componentTypeEntity1;
     ComponentTypeEntity componentTypeEntity2;
@@ -267,14 +267,14 @@ class CompatibilityBetweenComponentsImplTest {
                 .specificationToConsider2Id(specficationTypeListEntity5)
                 .build();
 
-        automaticCompatibility1 = AutomaticCompatibilityEntity.builder()
+        automaticCompatibility1 = CompatibilityEntity.builder()
                 .id(1L)
                 .component1Id(componentTypeEntity1)
                 .component2Id(componentTypeEntity2)
                 .ruleId(ruleEntity1)
                 .build();
 
-        automaticCompatibility2 = AutomaticCompatibilityEntity.builder()
+        automaticCompatibility2 = CompatibilityEntity.builder()
                 .id(2L)
                 .component1Id(componentTypeEntity1)
                 .component2Id(componentTypeEntity2)
@@ -284,7 +284,7 @@ class CompatibilityBetweenComponentsImplTest {
 
         automaticCompatibilityListBetweenComponent2AndComponentType4 = List.of(automaticCompatibility1,automaticCompatibility2);
 
-        automaticCompatibility3 = AutomaticCompatibilityEntity.builder()
+        automaticCompatibility3 = CompatibilityEntity.builder()
                 .id(1L)
                 .component1Id(componentTypeEntity2)
                 .component2Id(componentTypeEntity3)
@@ -432,7 +432,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentTypeRepository.existsById(4L)).thenReturn(true);
 
         when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
+        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
 
         when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity1)).thenReturn(allSpecificationsForComponentForFirstSpecification1);
 //        when(componentRepository.findComponentsByTypeAndSpecification(4L,96L,anyList())).thenReturn(List.of(givenComponent2,resultComponent3));
@@ -490,7 +490,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.existsById(2L)).thenReturn(true);
         when(componentTypeRepository.existsById(4L)).thenReturn(true);
         when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
+        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
         when(componentRepository.findByComponentType_Id(4L)).thenReturn(List.of(givenComponent2));
         when(componentSpecificationListRepository.findByComponentId(2L)).thenReturn(allSpecificationsForComponentForSecondComponent);
 
@@ -509,7 +509,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.existsById(2L)).thenReturn(true);
         when(componentTypeRepository.existsById(4L)).thenReturn(true);
         when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
+        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
         when(componentRepository.findByComponentType_Id(4L)).thenReturn(List.of());
 
         CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
@@ -521,7 +521,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.existsById(2L)).thenReturn(true);
         when(componentTypeRepository.existsById(4L)).thenReturn(true);
         when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
+        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
         when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L, specificationTypeEntity1)).thenReturn(allSpecificationsForComponentForFirstSpecification1);
         when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(96L), anyList()))
                 .thenReturn(List.of(givenComponent2, resultComponent3));

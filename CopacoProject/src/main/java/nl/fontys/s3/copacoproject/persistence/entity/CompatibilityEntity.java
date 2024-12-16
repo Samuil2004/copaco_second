@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nl.fontys.s3.copacoproject.domain.ComponentType;
 
 @Builder
 @Data
@@ -14,7 +13,7 @@ import nl.fontys.s3.copacoproject.domain.ComponentType;
 @NoArgsConstructor
 @Entity
 @Table(name="Automatic_compatibility")
-public class AutomaticCompatibilityEntity {
+public class CompatibilityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -36,4 +35,7 @@ public class AutomaticCompatibilityEntity {
     @ManyToOne
     @NotNull
     private RuleEntity ruleId;
+
+    @Column(name = "configuration_type")
+    private String configurationType;
 }

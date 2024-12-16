@@ -13,4 +13,5 @@ public interface SpecificationTypeManager {
     void deleteSpecificationType(Long id);
     SpecificationType getSpecificationType(Long id);
     List<SpecificationType> getSpecificationTypesByComponentId(Long componentId);
+    List<SpecificationType> getSpecificationTypesByComponentTypeId(Long componentTypeId, int currentPage, int itemsPerPage);
 }

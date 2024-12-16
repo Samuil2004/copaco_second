@@ -2,7 +2,6 @@ package nl.fontys.s3.copacoproject.persistence;
 
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,5 +25,11 @@ public interface ComponentTypeRepository extends JpaRepository<ComponentTypeEnti
     List<ComponentTypeEntity> findDistinctComponentTypesByTypeOfConfiguration(
             @Param("value") String value);
 
-
+    @Query("""
+    SELECT ct
+    FROM ComponentTypeEntity ct
+    JOIN ComponentTypeList_Template ctl ON ct = ctl.componentType
+    WHERE ctl.template.id = :templateId
+    """)
+    List<ComponentTypeEntity> getComponentTypeEntitiesByTemplateId(Long templateId);
 }
