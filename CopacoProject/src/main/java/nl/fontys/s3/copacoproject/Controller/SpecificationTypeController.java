@@ -73,7 +73,7 @@ public class SpecificationTypeController {
 
     //Authentication disabled for this one
     @GetMapping("findIdByComponentTypeIdAndSpecificationTypeId/{componentTypeId}/{specificationTypeId}")
-    @RolesAllowed({"ADMIN}"})
+    @RolesAllowed({"ADMIN"})
     public Long findIdByComponentTypeIdAndSpecificationTypeId(@PathVariable Long componentTypeId, @PathVariable Long specificationTypeId){
         return specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
     }
@@ -94,9 +94,5 @@ public class SpecificationTypeController {
         GetDistinctConfigurationTypesInCategoryResponse response = specificationsManager.getDistinctConfigurationTypesInCategory(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
-
-
-
 
 }
