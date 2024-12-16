@@ -9,6 +9,7 @@ stages:
 build:
   stage: build
   script:
+    - cd CopacoProject
     - ./gradlew assemble
 
 test:
