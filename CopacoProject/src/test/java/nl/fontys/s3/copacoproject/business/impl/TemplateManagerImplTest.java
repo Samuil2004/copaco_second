@@ -1,12 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.BrandManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.ComponentTypeItemInTemplate;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
-import nl.fontys.s3.copacoproject.domain.Brand;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.*;
@@ -41,13 +39,7 @@ class TemplateManagerImplTest {
     private CategoryManager categoryManager;
 
     @Mock
-    private BrandManager brandManager;
-
-    @Mock
     private CategoryRepository categoryRepository;
-
-    @Mock
-    private BrandRepository brandRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -64,9 +56,7 @@ class TemplateManagerImplTest {
                 componentTypeListRepository,
                 componentTypeRepository,
                 categoryManager,
-                brandManager,
-                categoryRepository,
-                brandRepository
+                categoryRepository
         );
         ReflectionTestUtils.setField(templateManager, "entityManager", entityManager);
     }
@@ -78,7 +68,6 @@ class TemplateManagerImplTest {
         CreateTemplateRequest request = CreateTemplateRequest.builder()
                 .name("Template1")
                 .categoryId(1L)
-                .brandId(2L)
                 .imageUrl("image_url")
                 .componentTypes(List.of(
                         ComponentTypeItemInTemplate.builder()
@@ -88,7 +77,6 @@ class TemplateManagerImplTest {
                 .build();
 
         Category category = mockCategory();
-        Brand brand = mockBrand();
         ComponentTypeEntity componentTypeEntity = mockComponentTypeEntity(1L);
 
         when(categoryManager.findCategoryById(1L)).thenReturn(category);

@@ -25,7 +25,6 @@ public final class ComponentConverter {
                 .componentName(entity.getComponentName())
                 .componentImageUrl(entity.getComponentImageUrl())
                 .componentType(ComponentTypeConverter.convertFromEntityToBase(entity.getComponentType()))
-                .brand(BrandConverter.convertFromEntityToBase(entity.getBrand()))
                 .componentPrice(entity.getComponentPrice())
                 .specifications(baseMap)
                 .build();
@@ -37,7 +36,6 @@ public final class ComponentConverter {
                 .componentName(component.getComponentName())
                 .componentImageUrl(component.getComponentImageUrl())
                 .componentType(ComponentTypeConverter.convertFromBaseToEntity(component.getComponentType()))
-                .brand(BrandConverter.convertFromBaseToEntity(component.getBrand()))
                 .componentPrice(component.getComponentPrice())
                 //.componentImageUrl(component.getComponentImageUrl())
                 .build();

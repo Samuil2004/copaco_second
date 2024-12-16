@@ -16,7 +16,6 @@ public class GetComponentResponse {
     private String componentTypeName;
     private String categoryName;
     private String componentImageUrl;
-    private String brandName;
     private Double componentPrice;
     private Map<String,List<String>> specifications;
 }

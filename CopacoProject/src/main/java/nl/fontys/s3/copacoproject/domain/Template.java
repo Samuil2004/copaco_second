@@ -15,7 +15,6 @@ public class Template {
     private long templateId;
     private Category category;
     private String name;
-    private Brand brand;
     private String configurationType;
     private String imageUrl;
     private List<ComponentType> components;

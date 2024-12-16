@@ -4,19 +4,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import nl.fontys.s3.copacoproject.business.BrandManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
-import nl.fontys.s3.copacoproject.business.converters.BrandConverter;
 import nl.fontys.s3.copacoproject.business.converters.CategoryConverter;
 import nl.fontys.s3.copacoproject.business.converters.TemplateConverter;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
-import nl.fontys.s3.copacoproject.domain.Brand;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.*;
@@ -38,9 +35,7 @@ public class TemplateManagerImpl implements TemplateManager {
     private final ComponentTypeList_TemplateRepository componentTypeListRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final CategoryManager categoryManager;
-    private final BrandManager brandManager;
     private final CategoryRepository categoryRepository;
-    private final BrandRepository brandRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -50,14 +45,10 @@ public class TemplateManagerImpl implements TemplateManager {
     public void createTemplate(CreateTemplateRequest request) {
         // Retrieve related entities
         Category category = categoryManager.findCategoryById(request.getCategoryId());
-        Brand brand = brandManager.getBrandById(request.getBrandId());
-        if(!brandRepository.existsById(request.getBrandId())) {
-            throw new InvalidInputException("This brand does not exist");
-        }
-        if(category == null || brand == null || request.getComponentTypes().isEmpty()) {
+        if(category == null || request.getComponentTypes().isEmpty()) {
             throw new InvalidInputException("Inputs not valid");
         }
-        if(templateRepository.existsTemplateEntityByNameAndBrandAndCategory(request.getName(), request.getBrandId(), request.getCategoryId())) {
+        if(templateRepository.existsTemplateEntityByNameAndCategory(request.getName(), request.getCategoryId())) {
             throw new InvalidInputException("Template already exists");
         }
         for(Long itemId : request.getComponentTypes()){
@@ -67,7 +58,6 @@ public class TemplateManagerImpl implements TemplateManager {
         }
         // Create and save template
         Template template = Template.builder()
-                .brand(brand)
                 .name(request.getName())
                 .category(category)
                 .configurationType(request.getConfigurationType())
@@ -207,28 +197,26 @@ public class TemplateManagerImpl implements TemplateManager {
         if(templateEntity == null) {
             throw new InvalidInputException("Template not found");
         }
-        if(!categoryRepository.existsById(request.getCategoryId()) || !brandRepository.existsById(request.getBrandId())) {
+        if(!categoryRepository.existsById(request.getCategoryId())) {
             throw new InvalidInputException("Inputs not valid");
         }
         Category category = categoryManager.findCategoryById(request.getCategoryId());
-        Brand brand = brandManager.getBrandById(request.getBrandId());
 
         for(Long itemId : request.getComponentTypes()){
             if(!componentTypeRepository.existsById(itemId)){
                 throw new InvalidInputException("Component type not found");
             }
         }
-        if(templateRepository.existsTemplateEntityForUpdate(templateId ,request.getName(), request.getBrandId(), request.getCategoryId())) {
+        if(templateRepository.existsTemplateEntityForUpdate(templateId ,request.getName(), request.getCategoryId())) {
             throw new ObjectExistsAlreadyException("Template already exists");
         }
 
-        updateTemplateData(templateEntity, request.getName(), BrandConverter.convertFromBaseToEntity(brand), CategoryConverter.convertFromBaseToEntity(category), request.getImageUrl());
+        updateTemplateData(templateEntity, request.getName(), CategoryConverter.convertFromBaseToEntity(category), request.getImageUrl());
         updateTemplateComponents(templateEntity, request.getComponentTypes());
     }
 
-    private void updateTemplateData(TemplateEntity templateEntity, String newName, BrandEntity brand, CategoryEntity category, String newImage) {
+    private void updateTemplateData(TemplateEntity templateEntity, String newName, CategoryEntity category, String newImage) {
         templateEntity.setName(newName);
-        templateEntity.setBrand(brand);
         templateEntity.setCategory(category);
         templateEntity.setImageURL(newImage);
         templateRepository.save(templateEntity);

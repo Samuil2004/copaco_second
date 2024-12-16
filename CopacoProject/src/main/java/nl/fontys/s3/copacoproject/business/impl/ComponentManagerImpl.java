@@ -75,7 +75,6 @@ public class ComponentManagerImpl implements ComponentManager {
                     .componentTypeName(componentEntity.getComponentType().getComponentTypeName())
                     .categoryName(componentEntity.getComponentType().getCategory().getCategoryName())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
-                    .brandName(componentEntity.getBrand().getName())
                     .componentPrice(componentEntity.getComponentPrice())
                     .specifications(specificationsForResponse)
                     .build();

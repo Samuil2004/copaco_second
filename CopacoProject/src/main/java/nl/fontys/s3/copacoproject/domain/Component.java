@@ -15,7 +15,6 @@ public class Component
     private String componentName;
     private ComponentType componentType;
     private String componentImageUrl;
-    private Brand brand;
     private Double componentPrice;
     //private Map<SpecificationType,String> specifications; //string = the value of the specification
     private Map<SpecificationType, List<String>> specifications;
