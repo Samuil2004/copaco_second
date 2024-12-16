@@ -70,7 +70,7 @@ public class TemplateController {
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<TemplateObjectResponse>> getFilteredTemplates(
             @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
-            @RequestParam(value = "currentPage", defaultValue = "0") int currentPage,
+            @RequestParam(value = "currentPage", defaultValue = "1") int currentPage,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "configurationType", required = false) String configurationType) {
 
