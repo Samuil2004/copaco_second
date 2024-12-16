@@ -15,6 +15,7 @@ build:
 test:
   stage: test
   script:
+    - cd CopacoProject
     - ./gradlew test
 
 sonarqube:
@@ -27,6 +28,7 @@ sonarqube:
     paths:
       - .sonar/cache
   script:
+    -  cd CopacoProject
     - ./gradlew clean test jacocoTestReport
     - ./gradlew sonar "-Dsonar.host.url=http://localhost:9000" "-Dsonar.token=sqp_5daf6275312c253fa0b42828a8223404380d2a1e" "-Dsonar.qualitygate.wait=true"
   allow_failure: false
