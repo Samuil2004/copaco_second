@@ -1,6 +1,7 @@
 package nl.fontys.s3.copacoproject.Controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
@@ -70,7 +71,7 @@ public class TemplateController {
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<TemplateObjectResponse>> getFilteredTemplates(
             @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
-            @RequestParam(value = "currentPage", defaultValue = "1") int currentPage,
+            @RequestParam(value = "currentPage", defaultValue = "1") @Min(1) int currentPage,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "configurationType", required = false) String configurationType) {
 
