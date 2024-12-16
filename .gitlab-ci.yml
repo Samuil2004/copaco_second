@@ -12,7 +12,6 @@ build:
     - shared
   script:
     - cd CopacoProject
-    - chmod +x ./gradlew
     - ./gradlew clean
     - ./gradlew assemble
 
@@ -22,7 +21,6 @@ test:
     - shared
   script:
     - cd CopacoProject
-    - chmod +x ./gradlew
     - ./gradlew test
 
 sonarqube:
