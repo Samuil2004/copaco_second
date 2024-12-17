@@ -8,6 +8,7 @@ import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.dto.*;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
+import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import org.springframework.http.HttpStatus;
@@ -67,6 +68,30 @@ public class CompatibilityController {
             @RequestParam (value = "itemsPerPage", defaultValue = "10") int itemsPerPage){
         List<RuleResponse> rules = compatibilityManager.getRulesByCategoryAndConfigurationType(configurationType, currentPage, itemsPerPage);
         return new ResponseEntity<>(rules, HttpStatus.OK);
+    }
+
+    @GetMapping("/getRuleById")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<RuleResponse> getRuleById(
+            @RequestParam (value = "ruleId") Long ruleId){
+        RuleResponse foundRule = compatibilityManager.getRuleById(ruleId);
+        return new ResponseEntity<>(foundRule, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteById")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<Void> deleteRuleById(
+            @RequestParam (value = "ruleId") Long ruleId){
+        compatibilityManager.deleteRuleById(ruleId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/updateRuleByid")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<RuleResponse> updateRuleById(
+            @RequestBody @Valid UpdateRuleRequest request){
+        RuleResponse updatedRule = compatibilityManager.updateRuleById(request);
+        return new ResponseEntity<>(updatedRule, HttpStatus.OK);
     }
 
     @GetMapping("/configurator")

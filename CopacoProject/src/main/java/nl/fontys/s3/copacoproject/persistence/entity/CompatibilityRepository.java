@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CompatibilityRepository extends JpaRepository<CompatibilityEntity, Long> {
     List<CompatibilityEntity> findByComponent1Id_IdOrComponent2Id_Id(Long component1Id, Long component2Id);
@@ -182,7 +183,40 @@ List<Object[]> findSpecification2IdsAndValuesOfSecondSpecification(
     """)
     Page<RuleResponse> findRulesByConfigurationType(@Param("configurationType") String configurationType, Pageable pageable);
 
+    @Query("""
+    SELECT new nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse(
+        r.id,
+        new nl.fontys.s3.copacoproject.business.dto.rule.ComponentTypeInRuleResponse(
+            ct1.id,
+            ct1.componentTypeName,
+            s1.id,
+            s1.specificationTypeName,
+            r.valueOfFirstSpecification
+        ),
+        new nl.fontys.s3.copacoproject.business.dto.rule.ComponentTypeInRuleResponse(
+            ct2.id,
+            ct2.componentTypeName,
+            s2.id,
+            s2.specificationTypeName,
+            r.valueOfSecondSpecification
+        ),
+        r.configurationType
+    )
+    FROM CompatibilityEntity c
+    JOIN c.ruleId r
+    JOIN c.component1Id ct1
+    JOIN c.component2Id ct2
+    JOIN r.specificationToConsider1Id s1InCompType
+    JOIN s1InCompType.specificationType s1
+    JOIN r.specificationToConsider2Id s2InCompType
+    JOIN s2InCompType.specificationType s2
+    WHERE r.id = :ruleId
+    """)
+    Optional<RuleResponse> findRuleById(@Param("ruleId") long ruleId);
 
+
+    @Query("SELECT c FROM CompatibilityEntity c WHERE c.ruleId.id = :ruleId")
+    Optional<CompatibilityEntity> findByRuleId(@Param("ruleId") Long ruleId);
 }
 
 
