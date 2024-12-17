@@ -7,7 +7,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest {
+public class ConfiguratorRequest {
     private Long firstComponentId;
     private Long secondComponentId;
     private Long thirdComponentId;

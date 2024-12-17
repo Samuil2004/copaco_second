@@ -2,7 +2,7 @@ package nl.fontys.s3.copacoproject.business;
 
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistinctComponentTypesByTypeOfConfigurationRequest;
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 
 import java.util.List;
@@ -14,6 +14,6 @@ public interface ComponentTypeManager {
     //CreateComponentTypeResponse createComponentType(CreateComponentTypeRequest request);
     /*void updateComponentType(UpdateComponentTypeRequest request);*/
     //void deleteComponentType(long id);
-    List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistinctComponentTypesByTypeOfConfigurationRequest request);
+    List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request);
     List<ComponentTypeResponse> getComponentTypesByTemplateId(Long templateId);
 }

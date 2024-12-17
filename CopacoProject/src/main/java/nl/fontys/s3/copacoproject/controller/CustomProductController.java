@@ -1,4 +1,4 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.NotNull;

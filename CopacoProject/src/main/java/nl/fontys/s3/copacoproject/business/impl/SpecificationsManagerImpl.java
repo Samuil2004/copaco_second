@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.SpecificationsManager;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetDistinctConfigurationTypesInCategoryRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetDistinctConfigurationTypesInCategoryResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetDistinctConfigurationTypesResponse;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigTypesInCategRequest;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfTypesInCategResponse;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigurationTypesResponse;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;
@@ -25,23 +25,23 @@ public class SpecificationsManagerImpl implements SpecificationsManager {
     private final SpecificationTypeList_ComponentTypeRepository specificationTypeList_ComponentTypeRepository;
 
     @Override
-    public GetDistinctConfigurationTypesResponse getDistinctConfigurationTypes() {
+    public GetConfigurationTypesResponse getDistinctConfigurationTypes() {
         List<String> distinctConfigurationTypes = componentSpecificationListRepository.getDistinctConfigurationTypes();
         if(distinctConfigurationTypes.isEmpty())
         {
             throw new ObjectNotFound("No configuration types were found");
         }
-        return GetDistinctConfigurationTypesResponse.builder().distinctConfigurationTypes(distinctConfigurationTypes).build();
+        return GetConfigurationTypesResponse.builder().distinctConfigurationTypes(distinctConfigurationTypes).build();
     }
 
     @Override
-    public GetDistinctConfigurationTypesInCategoryResponse getDistinctConfigurationTypesInCategory(GetDistinctConfigurationTypesInCategoryRequest request) {
+    public GetConfTypesInCategResponse getDistinctConfigurationTypesInCategory(GetConfigTypesInCategRequest request) {
         List<String> distinctConfigurationTypesFromCategory = componentSpecificationListRepository.getDistinctConfigurationTypesInCategory(request.getCategoryId());
         if(distinctConfigurationTypesFromCategory.isEmpty())
         {
             throw new ObjectNotFound("No configuration types were found within the selected category");
         }
-        return GetDistinctConfigurationTypesInCategoryResponse.builder().distinctConfigurationTypesInCategory(distinctConfigurationTypesFromCategory).build();
+        return GetConfTypesInCategResponse.builder().distinctConfigurationTypesInCategory(distinctConfigurationTypesFromCategory).build();
     }
 
     @Override

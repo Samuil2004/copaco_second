@@ -5,7 +5,7 @@ import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistinctComponentTypesByTypeOfConfigurationRequest;
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
@@ -92,7 +92,7 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
     }
 
     @Override
-    public List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistinctComponentTypesByTypeOfConfigurationRequest request) {
+    public List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request) {
         List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration());
         if(allDistinctComponentTypesFromConfigurationType.isEmpty()) {
             throw new ObjectNotFound("DISTINCT_COMPONENT_TYPE_NOT_FOUND");

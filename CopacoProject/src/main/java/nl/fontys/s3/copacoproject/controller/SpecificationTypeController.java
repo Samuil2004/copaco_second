@@ -1,4 +1,4 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Min;
@@ -80,18 +80,18 @@ public class SpecificationTypeController {
 
     @GetMapping("/getDistinctConfigurationTypes")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<GetDistinctConfigurationTypesResponse> getDistinctConfigurationTypes(){
-        GetDistinctConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
+    public ResponseEntity<GetConfigurationTypesResponse> getDistinctConfigurationTypes(){
+        GetConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
     @GetMapping("/getDistinctConfigurationTypesInCategory")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<GetDistinctConfigurationTypesInCategoryResponse> getDistinctConfigurationTypesInCategory(
+    public ResponseEntity<GetConfTypesInCategResponse> getDistinctConfigurationTypesInCategory(
             @RequestParam("categoryId") Long categoryId) {
-        GetDistinctConfigurationTypesInCategoryRequest request =  GetDistinctConfigurationTypesInCategoryRequest.builder().categoryId(categoryId).build();
-        GetDistinctConfigurationTypesInCategoryResponse response = specificationsManager.getDistinctConfigurationTypesInCategory(request);
+        GetConfigTypesInCategRequest request =  GetConfigTypesInCategRequest.builder().categoryId(categoryId).build();
+        GetConfTypesInCategResponse response = specificationsManager.getDistinctConfigurationTypesInCategory(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

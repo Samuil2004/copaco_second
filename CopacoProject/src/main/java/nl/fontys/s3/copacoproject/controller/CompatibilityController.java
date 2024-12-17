@@ -1,4 +1,4 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
@@ -82,7 +82,7 @@ public class CompatibilityController {
             @RequestParam("pageNumber") Integer pageNumber,
             @RequestParam("typeOfConfiguration") String typeOfConfiguration
             ){
-        GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        ConfiguratorRequest request = ConfiguratorRequest.builder()
                 .firstComponentId(firstComponentId)
                 .secondComponentId(secondComponentId)
                 .thirdComponentId(thirdComponentId)
