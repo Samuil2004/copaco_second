@@ -1435,8 +1435,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 thereIsNextPage = false;
             }
         }
-        //If it is the only component in the request, immediately return the first ten components from the searched category
-        //return only the first ten
+
         return FilterComponentsResult.builder().components(elevenComponentsFromTheSearchedComponentType).thereIsNextPage(thereIsNextPage).build();
     }
 
@@ -1456,10 +1455,11 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,firstEntry.getValue());
                 if(valueForPowerConsumption == null)
                 {
-                    Map.Entry<String, Long> secondEntry = iterator.next();
-                    if(secondEntry != null)
-                    {
-                        valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,secondEntry.getValue());
+                    if(iterator.hasNext()) {
+                        Map.Entry<String, Long> secondEntry = iterator.next();
+                        //if (secondEntry != null) {
+                            valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId, secondEntry.getValue());
+                       // }
                     }
                 }
             }
@@ -1471,7 +1471,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 continue;
             }
             totalPowerConsumption += valueForPowerConsumption;
-            if(componentTypeIdOfProvidedComponent == 2 || componentTypeIdOfProvidedComponent == 3)
+            if(componentTypeIdOfProvidedComponent == 1 || componentTypeIdOfProvidedComponent == 3)
             {
                 gpuCpuConsumptionFor12thRail += valueForPowerConsumption;
             }
@@ -1496,7 +1496,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             }
         }
         return FilterComponentsResult.builder().components(foundPSUs).thereIsNextPage(thereIsNextPage).build();
-        //return componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
     }
 
 
@@ -1530,6 +1529,8 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                             (String) result[1]
                     ))
                     .collect(Collectors.toList());
+
+
 
             //If the list is empty, this means that eventhough the component has the specification, the values it has for this specification is not compatible with any other specification types, which means not compatible
             if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.isEmpty()){
@@ -1580,7 +1581,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     //.componentTypeName(componentEntity.getComponentType().getComponentTypeName())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .price(componentEntity.getComponentPrice())
-                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
+                    //.componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
@@ -1636,13 +1637,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             switch(configurationType)
             {
                 case "Server":
-                    serverConfig.put(1073L, List.of("Server"));
+                    serverConfig.put(1070L, List.of("Server"));
                     break;
                 case "PC":
-                    serverConfig.put(1073L, List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
                 case "Workstation":
-                    serverConfig.put(1073L, List.of("Workstation"));
+                    serverConfig.put(1070L, List.of("Workstation"));
                     break;
             }
             return serverConfig;

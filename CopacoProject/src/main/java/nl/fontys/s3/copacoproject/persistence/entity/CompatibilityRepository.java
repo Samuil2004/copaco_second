@@ -1,6 +1,7 @@
 package nl.fontys.s3.copacoproject.persistence.entity;
 
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
+import nl.fontys.s3.copacoproject.persistence.entity.supportingEntities.SpecificationTypeAndValuesForIt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -135,15 +136,11 @@ List<Object[]> findSpecification2IdsAndValuesOfSecondSpecification(
             @Param("valueOfFirstSpecifications") List<String> valueOfFirstSpecifications
     );
 
-    //Old
-//    @Query("SELECT c FROM AutomaticCompatibilityEntity c " +
-//            "WHERE (c.component1Id = :component1 AND c.component2Id = :component2) " +
-//            "OR (c.component1Id = :component2 AND c.component2Id = :component1)")
-//    List<AutomaticCompatibilityEntity> findCompatibilityRecordsBetweenTwoComponentTypes(
-//            @Param("component1") ComponentTypeEntity component1,
-//            @Param("component2") ComponentTypeEntity component2);
 
-    //New
+
+
+
+
 
     @Query("SELECT c FROM CompatibilityEntity c " +
             "WHERE (c.component1Id.id = :component1Id AND c.component2Id.id = :component2Id) " +
