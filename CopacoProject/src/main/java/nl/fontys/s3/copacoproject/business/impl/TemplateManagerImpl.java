@@ -216,7 +216,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
     @Override
     @Transactional
-    public void updateTemplate(long templateId, UpdateTemplateRequest request) throws IOException {
+    public void updateTemplate(long templateId, UpdateTemplateRequest request, MultipartFile file) throws IOException {
         TemplateEntity templateEntity = templateRepository.findTemplateEntityById(templateId);
         if(templateEntity == null) {
             throw new InvalidInputException("Template not found");
@@ -235,7 +235,7 @@ public class TemplateManagerImpl implements TemplateManager {
             throw new ObjectExistsAlreadyException("Template already exists");
         }
 
-        byte[] imageInBytes = convertImageFromFileToByte(request.getImage());
+        byte[] imageInBytes = convertImageFromFileToByte(file);
 
         updateTemplateData(templateEntity, request.getName(), CategoryConverter.convertFromBaseToEntity(category), imageInBytes);
         updateTemplateComponents(templateEntity, request.getComponentTypes());

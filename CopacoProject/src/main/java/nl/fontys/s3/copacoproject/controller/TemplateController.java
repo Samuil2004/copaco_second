@@ -101,10 +101,14 @@ public class TemplateController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateTemplate(@PathVariable long id, @RequestBody @Validated UpdateTemplateRequest request) {
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<String> updateTemplate(
+            @PathVariable long id,
+            @RequestPart("request") @Validated UpdateTemplateRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
         try{
-            templateManager.updateTemplate(id, request);
+            templateManager.updateTemplate(id, request, file);
             return ResponseEntity.ok().build();
         }
         catch(IOException e){

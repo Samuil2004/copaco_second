@@ -17,5 +17,5 @@ public interface TemplateManager {
     List<Template> getTemplatesByName(String name);
     List<TemplateObjectResponse> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType);
     int getNumberOfTemplates(Long categoryId, String configurationType);
-    void updateTemplate(long templateId, UpdateTemplateRequest request) throws IOException;
+    void updateTemplate(long templateId, UpdateTemplateRequest request, MultipartFile file) throws IOException;
 }
