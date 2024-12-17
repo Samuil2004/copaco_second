@@ -33,6 +33,7 @@ public class TemplateEntity {
     @NotNull
     private String configurationType;
 
-    @Column(name = "image_url")
-    private String imageURL;
+    @Lob
+    @Column(name = "image", columnDefinition = "VARBINARY(MAX)")
+    private byte[] image;
 }

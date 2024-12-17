@@ -337,7 +337,7 @@
 //        //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
 //        //to be compatible with the selected component
 //        allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
-//
+
 //        //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
 //        //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
 //        if (indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
@@ -1225,7 +1225,7 @@ import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
@@ -1252,7 +1252,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
     private final SpecificationTypeComponentTypeRepository specificationTypeComponentTypeRepository;
 
-    private List<Long> checkIfGivenIdsExistInDatabase(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
         List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
                         request.getSecondComponentId(),
@@ -1274,7 +1274,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
     @Override
-    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(ConfiguratorRequest request)
     {
         boolean thereIsNextPage = true;
         Pageable pageable = PageRequest.of(request.getPageNumber(), 10);
@@ -1335,6 +1335,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                                 //return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
                             }
                             break;
+
+
+
                         }
                         continue;
                     }

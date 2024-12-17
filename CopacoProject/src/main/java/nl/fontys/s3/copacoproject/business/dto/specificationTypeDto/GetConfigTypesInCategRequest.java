@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetDistinctConfigurationTypesInCategoryRequest {
+public class GetConfigTypesInCategRequest {
 @NotNull
     private Long categoryId;
 }

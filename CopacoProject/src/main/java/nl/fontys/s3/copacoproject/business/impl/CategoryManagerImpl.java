@@ -17,6 +17,7 @@
     public class CategoryManagerImpl implements CategoryManager {
         private final CategoryRepository categoryRepository;
 
+
         @Override
         public List<Category> getAllCategories() {
             List<CategoryEntity> categoryEntities = categoryRepository.findAll();

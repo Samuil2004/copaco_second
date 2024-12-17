@@ -17,6 +17,6 @@ public class TemplateObjectResponse {
     private Category category;
     private String name;
     private String configurationType;
-    private String imageUrl;
+    private byte[] image;
     private List<String> components;
 }

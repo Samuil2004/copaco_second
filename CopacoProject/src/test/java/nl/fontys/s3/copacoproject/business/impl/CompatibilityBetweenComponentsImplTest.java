@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
