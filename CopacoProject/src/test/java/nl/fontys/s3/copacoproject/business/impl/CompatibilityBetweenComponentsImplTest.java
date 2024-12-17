@@ -53,7 +53,11 @@ class CompatibilityBetweenComponentsImplTest {
     ComponentEntity graphicsCard1;
     ComponentEntity processor1;
     ComponentEntity motherboard1;
-
+    ComponentEntity hardDrive;
+    ComponentEntity cooling;
+    ComponentEntity processorCooling;
+    ComponentEntity computerCase;
+    ComponentEntity powerSupply;
 
     //List of Components
     List<ComponentEntity> listOfPsu1;
@@ -66,40 +70,64 @@ class CompatibilityBetweenComponentsImplTest {
     List<ComponentEntity> listOf10GraphicsCards;
     List<ComponentEntity> listOf1Processor;
     List<ComponentEntity> listOf1Motherboard;
+    List<ComponentEntity> listOf1HardDrive;
+    List<ComponentEntity> listOf1Cooling;
+    List<ComponentEntity> listOf1ProcessorCooling;
+    List<ComponentEntity> listOf1ComputerCase;
+    List<ComponentEntity> listOf1PowerSupply;
+
 
 
 
 
 
     //Requests
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest processorProvidedRamSearchedPC;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest processorProvidedRamSearchedWorkstation;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest processorProvidedRamSearchedServer;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest processorProvidedRamSearchedLaptop;
+    ConfiguratorRequest processorProvidedRamSearchedPC;
+    ConfiguratorRequest processorProvidedRamSearchedWorkstation;
+    ConfiguratorRequest processorProvidedRamSearchedServer;
+    ConfiguratorRequest processorProvidedRamSearchedLaptop;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProcessorProvidedSSDSearchedPC;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProcessorProvidedSSDSearchedWorkstation;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProcessorProvidedSSDSearchedServer;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProcessorProvidedSSDSearchedLaptop;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedServer;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedLaptop;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProcessorProvidedGraphicsCardSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedHardDriveSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedHardDriveSearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedHardDriveSearchedServer;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithGraphicsCardProvidedProcessorSearchedPC;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithGraphicsCardProvidedProcessorSearchedServer;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithGraphicsCardProvidedProcessorSearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedCoolingSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedCoolingSearchedLaptop;
+    ConfiguratorRequest requestWithProcessorProvidedCoolingSearchedServer;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithGraphicsCardProvidedMotherboardSearchedPC;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithGraphicsCardProvidedMotherboardSearchedServer;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithGraphicsCardProvidedMotherboardSearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedProcessorCoolingSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedProcessorCoolingSearchedLaptop;
+    ConfiguratorRequest requestWithProcessorProvidedProcessorCoolingSearchedServer;
+
+    ConfiguratorRequest requestWithProcessorProvidedComputerCaseSearchedPC;
+
+    ConfiguratorRequest requestWithProcessorProvidedPowerSupplySearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedPowerSupplySearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedPowerSupplySearchedServer;
+
+    ConfiguratorRequest requestWithProcessorProvidedGraphicsCardSearchedPC;
+
+    ConfiguratorRequest requestWithGraphicsCardProvidedProcessorSearchedPC;
+    ConfiguratorRequest requestWithGraphicsCardProvidedProcessorSearchedServer;
+    ConfiguratorRequest requestWithGraphicsCardProvidedProcessorSearchedWorkstation;
+
+    ConfiguratorRequest requestWithGraphicsCardProvidedMotherboardSearchedPC;
+    ConfiguratorRequest requestWithGraphicsCardProvidedMotherboardSearchedServer;
+    ConfiguratorRequest requestWithGraphicsCardProvidedMotherboardSearchedWorkstation;
 
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProvidedComponentIdTheSameAsSearchedOne;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithMaxProvidedComponentsAndLastSearchedPSU;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithMaxProvidedComponentsAndLastSearchedPSU2;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithProvidedProcessorAndSearchedSSD;
+    ConfiguratorRequest requestWithProvidedComponentIdTheSameAsSearchedOne;
+    ConfiguratorRequest requestWithMaxProvidedComponentsAndLastSearchedPSU;
+    ConfiguratorRequest requestWithMaxProvidedComponentsAndLastSearchedPSU2;
+    ConfiguratorRequest requestWithProvidedProcessorAndSearchedSSD;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestProcessorAndGraphicsCardProvidedRamSearchedPC;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC;
+    ConfiguratorRequest requestProcessorAndGraphicsCardProvidedRamSearchedPC;
+    ConfiguratorRequest requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC;
 
 
 
@@ -159,6 +187,12 @@ class CompatibilityBetweenComponentsImplTest {
     GetAutomaticCompatibilityResponse motherboard1ResponseWithoutNextPage;
     GetAutomaticCompatibilityResponse ram1WithNextPageResponse;
     GetAutomaticCompatibilityResponse ram2WithNextPageResponse;
+    GetAutomaticCompatibilityResponse hardDriveResponse;
+    GetAutomaticCompatibilityResponse coolingResponse;
+    GetAutomaticCompatibilityResponse processorCoolingResponse;
+    GetAutomaticCompatibilityResponse computerCaseResponse;
+    GetAutomaticCompatibilityResponse powerSupplyResponse;
+
 
     List<GetAutomaticCompatibilityResponse> expectedResponseSearchedRamsForProcessor;
     List<GetAutomaticCompatibilityResponse> expectedResponseHandlePowerSupply;
@@ -171,6 +205,11 @@ class CompatibilityBetweenComponentsImplTest {
     List<GetAutomaticCompatibilityResponse> expectedResponse1ProcessorNoNextPage;
     List<GetAutomaticCompatibilityResponse> expectedResponse1MotherboardNoNextPage;
     List<GetAutomaticCompatibilityResponse> expectedResponseSearchedRamsForProcessorWithoutNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1HardDriveNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1CoolingNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1ProcessorCoolingNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1ComputerCaseNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1PowerSupplyNoNextPage;
 
 
 
@@ -264,6 +303,36 @@ class CompatibilityBetweenComponentsImplTest {
                 .componentPrice(100.0)
                 .build();
 
+        hardDrive = ComponentEntity.builder()
+                .componentId(11L)
+                .componentName("hard drive 1")
+                .componentPrice(100.0)
+                .build();
+
+        cooling = ComponentEntity.builder()
+                .componentId(8L)
+                .componentName("cooling 1")
+                .componentPrice(100.0)
+                .build();
+
+        processorCooling = ComponentEntity.builder()
+                .componentId(7L)
+                .componentName("processor cooling 1")
+                .componentPrice(100.0)
+                .build();
+
+        computerCase = ComponentEntity.builder()
+                .componentId(6L)
+                .componentName("computer case 1")
+                .componentPrice(100.0)
+                .build();
+
+        powerSupply = ComponentEntity.builder()
+                .componentId(5L)
+                .componentName("cooling 1")
+                .componentPrice(100.0)
+                .build();
+
         //List of components
         listOfPsu1 = List.of(psu1);
         listOfPsu2 = List.of(psu2);
@@ -275,7 +344,11 @@ class CompatibilityBetweenComponentsImplTest {
         listOf10GraphicsCards = List.of(graphicsCard1, new ComponentEntity(), new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity());
         listOf1Processor = List.of(processor1);
         listOf1Motherboard = List.of(motherboard1);
-
+        listOf1HardDrive = List.of(hardDrive);
+        listOf1Cooling = List.of(cooling);
+        listOf1ProcessorCooling = List.of(processorCooling);
+        listOf1ComputerCase = List.of(computerCase);
+        listOf1PowerSupply = List.of(powerSupply);
         //Pages
         oneRam = new PageImpl<>(List.of(ram1),pageableFirstPage, 2);
         twoRams = new PageImpl<>(List.of(ram1,ram2),pageableFirstPage, 2);
@@ -288,6 +361,7 @@ class CompatibilityBetweenComponentsImplTest {
                 .price(100.0)
                 .thereIsNextPage(false)
                 .build();
+
         ram2Response = GetAutomaticCompatibilityResponse.builder()
                 .componentId(2L)
                 .componentName("Ram 2")
@@ -366,6 +440,40 @@ class CompatibilityBetweenComponentsImplTest {
                 .thereIsNextPage(false)
                 .build();
 
+        hardDriveResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(11L)
+                .componentName("hard drive 1")
+                .price(100.0)
+                .thereIsNextPage(false)
+                .build();
+
+        coolingResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(8L)
+                .componentName("cooling 1")
+                .price(100.0)
+                .thereIsNextPage(false)
+                .build();
+
+        processorCoolingResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(7L)
+                .componentName("processor cooling 1")
+                .price(100.0)
+                .thereIsNextPage(false)
+                .build();
+
+        computerCaseResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(6L)
+                .componentName("computer case 1")
+                .price(100.0)
+                .thereIsNextPage(false)
+                .build();
+
+        powerSupplyResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(5L)
+                .componentName("power supply 1")
+                .price(100.0)
+                .thereIsNextPage(false)
+                .build();
 
         expectedResponseSearchedRamsForProcessor = List.of(ram1Response,ram2Response);
         expectedResponseSearchedRamsForProcessorWithoutNextPage = List.of(ram1Response,ram2Response,new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse());
@@ -378,121 +486,224 @@ class CompatibilityBetweenComponentsImplTest {
         expectedResponse1GraphicCardWithoutNextPage = List.of(graphicsCard1ResponseWithoutNextPage);
         expectedResponse1ProcessorNoNextPage = List.of(processor1ResponseWithoutNextPage);
         expectedResponse1MotherboardNoNextPage = List.of(motherboard1ResponseWithoutNextPage);
+        expectedResponse1HardDriveNoNextPage = List.of(hardDriveResponse);
+        expectedResponse1CoolingNoNextPage = List.of(coolingResponse);
+        expectedResponse1ProcessorCoolingNoNextPage = List.of(processorCoolingResponse);
+        expectedResponse1ComputerCaseNoNextPage = List.of(computerCaseResponse);
+        expectedResponse1PowerSupplyNoNextPage = List.of(powerSupplyResponse);
+
 
         //Requests
-        processorProvidedRamSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        processorProvidedRamSearchedPC = ConfiguratorRequest.builder()
             .firstComponentId(1L)
             .searchedComponentTypeId(4L)
             .pageNumber(1)
             .typeOfConfiguration("PC")
             .build();
 
-        processorProvidedRamSearchedWorkstation = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        processorProvidedRamSearchedWorkstation = ConfiguratorRequest.builder()
             .firstComponentId(1L)
             .searchedComponentTypeId(4L)
             .pageNumber(1)
             .typeOfConfiguration("Workstation")
             .build();
 
-        processorProvidedRamSearchedServer = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        processorProvidedRamSearchedServer = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(4L)
                 .pageNumber(1)
                 .typeOfConfiguration("Server")
                 .build();
 
-        processorProvidedRamSearchedLaptop = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        processorProvidedRamSearchedLaptop = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(4L)
                 .pageNumber(1)
                 .typeOfConfiguration("Laptop")
                 .build();
 
-        requestWithProcessorProvidedSSDSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithProcessorProvidedSSDSearchedPC = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(10L)
                 .pageNumber(1)
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestWithProcessorProvidedSSDSearchedWorkstation = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithProcessorProvidedSSDSearchedWorkstation = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(10L)
                 .pageNumber(1)
                 .typeOfConfiguration("Workstation")
                 .build();
 
-        requestWithProcessorProvidedSSDSearchedServer = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithProcessorProvidedSSDSearchedServer = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(10L)
                 .pageNumber(1)
                 .typeOfConfiguration("Server")
                 .build();
 
-        requestWithProcessorProvidedSSDSearchedLaptop = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithProcessorProvidedSSDSearchedLaptop = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(10L)
                 .pageNumber(1)
                 .typeOfConfiguration("Laptop")
                 .build();
 
-        requestWithProcessorProvidedGraphicsCardSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithProcessorProvidedHardDriveSearchedPC = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(11L)
+                .pageNumber(1)
+                .typeOfConfiguration("PC")
+                .build();
+
+        requestWithProcessorProvidedHardDriveSearchedWorkstation = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(11L)
+                .pageNumber(1)
+                .typeOfConfiguration("Workstation")
+                .build();
+
+        requestWithProcessorProvidedHardDriveSearchedServer = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(11L)
+                .pageNumber(1)
+                .typeOfConfiguration("Server")
+                .build();
+
+        requestWithProcessorProvidedCoolingSearchedPC = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(8L)
+                .pageNumber(1)
+                .typeOfConfiguration("PC")
+                .build();
+
+        requestWithProcessorProvidedCoolingSearchedLaptop = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(8L)
+                .pageNumber(1)
+                .typeOfConfiguration("Laptop")
+                .build();
+
+        requestWithProcessorProvidedCoolingSearchedServer = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(8L)
+                .pageNumber(1)
+                .typeOfConfiguration("Server")
+                .build();
+
+
+        requestWithProcessorProvidedProcessorCoolingSearchedPC = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(7L)
+                .pageNumber(1)
+                .typeOfConfiguration("PC")
+                .build();
+
+        requestWithProcessorProvidedProcessorCoolingSearchedLaptop = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(7L)
+                .pageNumber(1)
+                .typeOfConfiguration("Laptop")
+                .build();
+
+        requestWithProcessorProvidedProcessorCoolingSearchedServer = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(7L)
+                .pageNumber(1)
+                .typeOfConfiguration("Server")
+                .build();
+
+
+        requestWithProcessorProvidedComputerCaseSearchedPC = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(6L)
+                .pageNumber(1)
+                .typeOfConfiguration("PC")
+                .build();
+
+        requestWithProcessorProvidedPowerSupplySearchedPC = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(5L)
+                .pageNumber(1)
+                .typeOfConfiguration("PC")
+                .build();
+
+        requestWithProcessorProvidedPowerSupplySearchedWorkstation = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(5L)
+                .pageNumber(1)
+                .typeOfConfiguration("Workstation")
+                .build();
+
+        requestWithProcessorProvidedPowerSupplySearchedServer = ConfiguratorRequest.builder()
+                .firstComponentId(1L)
+                .searchedComponentTypeId(5L)
+                .pageNumber(1)
+                .typeOfConfiguration("Server")
+                .build();
+
+
+
+
+
+        requestWithProcessorProvidedGraphicsCardSearchedPC = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(3L)
                 .pageNumber(1)
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestWithGraphicsCardProvidedProcessorSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithGraphicsCardProvidedProcessorSearchedPC = ConfiguratorRequest.builder()
                 .firstComponentId(3L)
                 .searchedComponentTypeId(1L)
                 .pageNumber(1)
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestWithGraphicsCardProvidedProcessorSearchedServer = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithGraphicsCardProvidedProcessorSearchedServer = ConfiguratorRequest.builder()
                 .firstComponentId(3L)
                 .searchedComponentTypeId(1L)
                 .pageNumber(1)
                 .typeOfConfiguration("Server")
                 .build();
 
-        requestWithGraphicsCardProvidedProcessorSearchedWorkstation = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithGraphicsCardProvidedProcessorSearchedWorkstation = ConfiguratorRequest.builder()
                 .firstComponentId(3L)
                 .searchedComponentTypeId(1L)
                 .pageNumber(1)
                 .typeOfConfiguration("Workstation")
                 .build();
 
-        requestWithGraphicsCardProvidedMotherboardSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithGraphicsCardProvidedMotherboardSearchedPC = ConfiguratorRequest.builder()
                 .firstComponentId(3L)
                 .searchedComponentTypeId(2L)
                 .pageNumber(1)
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestWithGraphicsCardProvidedMotherboardSearchedServer = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithGraphicsCardProvidedMotherboardSearchedServer = ConfiguratorRequest.builder()
                 .firstComponentId(3L)
                 .searchedComponentTypeId(2L)
                 .pageNumber(1)
                 .typeOfConfiguration("Server")
                 .build();
 
-        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation = ConfiguratorRequest.builder()
                 .firstComponentId(3L)
                 .searchedComponentTypeId(2L)
                 .pageNumber(1)
                 .typeOfConfiguration("Workstation")
                 .build();
 
-        requestWithProvidedComponentIdTheSameAsSearchedOne = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithProvidedComponentIdTheSameAsSearchedOne = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .searchedComponentTypeId(1L)
                 .pageNumber(1)
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestWithMaxProvidedComponentsAndLastSearchedPSU = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithMaxProvidedComponentsAndLastSearchedPSU = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .secondComponentId(2L)
                 .thirdComponentId(3L)
@@ -505,7 +716,7 @@ class CompatibilityBetweenComponentsImplTest {
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestWithMaxProvidedComponentsAndLastSearchedPSU2 = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestWithMaxProvidedComponentsAndLastSearchedPSU2 = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .secondComponentId(2L)
                 .thirdComponentId(3L)
@@ -518,7 +729,7 @@ class CompatibilityBetweenComponentsImplTest {
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestProcessorAndGraphicsCardProvidedRamSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestProcessorAndGraphicsCardProvidedRamSearchedPC = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .secondComponentId(3L)
                 .searchedComponentTypeId(4L)
@@ -526,7 +737,7 @@ class CompatibilityBetweenComponentsImplTest {
                 .typeOfConfiguration("PC")
                 .build();
 
-        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
+        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC = ConfiguratorRequest.builder()
                 .firstComponentId(1L)
                 .secondComponentId(3L)
                 .thirdComponentId(2L)
@@ -1277,6 +1488,213 @@ class CompatibilityBetweenComponentsImplTest {
 
     }
 
+
+
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForHardDrivePCConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedHardDriveSearchedPC.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedHardDriveSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedHardDriveSearchedPC.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedHardDriveSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedHardDriveSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableFirstPage)).thenReturn(listOf1HardDrive);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedHardDriveSearchedPC);
+        assertEquals(Set.copyOf(expectedResponse1HardDriveNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForHardDriveWorkstationConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedHardDriveSearchedWorkstation.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedHardDriveSearchedWorkstation.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedHardDriveSearchedWorkstation.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedHardDriveSearchedWorkstation.getSearchedComponentTypeId(),typeOfConfigurationWorkstation)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedHardDriveSearchedWorkstation.getSearchedComponentTypeId(),1070L,List.of("Workstation","workstation"),pageableFirstPage)).thenReturn(listOf1HardDrive);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedHardDriveSearchedWorkstation);
+        assertEquals(Set.copyOf(expectedResponse1HardDriveNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForHardDriveServerConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedHardDriveSearchedServer.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedHardDriveSearchedServer.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedHardDriveSearchedServer.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedHardDriveSearchedServer.getSearchedComponentTypeId(),typeOfConfigurationServer)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedHardDriveSearchedServer.getSearchedComponentTypeId(),1070L,List.of("Server"),pageableFirstPage)).thenReturn(listOf1HardDrive);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedHardDriveSearchedServer);
+        assertEquals(Set.copyOf(expectedResponse1HardDriveNoNextPage), Set.copyOf(actualResponse));
+    }
+
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForCoolingPCConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedCoolingSearchedPC.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedCoolingSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedCoolingSearchedPC.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedCoolingSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedCoolingSearchedPC.getSearchedComponentTypeId(),954L,List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"),pageableFirstPage)).thenReturn(listOf1Cooling);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedCoolingSearchedPC);
+        assertEquals(Set.copyOf(expectedResponse1CoolingNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForCoolingLaptopConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedCoolingSearchedLaptop.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedCoolingSearchedLaptop.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedCoolingSearchedLaptop.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedCoolingSearchedLaptop.getSearchedComponentTypeId(),typeOfConfigurationLaptop)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedCoolingSearchedLaptop.getSearchedComponentTypeId(),954L,List.of("Thermal paste"),pageableFirstPage)).thenReturn(listOf1Cooling);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedCoolingSearchedLaptop);
+        assertEquals(Set.copyOf(expectedResponse1CoolingNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForCoolingServerConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedCoolingSearchedServer.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedCoolingSearchedServer.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedCoolingSearchedServer.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedCoolingSearchedServer.getSearchedComponentTypeId(),typeOfConfigurationServer)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedCoolingSearchedServer.getSearchedComponentTypeId(),954L,List.of("Fan","Fan tray","Cooler"),pageableFirstPage)).thenReturn(listOf1Cooling);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedCoolingSearchedServer);
+        assertEquals(Set.copyOf(expectedResponse1CoolingNoNextPage), Set.copyOf(actualResponse));
+    }
+
+
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForProcessorCoolingPCConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedProcessorCoolingSearchedPC.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedProcessorCoolingSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedProcessorCoolingSearchedPC.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedProcessorCoolingSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedProcessorCoolingSearchedPC.getSearchedComponentTypeId(),954L,List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"),pageableFirstPage)).thenReturn(listOf1ProcessorCooling);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedProcessorCoolingSearchedPC);
+        assertEquals(Set.copyOf(expectedResponse1ProcessorCoolingNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForProcessorCoolingLaptopConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedProcessorCoolingSearchedLaptop.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedProcessorCoolingSearchedLaptop.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedProcessorCoolingSearchedLaptop.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedProcessorCoolingSearchedLaptop.getSearchedComponentTypeId(),typeOfConfigurationLaptop)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedProcessorCoolingSearchedLaptop.getSearchedComponentTypeId(),954L,List.of("Thermal paste"),pageableFirstPage)).thenReturn(listOf1ProcessorCooling);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedProcessorCoolingSearchedLaptop);
+        assertEquals(Set.copyOf(expectedResponse1ProcessorCoolingNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForProcessorCoolingServerConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedProcessorCoolingSearchedServer.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedProcessorCoolingSearchedServer.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedProcessorCoolingSearchedServer.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedProcessorCoolingSearchedServer.getSearchedComponentTypeId(),typeOfConfigurationServer)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedProcessorCoolingSearchedServer.getSearchedComponentTypeId(),954L,List.of("Fan","Fan module"),pageableFirstPage)).thenReturn(listOf1ProcessorCooling);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedProcessorCoolingSearchedServer);
+        assertEquals(Set.copyOf(expectedResponse1ProcessorCoolingNoNextPage), Set.copyOf(actualResponse));
+    }
+
+
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForComputerCasePCConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(requestWithProcessorProvidedComputerCaseSearchedPC.getFirstComponentId())).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedComputerCaseSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedComputerCaseSearchedPC.getFirstComponentId())).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedComputerCaseSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedComputerCaseSearchedPC.getSearchedComponentTypeId(),954L,List.of("PC"),pageableFirstPage)).thenReturn(listOf1ComputerCase);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedComputerCaseSearchedPC);
+        assertEquals(Set.copyOf(expectedResponse1ComputerCaseNoNextPage), Set.copyOf(actualResponse));
+    }
 
 
 
