@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class UpdateTemplateRequest {
     @NotBlank
     private String name;
     @NotBlank
-    private String imageUrl;
+    private MultipartFile image;
     @NotNull
     private List<Long> componentTypes;
 }

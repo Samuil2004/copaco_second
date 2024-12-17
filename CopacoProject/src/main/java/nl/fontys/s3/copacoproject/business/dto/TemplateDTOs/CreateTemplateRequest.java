@@ -17,7 +17,6 @@ public class CreateTemplateRequest {
     private String configurationType;
     @NotBlank
     private String name;
-    private String imageUrl;
     @NotNull
     private List<Long> componentTypes;
 }
