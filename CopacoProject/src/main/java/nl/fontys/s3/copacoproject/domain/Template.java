@@ -16,6 +16,6 @@ public class Template {
     private Category category;
     private String name;
     private String configurationType;
-    private String imageUrl;
+    private byte[] image;
     private List<ComponentType> components;
 }

@@ -18,8 +18,6 @@ public class UpdateTemplateRequest {
     private long categoryId;
     @NotBlank
     private String name;
-    @NotBlank
-    private String imageUrl;
     @NotNull
     private List<Long> componentTypes;
 }

@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
@@ -16,8 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.security.InvalidParameterException;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -27,15 +28,16 @@ public class TemplateController {
     private final TemplateManager templateManager;
     private final ComponentTypeManager componentTypeManager;
 
-    @PostMapping()
+    @PostMapping(value = "",consumes = "multipart/form-data")
     @RolesAllowed({"ADMIN"})
-    public ResponseEntity<Void> createTemplate(@RequestBody @Validated CreateTemplateRequest request) {
+    public ResponseEntity<Void> createTemplate(
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart("request") @Valid CreateTemplateRequest request) {
         try {
-            templateManager.createTemplate(request);
+            templateManager.createTemplate(request, file);
             return ResponseEntity.ok().build();
-        }
-        catch (InvalidParameterException e) {
-            return ResponseEntity.badRequest().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -99,17 +101,18 @@ public class TemplateController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateTemplate(@PathVariable long id, @RequestBody @Validated UpdateTemplateRequest request) {
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<String> updateTemplate(
+            @PathVariable long id,
+            @RequestPart("request") @Validated UpdateTemplateRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
         try{
-            templateManager.updateTemplate(id, request);
+            templateManager.updateTemplate(id, request, file);
             return ResponseEntity.ok().build();
         }
-        catch(ObjectNotFound e){
-            return ResponseEntity.notFound().build();
-        }
-        catch(InvalidParameterException | ObjectExistsAlreadyException e) {
-            return ResponseEntity.badRequest().build();
+        catch(IOException e){
+            return ResponseEntity.internalServerError().build();
         }
     }
 
