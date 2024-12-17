@@ -18,8 +18,8 @@ public class SpringCorsConfiguration {
                 registry.addMapping("/**")
                         .allowedOrigins(allowedOrigins) // Accepts multiple origins
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Explicitly allow these methods
-                        .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(true); // Allow cookies and other credentials
+                        .allowedHeaders("*"); // Allow all headers
+//                        .allowCredentials(true); // Allow cookies and other credentials
             }
         };
     }

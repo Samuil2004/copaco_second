@@ -1,9 +1,9 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
-import nl.fontys.s3.copacoproject.business.BrandManager;
-import nl.fontys.s3.copacoproject.domain.Brand;
+import nl.fontys.s3.copacoproject.business.CategoryManager;
+import nl.fontys.s3.copacoproject.domain.Category;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,15 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/brand")
+@RequestMapping("/category")
 @AllArgsConstructor
-public class BrandController {
+public class CategoryController {
 
-    private final BrandManager brandManager;
+    private final CategoryManager categoryManager;
 
     @GetMapping()
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<List<Brand>> getAllBrands() {
-        return ResponseEntity.ok().body(brandManager.getAllBrands());
+    public ResponseEntity<List<Category>> getAllCategories() {
+        return ResponseEntity.ok().body(categoryManager.getAllCategories());
     }
+
 }

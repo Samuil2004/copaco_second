@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nl.fontys.s3.copacoproject.domain.ComponentType;
 
 @Builder
 @Data
@@ -14,19 +13,21 @@ import nl.fontys.s3.copacoproject.domain.ComponentType;
 @NoArgsConstructor
 @Entity
 @Table(name="Automatic_compatibility")
-public class AutomaticCompatibilityEntity {
+public class CompatibilityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
     @JoinColumn(name="component1_id", referencedColumnName = "id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity component1Id;
 
     @JoinColumn(name="component2_id", referencedColumnName = "id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity component2Id;
 
@@ -34,4 +35,7 @@ public class AutomaticCompatibilityEntity {
     @ManyToOne
     @NotNull
     private RuleEntity ruleId;
+
+    @Column(name = "configuration_type")
+    private String configurationType;
 }

@@ -2,7 +2,6 @@ package nl.fontys.s3.copacoproject.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JoinFormula;
 
 @Builder
 @Getter
@@ -17,13 +16,6 @@ public class RuleEntity {
     @Column(name = "id")
     private long id;
 
-//
-//    @Column(name = "component1_id")
-//    private long component1Id;
-//
-//    @Column(name = "component2_id")
-//    private long component2Id;
-
     @JoinColumn(name="specification1_id", referencedColumnName = "id")
     @ManyToOne
     private SpecficationTypeList_ComponentTypeEntity specificationToConsider1Id;
@@ -31,5 +23,14 @@ public class RuleEntity {
     @JoinColumn(name="specification2_id",referencedColumnName = "id")
     @ManyToOne
     private SpecficationTypeList_ComponentTypeEntity specificationToConsider2Id;
+
+    @Column(name = "valueOfFirstSpecification", nullable = true)
+    private String valueOfFirstSpecification;
+
+    @Column(name = "valueOfSecondSpecification", nullable = true)
+    private String valueOfSecondSpecification;
+
+    @Column(name = "configuration_type", nullable = true)
+    private String configurationType;
 
 }

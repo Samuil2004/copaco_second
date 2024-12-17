@@ -4,15 +4,21 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.ActionDeniedException;
+import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.Exceptions.UnauthorizedException;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.converters.StatusConverter;
+import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
 import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.enums.Status;
 import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -53,27 +59,42 @@ public class CustomProductManagerImpl implements CustomProductManager {
     }
 
     @Override
-    public List<CustomProductResponse> getCustomProductsOfUserByState(long userId, long authenticatedUser, GetCustomProductsByUserAndStatusRequest request) {
-        validateGetRequest(userId, authenticatedUser, request.getStatusId());
+    public List<CustomProductResponse> getCustomProductsOfUserByState(long userId, long authenticatedUser, int currentPage, int itemsPerPage, int statusId) {
+        validateGetRequest(userId, authenticatedUser, statusId);
         List<CustomProductResponse> customProducts = new ArrayList<>();
-        Status status = Status.fromValue(request.getStatusId());
+        Status status = Status.fromValue(statusId);
         StatusEntity statusEntity = StatusEntity.builder()
                 .id(status.getValue())
                 .name(status.name())
                 .build();
         UserEntity userEntity = userRepository.findUserEntityById(userId);
-        List<CustomProductEntity> productEntities = customProductRepository.findCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity);
+
+        Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
+        Page<CustomProductEntity> productEntities = customProductRepository.findCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity, pageable);
         for(CustomProductEntity productEntity : productEntities) {
             List<Component> components = getComponentsOfCustomProductEntity(productEntity);
+            List<ComponentInConfigurationResponse> componentsResponse = new ArrayList<>();
+            for(Component component : components) {
+                componentsResponse.add(ComponentConverter.convertFromBaseToResponse(component));
+            }
             customProducts.add(CustomProductResponse.builder()
                     .customProductId(productEntity.getId())
-                    .componentsIncluded(components)
+                    .componentsIncluded(componentsResponse)
                     .statusId(status.getValue())
                     .userId(userId)
                     .templateId(productEntity.getTemplate().getId())
                     .build());
         }
         return customProducts;
+    }
+
+    @Override
+    public int getNumberOfCustomProductsOfUserByStatus(long userId, long authenticatedUser, int statusId) {
+        validateGetRequest(userId, authenticatedUser, statusId);
+        StatusEntity statusEntity = statusRepository.findById(statusId);
+        UserEntity userEntity = userRepository.findUserEntityById(userId);
+
+        return customProductRepository.countCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity);
     }
 
     @Transactional
@@ -139,7 +160,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
             throw new ObjectNotFound("User not found");
         }
         if(!statusRepository.existsById(statusId)){
-            throw new ObjectNotFound("Invalid status");
+            throw new InvalidInputException("Invalid status");
         }
     }
 

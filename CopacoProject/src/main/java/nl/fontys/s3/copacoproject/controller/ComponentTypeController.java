@@ -1,9 +1,11 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,4 +46,12 @@ public class ComponentTypeController {
         return ResponseEntity.status(HttpStatus.OK).body(componentType);
     }
 
+    @GetMapping("/getDistinctComponentTypesFromConfigurationType")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<ComponentTypeResponse>> getDistinctComponentTypesFromConfigurationType(
+            @RequestParam("configurationType") String configurationType) {
+        GetDistCompTypesByTyOfConfRequest request =  GetDistCompTypesByTyOfConfRequest.builder().typeOfConfiguration(configurationType).build();
+        List<ComponentTypeResponse> response = componentTypeManager.findDistinctComponentTypesByTypeOfConfiguration(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

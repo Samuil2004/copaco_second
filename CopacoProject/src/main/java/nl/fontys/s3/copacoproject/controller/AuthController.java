@@ -1,4 +1,4 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

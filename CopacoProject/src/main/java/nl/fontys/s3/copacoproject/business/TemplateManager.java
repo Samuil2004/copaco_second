@@ -1,16 +1,21 @@
 package nl.fontys.s3.copacoproject.business;
 
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Template;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface TemplateManager {
-    void createTemplate(CreateTemplateRequest request);
+    void createTemplate(CreateTemplateRequest request, MultipartFile file) throws IOException;
     void deleteTemplate(long id);
-    Template getTemplateById(long id);
+    TemplateObjectResponse getTemplateById(long id);
     List<Template> getTemplates();
     List<Template> getTemplatesByName(String name);
-    void updateTemplate(long templateId, UpdateTemplateRequest request);
+    List<TemplateObjectResponse> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType);
+    int getNumberOfTemplates(Long categoryId, String configurationType);
+    void updateTemplate(long templateId, UpdateTemplateRequest request, MultipartFile file) throws IOException;
 }

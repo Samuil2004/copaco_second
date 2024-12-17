@@ -1,10 +1,9 @@
-package nl.fontys.s3.copacoproject.Controller;
+package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.AddressManager;
 import nl.fontys.s3.copacoproject.business.UserManager;
-import nl.fontys.s3.copacoproject.business.dto.addressDto.CreateNewAddressResponse;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateUserRequest;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateUserResponse;
 import nl.fontys.s3.copacoproject.business.dto.userDto.GetAllUsersResponse;

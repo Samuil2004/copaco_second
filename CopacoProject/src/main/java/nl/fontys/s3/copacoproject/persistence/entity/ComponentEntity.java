@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.List;
 
 @Builder
 @Data
@@ -25,7 +24,8 @@ public class ComponentEntity{
     private String componentName;
 
     @JoinColumn(name="component_type_id")
-    @ManyToOne
+//    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private ComponentTypeEntity componentType;
 
@@ -34,13 +34,6 @@ public class ComponentEntity{
     @Length(max = 256)
     private String componentImageUrl;
 
-    @JoinColumn(name="brand_id")
-    @ManyToOne
-    private BrandEntity brand;
-
     @Column(name="price")
     private Double componentPrice;
-
-    //@OneToMany(mappedBy = "componentId", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Component_SpecificationList> specifications;
 }
