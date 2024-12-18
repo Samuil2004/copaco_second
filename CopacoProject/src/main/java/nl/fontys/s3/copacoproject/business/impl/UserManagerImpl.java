@@ -26,7 +26,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserManagerImpl implements UserManager {
     private final UserRepository userRepository;
-    private final UserConverter userConverter;
 
     private final PasswordEncoder passwordEncoder;
     private final AccessTokenEncoder accessTokenEncoder;
