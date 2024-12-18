@@ -62,6 +62,9 @@ class SpecificationTypeManagerImplTest {
         final GetAllSpecificationTypeResponse result = specificationTypeManagerImplUnderTest.getAllSpecificationType();
 
         // Verify the results
+        assertThat(result.getSpecificationTypes()).isNotNull();
+        assertThat(result.getSpecificationTypes()).hasSize(1);
+        assertThat(result.getSpecificationTypes().get(0).getSpecificationTypeName()).isEqualTo("specificationTypeName");
     }
 
     @Test
@@ -73,6 +76,7 @@ class SpecificationTypeManagerImplTest {
         final GetAllSpecificationTypeResponse result = specificationTypeManagerImplUnderTest.getAllSpecificationType();
 
         // Verify the results
+        assertThat(result.getSpecificationTypes()).isEmpty();
     }
 
     @Test
@@ -97,6 +101,8 @@ class SpecificationTypeManagerImplTest {
                 request);
 
         // Verify the results
+        assertThat(result).isNotNull();
+        assertThat(result.getSpecificationTypeId()).isEqualTo(0L);
     }
 
     @Test
