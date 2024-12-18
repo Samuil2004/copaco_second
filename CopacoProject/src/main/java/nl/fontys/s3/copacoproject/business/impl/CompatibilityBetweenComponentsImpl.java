@@ -1378,7 +1378,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
     }
 
-    private FilterComponentsResult fetchComponentsWithoutFiltering(String typeOfConfiguration,GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request,Pageable pageable,Pageable checkNextPageSinceComponent)
+    private FilterComponentsResult fetchComponentsWithoutFiltering(String typeOfConfiguration,ConfiguratorRequest request,Pageable pageable,Pageable checkNextPageSinceComponent)
     {
         boolean thereIsNextPage = false;
         List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
