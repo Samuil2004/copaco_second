@@ -93,6 +93,7 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
 
     @Override
     public List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request) {
+        //List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = new ArrayList<>();
         List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration());
         if(allDistinctComponentTypesFromConfigurationType.isEmpty()) {
             throw new ObjectNotFound("DISTINCT_COMPONENT_TYPE_NOT_FOUND");
