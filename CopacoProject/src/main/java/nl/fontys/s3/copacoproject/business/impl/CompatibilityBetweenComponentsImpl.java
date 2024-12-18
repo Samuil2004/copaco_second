@@ -1631,9 +1631,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
     private Map<Long,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
     {
-        //Component voor - 1070
-        //Bedoel voor - 947
-        //Soort - 954
+        //Component voor - 1070 - Hardware
+        //Bedoel voor - 947 - Hardware
+        //Soort - 954 - Hardware
+        //Bike type - 1792 - Hardware
         Map<Long, List<String>> serverConfig = new HashMap<>();
         if(componentTypeId == 1)
         {
@@ -1775,6 +1776,32 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     break;
                 case "PC":
                     serverConfig.put(1070L, List.of("PC"));
+                    break;
+            }
+            return serverConfig;
+        }
+        if(componentTypeId == 12)
+        {
+            switch(configurationType)
+            {
+                case "CITY BIKE":
+                    serverConfig.put(1792L, List.of("CITY BIKE"));
+                    break;
+                case "DOWNHILL":
+                    serverConfig.put(1792L, List.of("DOWNHILL"));
+                    break;
+            }
+            return serverConfig;
+        }
+        if(componentTypeId == 13)
+        {
+            switch(configurationType)
+            {
+                case "CITY BIKE":
+                    serverConfig.put(1792L, List.of("CITY BIKE"));
+                    break;
+                case "DOWNHILL":
+                    serverConfig.put(1792L, List.of("DOWNHILL"));
                     break;
             }
             return serverConfig;

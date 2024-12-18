@@ -28,18 +28,41 @@ public class TemplateController {
     private final TemplateManager templateManager;
     private final ComponentTypeManager componentTypeManager;
 
-    @PostMapping(value = "",consumes = "multipart/form-data")
-    @RolesAllowed({"ADMIN"})
-    public ResponseEntity<Void> createTemplate(
-            @RequestPart(value = "file", required = false) MultipartFile file,
-            @RequestPart("request") @Valid CreateTemplateRequest request) {
-        try {
-            templateManager.createTemplate(request, file);
-            return ResponseEntity.ok().build();
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+//    @PostMapping(value = "",consumes = "multipart/form-data")
+//    @RolesAllowed({"ADMIN"})
+//    public ResponseEntity<Void> createTemplate(
+//            @RequestPart(value = "file", required = false) MultipartFile file,
+//            @RequestPart("request") @Valid CreateTemplateRequest request) {
+//        try {
+//            templateManager.createTemplate(request, file);
+//            return ResponseEntity.ok().build();
+//        } catch (IOException e) {
+//            return ResponseEntity.internalServerError().build();
+//        }
+//    }
+@PostMapping(value = "")
+@RolesAllowed({"ADMIN"})
+public ResponseEntity<Void> createTemplate(
+        @RequestParam(value = "file", required = false) MultipartFile file,
+        @RequestParam(value = "categoryId") int categoryId,
+        @RequestParam(value = "configurationType") String configurationType,
+        @RequestParam(value = "name") String name,
+        @RequestParam(value = "componentTypes") List<Long> componentTypes){
+
+        //@RequestPart("request") @Valid CreateTemplateRequest request) {
+    try {
+        CreateTemplateRequest request1 = CreateTemplateRequest.builder()
+            .categoryId(categoryId)
+                    .configurationType(configurationType)
+                            .name(name)
+                                    .componentTypes(componentTypes)
+                                            .build();
+        templateManager.createTemplate(request1, file);
+        return ResponseEntity.ok().build();
+    } catch (IOException e) {
+        return ResponseEntity.internalServerError().build();
     }
+}
 
     @GetMapping("/{id}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
