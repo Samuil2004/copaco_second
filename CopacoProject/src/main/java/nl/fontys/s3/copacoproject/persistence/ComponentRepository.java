@@ -247,7 +247,7 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN (947, 954, 1070)
+    AND cs.specificationType.id IN (947, 954, 1070,1792)
     AND cs.value = :configurationType
     """)
     Page<ComponentEntity> findComponentEntityByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, Pageable pageable);
@@ -257,7 +257,7 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN (947, 954, 1070)
+    AND cs.specificationType.id IN (947, 954, 1070,1792)
     AND cs.value = :configurationType
     """)
     Integer countByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType);
