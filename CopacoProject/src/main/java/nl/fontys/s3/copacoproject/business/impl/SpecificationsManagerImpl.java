@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -36,7 +37,13 @@ public class SpecificationsManagerImpl implements SpecificationsManager {
 
     @Override
     public GetConfTypesInCategResponse getDistinctConfigurationTypesInCategory(GetConfigTypesInCategRequest request) {
-        List<String> distinctConfigurationTypesFromCategory = componentSpecificationListRepository.getDistinctConfigurationTypesInCategory(request.getCategoryId());
+        List<String> distinctConfigurationTypesFromCategory = new ArrayList<>();
+        if(request.getCategoryId() == 1) {
+            distinctConfigurationTypesFromCategory = componentSpecificationListRepository.getDistinctConfigurationTypesInCategory(request.getCategoryId());
+        }
+        else if(request.getCategoryId() == 2) {
+            distinctConfigurationTypesFromCategory = componentSpecificationListRepository.getDistinctConfigurationTypesInCategory2(request.getCategoryId());
+        }
         if(distinctConfigurationTypesFromCategory.isEmpty())
         {
             throw new ObjectNotFound("No configuration types were found within the selected category");

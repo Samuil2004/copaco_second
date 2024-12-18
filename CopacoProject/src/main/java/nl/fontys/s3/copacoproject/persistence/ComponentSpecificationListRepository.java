@@ -48,6 +48,14 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             "WHERE ct.category.id = :categoryId AND cs.specificationType.id = 1070")
     List<String> getDistinctConfigurationTypesInCategory(@Param("categoryId") Long categoryId);
 
+    @Query("SELECT DISTINCT cs.value " +
+            "FROM Component_SpecificationList cs " +
+            "JOIN cs.componentId c " +
+            "JOIN c.componentType ct " +
+            "WHERE ct.category.id = :categoryId AND cs.specificationType.id = 1792")
+    List<String> getDistinctConfigurationTypesInCategory2(@Param("categoryId") Long categoryId);
+
+
 
     @Query("SELECT cs.value " +
             "FROM Component_SpecificationList cs " +
