@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nl.fontys.s3.copacoproject.domain.Component;
+import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class CustomProductResponse {
     private long userId;
     private long customProductId;
     private long templateId;
-    private List<Component> componentsIncluded;
+    private List<ComponentInConfigurationResponse> componentsIncluded;
     private long statusId;
 
 }

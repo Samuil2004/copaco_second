@@ -6,7 +6,6 @@ import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfResponse;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
@@ -20,9 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,18 +92,23 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
     }
 
     @Override
-    public GetDistCompTypesByTyOfConfResponse findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request) {
+    public List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request) {
         List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration());
         if(allDistinctComponentTypesFromConfigurationType.isEmpty()) {
             throw new ObjectNotFound("DISTINCT_COMPONENT_TYPE_NOT_FOUND");
         }
-        Map<Long, String> distinctComponentTypes = allDistinctComponentTypesFromConfigurationType.stream()
-                .collect(Collectors.toMap(
-                        ComponentTypeEntity::getId,
-                        ComponentTypeEntity::getComponentTypeName
-                        ));
+        List<ComponentTypeResponse> componentTypes = new ArrayList<>();
+        for(ComponentTypeEntity componentTypeEntity : allDistinctComponentTypesFromConfigurationType) {
+            componentTypes.add(ComponentTypeResponse.builder()
+                    .id(componentTypeEntity.getId())
+                    .componentTypeName(componentTypeEntity.getComponentTypeName())
+                    .configurationType(componentTypeEntity.getConfigurationType())
+                    .componentTypeImageUrl(componentTypeEntity.getComponentTypeImageUrl())
+                    .categoryName(componentTypeEntity.getCategory().getCategoryName())
+                    .build());
+        }
 
-        return GetDistCompTypesByTyOfConfResponse.builder().distinctComponentTypesFromTypeOfConfiguration(distinctComponentTypes).build();
+        return componentTypes;
     }
 
     @Override

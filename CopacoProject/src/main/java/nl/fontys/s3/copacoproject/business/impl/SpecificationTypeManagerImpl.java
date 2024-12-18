@@ -7,6 +7,7 @@ import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetSpecificationTypeByComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -75,7 +76,7 @@ public class SpecificationTypeManagerImpl implements SpecificationTypeManager {
     }
 
     @Override
-    public List<SpecificationType> getSpecificationTypesByComponentTypeId(Long componentTypeId, int currentPage, int itemsPerPage) {
+    public GetSpecificationTypeByComponentTypeResponse getSpecificationTypesByComponentTypeId(Long componentTypeId, int currentPage, int itemsPerPage) {
         if(!componentTypeRepository.existsById(componentTypeId)) {
             throw new IllegalArgumentException("Component not found");
         }
@@ -88,7 +89,11 @@ public class SpecificationTypeManagerImpl implements SpecificationTypeManager {
         for(SpecificationTypeEntity specificationTypeEntity : specificationTypeEntities) {
             specifications.add(SpecificationTypeConverter.convertFromEntityToBase(specificationTypeEntity));
         }
-        return specifications;
+        int totalNumberOfItems = specificationTypeRepository.countSpecificationTypesByComponentTypeId(componentTypeId);
+        return GetSpecificationTypeByComponentTypeResponse.builder()
+                .specificationTypes(specifications)
+                .totalNumberOfItems(totalNumberOfItems)
+                .build();
     }
 
     @Override

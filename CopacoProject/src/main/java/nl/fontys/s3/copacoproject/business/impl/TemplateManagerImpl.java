@@ -4,19 +4,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import nl.fontys.s3.copacoproject.business.BrandManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
-import nl.fontys.s3.copacoproject.business.converters.BrandConverter;
 import nl.fontys.s3.copacoproject.business.converters.CategoryConverter;
 import nl.fontys.s3.copacoproject.business.converters.TemplateConverter;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
 import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
-import nl.fontys.s3.copacoproject.domain.Brand;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.*;
@@ -26,8 +23,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,26 +38,20 @@ public class TemplateManagerImpl implements TemplateManager {
     private final ComponentTypeList_TemplateRepository componentTypeListRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final CategoryManager categoryManager;
-    private final BrandManager brandManager;
     private final CategoryRepository categoryRepository;
-    private final BrandRepository brandRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     @Transactional
-    public void createTemplate(CreateTemplateRequest request) {
+    public void createTemplate(CreateTemplateRequest request, MultipartFile file) throws IOException {
         // Retrieve related entities
         Category category = categoryManager.findCategoryById(request.getCategoryId());
-        Brand brand = brandManager.getBrandById(request.getBrandId());
-        if(!brandRepository.existsById(request.getBrandId())) {
-            throw new InvalidInputException("This brand does not exist");
-        }
-        if(category == null || brand == null || request.getComponentTypes().isEmpty()) {
+        if(category == null || request.getComponentTypes().isEmpty()) {
             throw new InvalidInputException("Inputs not valid");
         }
-        if(templateRepository.existsTemplateEntityByNameAndBrandAndCategory(request.getName(), request.getBrandId(), request.getCategoryId())) {
+        if(templateRepository.existsTemplateEntityByNameAndCategory(request.getName(), request.getCategoryId())) {
             throw new InvalidInputException("Template already exists");
         }
         for(Long itemId : request.getComponentTypes()){
@@ -65,13 +59,15 @@ public class TemplateManagerImpl implements TemplateManager {
                 throw new InvalidInputException("Component type not found");
             }
         }
+        //if image is uploaded set it
+        byte[] imageInByte= convertImageFromFileToByte(file);
+
         // Create and save template
         Template template = Template.builder()
-                .brand(brand)
                 .name(request.getName())
                 .category(category)
                 .configurationType(request.getConfigurationType())
-                .imageUrl(request.getImageUrl())
+                .image(imageInByte)
                 .build();
 
         TemplateEntity templateEntity = TemplateConverter.convertFromBaseToEntity(template);
@@ -79,6 +75,24 @@ public class TemplateManagerImpl implements TemplateManager {
 
         //save list of componentTypes in template
         saveComponentTypeListTemplate(request.getComponentTypes(), templateEntity);
+    }
+
+    private byte[] convertImageFromFileToByte (MultipartFile file) throws IOException {
+        byte[] imageInByte;
+        if(file != null){
+            String fileType = file.getContentType();
+            if (!MediaType.IMAGE_JPEG_VALUE.equals(fileType) && !MediaType.IMAGE_PNG_VALUE.equals(fileType)) {
+                throw new IllegalArgumentException("Only PNG and JPG files are allowed.");
+            }
+            else{
+                imageInByte = file.getBytes();
+            }
+        }
+        else{
+            imageInByte = null;
+        }
+
+        return imageInByte;
     }
 
     // Transactional method to save ComponentTypeList_Template
@@ -202,35 +216,35 @@ public class TemplateManagerImpl implements TemplateManager {
 
     @Override
     @Transactional
-    public void updateTemplate(long templateId, UpdateTemplateRequest request) {
+    public void updateTemplate(long templateId, UpdateTemplateRequest request, MultipartFile file) throws IOException {
         TemplateEntity templateEntity = templateRepository.findTemplateEntityById(templateId);
         if(templateEntity == null) {
             throw new InvalidInputException("Template not found");
         }
-        if(!categoryRepository.existsById(request.getCategoryId()) || !brandRepository.existsById(request.getBrandId())) {
+        if(!categoryRepository.existsById(request.getCategoryId())) {
             throw new InvalidInputException("Inputs not valid");
         }
         Category category = categoryManager.findCategoryById(request.getCategoryId());
-        Brand brand = brandManager.getBrandById(request.getBrandId());
 
         for(Long itemId : request.getComponentTypes()){
             if(!componentTypeRepository.existsById(itemId)){
                 throw new InvalidInputException("Component type not found");
             }
         }
-        if(templateRepository.existsTemplateEntityForUpdate(templateId ,request.getName(), request.getBrandId(), request.getCategoryId())) {
+        if(templateRepository.existsTemplateEntityForUpdate(templateId ,request.getName(), request.getCategoryId())) {
             throw new ObjectExistsAlreadyException("Template already exists");
         }
 
-        updateTemplateData(templateEntity, request.getName(), BrandConverter.convertFromBaseToEntity(brand), CategoryConverter.convertFromBaseToEntity(category), request.getImageUrl());
+        byte[] imageInBytes = convertImageFromFileToByte(file);
+
+        updateTemplateData(templateEntity, request.getName(), CategoryConverter.convertFromBaseToEntity(category), imageInBytes);
         updateTemplateComponents(templateEntity, request.getComponentTypes());
     }
 
-    private void updateTemplateData(TemplateEntity templateEntity, String newName, BrandEntity brand, CategoryEntity category, String newImage) {
+    private void updateTemplateData(TemplateEntity templateEntity, String newName, CategoryEntity category, byte[] newImage) {
         templateEntity.setName(newName);
-        templateEntity.setBrand(brand);
         templateEntity.setCategory(category);
-        templateEntity.setImageURL(newImage);
+        templateEntity.setImage(newImage);
         templateRepository.save(templateEntity);
     }
 

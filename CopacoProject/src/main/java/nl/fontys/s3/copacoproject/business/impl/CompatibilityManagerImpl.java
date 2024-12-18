@@ -12,6 +12,7 @@ import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRe
 import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
+import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
 import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -283,6 +284,37 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
     public List<RuleResponse> getRulesByCategoryAndConfigurationType(String compatibilityType, int currentPage, int itemsPerPage) {
         Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
         return compatibilityRepository.findRulesByConfigurationType(compatibilityType, pageable).getContent();
+    }
+
+    @Override
+    public RuleResponse getRuleById(Long ruleId) {
+        Optional<RuleResponse> foundRuleById = compatibilityRepository.findRuleById(ruleId);
+        if(foundRuleById.isPresent()) {
+            return foundRuleById.get();
+        }
+        throw new ObjectNotFound("Rule has not been found");
+    }
+
+    @Override
+    public void deleteRuleById(Long ruleId) {
+        Optional<CompatibilityEntity> foundCompatibilityByRuleId = compatibilityRepository.findByRuleId(ruleId);
+        if(foundCompatibilityByRuleId.isPresent()) {
+            compatibilityRepository.deleteById(foundCompatibilityByRuleId.get().getId());
+            ruleEntityRepository.deleteById(ruleId);
+        }
+    }
+
+    @Override
+    public RuleResponse updateRuleById(UpdateRuleRequest request) {
+        Optional<RuleEntity> foundRuleById = ruleEntityRepository.findById(request.getRuleId());
+        if(foundRuleById.isPresent()) {
+            foundRuleById.get().setValueOfFirstSpecification(request.getValueForTheFirstSpecification());
+            String commaSeparated = String.join(",", request.getValuesForTheSecondSpecification());
+            foundRuleById.get().setValueOfSecondSpecification(commaSeparated);
+            ruleEntityRepository.save(foundRuleById.get());
+            return getRuleById(foundRuleById.get().getId());
+        }
+        throw new ObjectNotFound("Rule has not been found");
     }
 
 }

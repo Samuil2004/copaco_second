@@ -19,9 +19,5 @@ public class UpdateTemplateRequest {
     @NotBlank
     private String name;
     @NotNull
-    private long brandId;
-    @NotBlank
-    private String imageUrl;
-    @NotNull
     private List<Long> componentTypes;
 }

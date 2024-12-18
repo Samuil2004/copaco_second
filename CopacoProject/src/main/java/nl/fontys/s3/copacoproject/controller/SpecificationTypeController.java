@@ -37,7 +37,7 @@ public class SpecificationTypeController {
 
     @GetMapping("componentTypeId/{componentTypeId}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<List<SpecificationType>> getSpecificationTypesByComponentTypeId(@PathVariable Long componentTypeId,
+    public ResponseEntity<GetSpecificationTypeByComponentTypeResponse> getSpecificationTypesByComponentTypeId(@PathVariable Long componentTypeId,
                                                                                           @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
                                                                                           @RequestParam(value = "currentPage", defaultValue = "1") @Min(value = 1, message = "Page numbering starts from 1") int currentPage){
         return ResponseEntity.status(HttpStatus.OK).body(specificationTypeManager.getSpecificationTypesByComponentTypeId(componentTypeId, currentPage, itemsPerPage));

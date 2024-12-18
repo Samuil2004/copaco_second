@@ -1,181 +1,268 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
+import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetSpecificationTypeByComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
+import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.SpecificationTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class SpecificationTypeManagerImplTest {
 
     @Mock
-    private SpecificationTypeRepository specificationTypeRepository;
-
+    private SpecificationTypeRepository mockSpecificationTypeRepository;
     @Mock
-    private ComponentRepository componentRepository;
+    private ComponentRepository mockComponentRepository;
+    @Mock
+    private ComponentTypeRepository mockComponentTypeRepository;
 
-    @InjectMocks
-    private SpecificationTypeManagerImpl specificationTypeManager;
+    private SpecificationTypeManagerImpl specificationTypeManagerImplUnderTest;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        specificationTypeManagerImplUnderTest = new SpecificationTypeManagerImpl(mockSpecificationTypeRepository,
+                mockComponentRepository, mockComponentTypeRepository);
     }
 
     @Test
-    void getAllSpecificationType_ShouldReturnAllSpecificationTypes() {
-        // Arrange
-        SpecificationTypeEntity entity1 = SpecificationTypeEntity.builder()
-                .id(1L)
-                .specificationTypeName("Type1")
-                .build();
-        SpecificationTypeEntity entity2 = SpecificationTypeEntity.builder()
-                .id(2L)
-                .specificationTypeName("Type2")
-                .build();
+    void testGetAllSpecificationType() {
+        // Setup
+        // Configure SpecificationTypeRepository.findAll(...).
+        final List<SpecificationTypeEntity> specificationTypeEntities = List.of(SpecificationTypeEntity.builder()
+                .id(0L)
+                .specificationTypeName("specificationTypeName")
+                .build());
+        when(mockSpecificationTypeRepository.findAll()).thenReturn(specificationTypeEntities);
 
-        when(specificationTypeRepository.findAll()).thenReturn(List.of(entity1, entity2));
+        // Run the test
+        final GetAllSpecificationTypeResponse result = specificationTypeManagerImplUnderTest.getAllSpecificationType();
 
-        // Act
-        GetAllSpecificationTypeResponse response = specificationTypeManager.getAllSpecificationType();
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(2, response.getSpecificationTypes().size());
-        assertEquals("Type1", response.getSpecificationTypes().get(0).getSpecificationTypeName());
-        assertEquals("Type2", response.getSpecificationTypes().get(1).getSpecificationTypeName());
-        verify(specificationTypeRepository, times(1)).findAll();
-    }
-
-
-    @Test
-    void createSpecificationType_ShouldReturnResponse_WhenRequestIsValid() {
-        // Arrange
-        CreateSpecificationTypeRequest request = CreateSpecificationTypeRequest.builder()
-                .specificationTypeName("Type1")
-                .build();
-
-        SpecificationTypeEntity entity = SpecificationTypeEntity.builder()
-                .id(1L)
-                .specificationTypeName("Type1")
-                .build();
-
-        when(specificationTypeRepository.save(any(SpecificationTypeEntity.class))).thenReturn(entity);
-
-        // Act
-        CreateSpecificationTypeResponse response = specificationTypeManager.createSpecificationType(request);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(1L, response.getSpecificationTypeId());
-        verify(specificationTypeRepository, times(1)).save(any(SpecificationTypeEntity.class));
+        // Verify the results
+        assertThat(result.getSpecificationTypes()).isNotNull();
+        assertThat(result.getSpecificationTypes()).hasSize(1);
+        assertThat(result.getSpecificationTypes().get(0).getSpecificationTypeName()).isEqualTo("specificationTypeName");
     }
 
     @Test
-    void createSpecificationType_ShouldThrowException_WhenNameIsNull() {
-        // Arrange
-        CreateSpecificationTypeRequest request = CreateSpecificationTypeRequest.builder()
+    void testGetAllSpecificationType_SpecificationTypeRepositoryReturnsNoItems() {
+        // Setup
+        when(mockSpecificationTypeRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Run the test
+        final GetAllSpecificationTypeResponse result = specificationTypeManagerImplUnderTest.getAllSpecificationType();
+
+        // Verify the results
+        assertThat(result.getSpecificationTypes()).isEmpty();
+    }
+
+    @Test
+    void testCreateSpecificationType() {
+        // Setup
+        final CreateSpecificationTypeRequest request = CreateSpecificationTypeRequest.builder()
+                .specificationTypeName("specificationTypeName")
+                .build();
+
+        // Configure SpecificationTypeRepository.save(...).
+        final SpecificationTypeEntity specificationTypeEntity = SpecificationTypeEntity.builder()
+                .id(0L)
+                .specificationTypeName("specificationTypeName")
+                .build();
+        when(mockSpecificationTypeRepository.save(SpecificationTypeEntity.builder()
+                .id(0L)
+                .specificationTypeName("specificationTypeName")
+                .build())).thenReturn(specificationTypeEntity);
+
+        // Run the test
+        final CreateSpecificationTypeResponse result = specificationTypeManagerImplUnderTest.createSpecificationType(
+                request);
+
+        // Verify the results
+        assertThat(result).isNotNull();
+        assertThat(result.getSpecificationTypeId()).isEqualTo(0L);
+    }
+
+    @Test
+    void testCreateSpecificationType_InvalidSpecificationTypeName() {
+        //Arrange
+        final CreateSpecificationTypeRequest request = CreateSpecificationTypeRequest.builder()
                 .specificationTypeName(null)
                 .build();
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> specificationTypeManager.createSpecificationType(request));
-        verify(specificationTypeRepository, never()).save(any(SpecificationTypeEntity.class));
+        // Run the test
+        assertThatThrownBy(() -> specificationTypeManagerImplUnderTest.createSpecificationType(request)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void getSpecificationType_ShouldReturnSpecificationType_WhenIdIsValid() {
-        // Arrange
-        long id = 1L;
-        SpecificationTypeEntity entity = SpecificationTypeEntity.builder()
-                .id(id)
-                .specificationTypeName("Type1")
+    void testGetSpecificationType() {
+        // Setup
+        final SpecificationType expectedResult = SpecificationType.builder()
+                .specificationTypeId(0L)
+                .specificationTypeName("specificationTypeName")
                 .build();
 
-        when(specificationTypeRepository.findById(id)).thenReturn(Optional.of(entity));
+        // Configure SpecificationTypeRepository.findById(...).
+        final Optional<SpecificationTypeEntity> specificationTypeEntity = Optional.of(SpecificationTypeEntity.builder()
+                .id(0L)
+                .specificationTypeName("specificationTypeName")
+                .build());
+        when(mockSpecificationTypeRepository.findById(0L)).thenReturn(specificationTypeEntity);
 
-        // Act
-        SpecificationType result = specificationTypeManager.getSpecificationType(id);
+        // Run the test
+        final SpecificationType result = specificationTypeManagerImplUnderTest.getSpecificationType(0L);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("Type1", result.getSpecificationTypeName());
-        verify(specificationTypeRepository, times(1)).findById(id);
+        // Verify the results
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
-    void getSpecificationType_ShouldThrowException_WhenIdIsInvalid() {
-        // Arrange
-        long id = 1L;
-        when(specificationTypeRepository.findById(id)).thenReturn(Optional.empty());
+    void testGetSpecificationType_SpecificationTypeRepositoryReturnsAbsent() {
+        // Setup
+        when(mockSpecificationTypeRepository.findById(0L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> specificationTypeManager.getSpecificationType(id));
-        verify(specificationTypeRepository, times(1)).findById(id);
+        // Run the test
+        assertThatThrownBy(() -> specificationTypeManagerImplUnderTest.getSpecificationType(0L))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void getSpecificationTypesByComponentId_ShouldReturnSpecificationTypes_WhenComponentIdIsValid() {
-        // Arrange
-        long componentId = 1L;
-        SpecificationTypeEntity entity1 = SpecificationTypeEntity.builder()
-                .id(1L)
-                .specificationTypeName("Type1")
-                .build();
-        SpecificationTypeEntity entity2 = SpecificationTypeEntity.builder()
-                .id(2L)
-                .specificationTypeName("Type2")
-                .build();
+    void testGetSpecificationTypesByComponentId() {
+        // Setup
+        final List<SpecificationType> expectedResult = List.of(SpecificationType.builder()
+                .specificationTypeId(0L)
+                .specificationTypeName("specificationTypeName")
+                .build());
+        when(mockComponentRepository.existsById(0L)).thenReturn(true);
 
-        when(componentRepository.existsById(componentId)).thenReturn(true);
-        when(specificationTypeRepository.findSpecificationTypeEntitiesByComponentId(componentId)).thenReturn(List.of(entity1, entity2));
+        // Configure SpecificationTypeRepository.findSpecificationTypeEntitiesByComponentId(...).
+        final List<SpecificationTypeEntity> specificationTypeEntities = List.of(SpecificationTypeEntity.builder()
+                .id(0L)
+                .specificationTypeName("specificationTypeName")
+                .build());
+        when(mockSpecificationTypeRepository.findSpecificationTypeEntitiesByComponentId(0L))
+                .thenReturn(specificationTypeEntities);
 
-        // Act
-        List<SpecificationType> result = specificationTypeManager.getSpecificationTypesByComponentId(componentId);
+        // Run the test
+        final List<SpecificationType> result = specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentId(
+                0L);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Type1", result.get(0).getSpecificationTypeName());
-        assertEquals("Type2", result.get(1).getSpecificationTypeName());
-        verify(componentRepository, times(1)).existsById(componentId);
-        verify(specificationTypeRepository, times(1)).findSpecificationTypeEntitiesByComponentId(componentId);
+        // Verify the results
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
-    void getSpecificationTypesByComponentId_ShouldThrowException_WhenComponentIdIsInvalid() {
-        // Arrange
-        long componentId = 1L;
-        when(componentRepository.existsById(componentId)).thenReturn(false);
+    void testGetSpecificationTypesByComponentId_ComponentRepositoryReturnsFalse() {
+        // Setup
+        when(mockComponentRepository.existsById(0L)).thenReturn(false);
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> specificationTypeManager.getSpecificationTypesByComponentId(componentId));
-        verify(componentRepository, times(1)).existsById(componentId);
-        verify(specificationTypeRepository, never()).findSpecificationTypeEntitiesByComponentId(anyLong());
+        // Run the test
+        assertThatThrownBy(
+                () -> specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentId(0L))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void deleteSpecificationType_ShouldDeleteSuccessfully_WhenIdIsValid() {
-        // Arrange
-        long id = 1L;
+    void testGetSpecificationTypesByComponentId_SpecificationTypeRepositoryReturnsNoItems() {
+        // Setup
+        when(mockComponentRepository.existsById(0L)).thenReturn(true);
+        when(mockSpecificationTypeRepository.findSpecificationTypeEntitiesByComponentId(0L))
+                .thenReturn(Collections.emptyList());
 
-        // Act
-        specificationTypeManager.deleteSpecificationType(id);
+        // Run the test
+        final List<SpecificationType> result = specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentId(
+                0L);
 
-        // Assert
-        verify(specificationTypeRepository, times(1)).deleteById(id);
+        // Verify the results
+        assertThat(result).isEqualTo(Collections.emptyList());
+    }
+
+    @Test
+    void testGetSpecificationTypesByComponentTypeId() {
+        // Setup
+        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+
+        // Configure SpecificationTypeRepository.findSpecificationTypeEntitiesByComponentTypeId(...).
+        final Page<SpecificationTypeEntity> specificationTypeEntities = new PageImpl<>(
+                List.of(SpecificationTypeEntity.builder()
+                        .id(0L)
+                        .specificationTypeName("specificationTypeName")
+                        .build()));
+        when(mockSpecificationTypeRepository.findSpecificationTypeEntitiesByComponentTypeId(eq(0L),
+                any(Pageable.class))).thenReturn(specificationTypeEntities);
+
+        when(mockSpecificationTypeRepository.countSpecificationTypesByComponentTypeId(0L)).thenReturn(0);
+
+        // Run the test
+        final GetSpecificationTypeByComponentTypeResponse result = specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentTypeId(
+                0L, 1, 10);
+
+        // Verify the results
+    }
+
+    @Test
+    void testGetSpecificationTypesByComponentTypeId_ComponentTypeRepositoryReturnsFalse() {
+        // Setup
+        when(mockComponentTypeRepository.existsById(0L)).thenReturn(false);
+
+        // Run the test
+        assertThatThrownBy(() -> specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentTypeId(0L, 0,
+                0)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void testGetSpecificationTypesByComponentTypeId_TooManyItemsRequested() {
+        // Setup
+        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+
+        // Run the test
+        assertThatThrownBy(() -> specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentTypeId(0L, 1,
+                30)).isInstanceOf(InvalidInputException.class);
+    }
+
+    @Test
+    void testGetSpecificationTypesByComponentTypeId_SpecificationTypeRepositoryFindSpecificationTypeEntitiesByComponentTypeIdReturnsNoItems() {
+        // Setup
+        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+        when(mockSpecificationTypeRepository.findSpecificationTypeEntitiesByComponentTypeId(eq(0L),
+                any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+        when(mockSpecificationTypeRepository.countSpecificationTypesByComponentTypeId(0L)).thenReturn(0);
+
+        // Run the test
+        final GetSpecificationTypeByComponentTypeResponse result = specificationTypeManagerImplUnderTest.getSpecificationTypesByComponentTypeId(
+                0L, 1, 10);
+
+        // Verify the results
+    }
+
+    @Test
+    void testDeleteSpecificationType() {
+        // Setup
+        // Run the test
+        specificationTypeManagerImplUnderTest.deleteSpecificationType(0L);
+
+        // Verify the results
+        verify(mockSpecificationTypeRepository).deleteById(0L);
     }
 }
