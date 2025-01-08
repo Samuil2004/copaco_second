@@ -24,6 +24,7 @@ test:
     - ./gradlew test
 
 
+
 #sonarqube:
 #  stage: sonarqube
 #  tags:
