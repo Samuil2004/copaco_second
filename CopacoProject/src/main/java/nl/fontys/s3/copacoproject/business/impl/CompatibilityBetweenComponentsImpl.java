@@ -1273,6 +1273,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return notNullIds;
     }
 
+
     @Override
     public List<GetAutomaticCompatibilityResponse> automaticCompatibility(ConfiguratorRequest request)
     {
