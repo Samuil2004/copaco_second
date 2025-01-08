@@ -23,6 +23,7 @@ test:
     - cd CopacoProject
     - ./gradlew test
 
+
 #sonarqube:
 #  stage: sonarqube
 #  tags:
