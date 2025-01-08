@@ -1274,6 +1274,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
 
+
     @Override
     public List<GetAutomaticCompatibilityResponse> automaticCompatibility(ConfiguratorRequest request)
     {
