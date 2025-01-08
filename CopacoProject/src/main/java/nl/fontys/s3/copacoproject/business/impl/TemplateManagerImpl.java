@@ -166,6 +166,7 @@ public class TemplateManagerImpl implements TemplateManager {
             if (!categoryRepository.existsById(categoryId)) {
                 throw new ObjectNotFound("Category not found");
             }
+
             categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
         }
 
