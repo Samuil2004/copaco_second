@@ -164,6 +164,7 @@ public class TemplateManagerImpl implements TemplateManager {
         CategoryEntity categoryEntity = null;
         if (categoryId != null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
+
                 throw new ObjectNotFound("Category not found");
             }
 
