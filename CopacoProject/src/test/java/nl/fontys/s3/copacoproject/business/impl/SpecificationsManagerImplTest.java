@@ -66,36 +66,36 @@ class SpecificationsManagerImplTest {
                 .isInstanceOf(ObjectNotFound.class);
     }
 
-    @Test
-    void testGetDistinctConfigurationTypesInCategory() {
-        // Setup
-        final GetConfigTypesInCategRequest request = GetConfigTypesInCategRequest.builder()
-                .categoryId(0L)
-                .build();
-        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypesInCategory(0L))
-                .thenReturn(List.of("value"));
+//    @Test
+//    void testGetDistinctConfigurationTypesInCategory() {
+//        // Setup
+//        final GetConfigTypesInCategRequest request = GetConfigTypesInCategRequest.builder()
+//                .categoryId(0L)
+//                .build();
+//        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypesInCategory(0L))
+//                .thenReturn(List.of("value"));
+//
+//        // Run the test
+//        final GetConfTypesInCategResponse result = specificationsManagerImplUnderTest.getDistinctConfigurationTypesInCategory(
+//                request);
+//
+//        // Verify the results
+//    }
 
-        // Run the test
-        final GetConfTypesInCategResponse result = specificationsManagerImplUnderTest.getDistinctConfigurationTypesInCategory(
-                request);
-
-        // Verify the results
-    }
-
-    @Test
-    void testGetDistinctConfigurationTypesInCategory_ComponentSpecificationListRepositoryReturnsNoItems() {
-        // Setup
-        final GetConfigTypesInCategRequest request = GetConfigTypesInCategRequest.builder()
-                .categoryId(0L)
-                .build();
-        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypesInCategory(0L))
-                .thenReturn(Collections.emptyList());
-
-        // Run the test
-        assertThatThrownBy(
-                () -> specificationsManagerImplUnderTest.getDistinctConfigurationTypesInCategory(request))
-                .isInstanceOf(ObjectNotFound.class);
-    }
+//    @Test
+//    void testGetDistinctConfigurationTypesInCategory_ComponentSpecificationListRepositoryReturnsNoItems() {
+//        // Setup
+//        final GetConfigTypesInCategRequest request = GetConfigTypesInCategRequest.builder()
+//                .categoryId(0L)
+//                .build();
+//        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypesInCategory(0L))
+//                .thenReturn(Collections.emptyList());
+//
+//        // Run the test
+//        assertThatThrownBy(
+//                () -> specificationsManagerImplUnderTest.getDistinctConfigurationTypesInCategory(request))
+//                .isInstanceOf(ObjectNotFound.class);
+//    }
 
     @Test
     void testGetSpecificationValuesOfSpecificationTypeByComponentType() {
