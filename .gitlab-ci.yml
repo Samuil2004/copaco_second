@@ -2,18 +2,18 @@ variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 stages:
-  - build
+#  - build
 #  - test
   - sonarqube
 
-build:
-  stage: build
-  tags:
-    - shared
-  script:
-    - cd CopacoProject
-    - ./gradlew clean
-    - ./gradlew assemble
+#build:
+#  stage: build
+#  tags:
+#    - shared
+#  script:
+#    - cd CopacoProject
+#    - ./gradlew clean
+#    - ./gradlew assemble
 
 #test:
 #  stage: test
