@@ -2,6 +2,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Workstation":
                     serverConfig.put(1070L, List.of("Workstation"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -48,8 +51,25 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Workstation":
                     serverConfig.put(1070L, List.of("Workstation"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
+        }
+        else if(componentTypeId == 3)
+        {
+            switch(configurationType)
+            {
+                case "Server":
+                    return serverConfig;
+                case "PC":
+                    return serverConfig;
+                case "Workstation":
+                    return serverConfig;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            //return serverConfig;
         }
         else if(componentTypeId == 4)
         {
@@ -67,6 +87,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Laptop":
                     serverConfig.put(1070L, List.of("Notebook"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -83,6 +105,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Workstation":
                     serverConfig.put(947L, List.of("PC"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -93,6 +117,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "PC":
                     serverConfig.put(954L, List.of("PC"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -109,6 +135,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Laptop":
                     serverConfig.put(954L, List.of("Thermal paste"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -125,8 +153,22 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Laptop":
                     serverConfig.put(954L, List.of("Thermal paste"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
+        }
+        else if(componentTypeId == 9)
+        {
+            switch(configurationType)
+            {
+                case "Workstation":
+                    return serverConfig;
+                case "PC":
+                    return serverConfig;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
         }
         else if(componentTypeId == 10)
         {
@@ -144,6 +186,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "Laptop":
                     serverConfig.put(1070L, List.of("Notebook"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -160,6 +204,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "PC":
                     serverConfig.put(1070L, List.of("PC"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -173,6 +219,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "DOWNHILL":
                     serverConfig.put(1792L, List.of("DOWNHILL"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -186,11 +234,14 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                 case "DOWNHILL":
                     serverConfig.put(1792L, List.of("DOWNHILL"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+
             }
             return serverConfig;
         }
         else {
-            return null;
+            return serverConfig;
         }
     }
 

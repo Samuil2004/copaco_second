@@ -1278,9 +1278,12 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private void checkIfCongfigurationTypeChanged(String configurationTypeFromRequest,Long componentTypeId,Long componentId)
     {
         Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationTypeFromRequest,componentTypeId);
+        //This is for the unique cases like graphics card, where the graphics card do not have specification for their purpose, which means that they are compatible with
+        // all configuration types that are in the switch statements (PC,WORKSTATION,NOTEBOOK)but not (City Bike and Downhill)
         if(componentPurposeAndSpecificationId.isEmpty())
         {
-            throw new CompatibilityError("One of the selected components does not support this type of configuration");
+            return;
+            //throw new CompatibilityError("One of the selected components does not support this type of configuration");
         }
         Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
         //this query checks if the configuration type the current component is meant for is the same with the one provided in the
@@ -1345,7 +1348,12 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                         }
                         if (notNullIds.indexOf(componentId) == notNullIds.size() - 1) {
                             //If there are no compatibility rules, there are not foundComponents until now and it is the last provided component id, return first ten components from the searched component type
-                            if(foundComponentsThatSatisfyAllFilters.isEmpty())
+
+
+                            //If there are no rules to be considered and it is the last component from the list of provided components, then get without filtering,otherwise,if there are rules
+                            //and it is the last components (in this case for this last component, there aren't rules), then we should break the loop for the ids, and go to the custom query to consider the rules,
+                            //and fetch the searched components that satisfy the rules
+                            if(specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.isEmpty())
                             {
                                 FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
                                 return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
@@ -1365,8 +1373,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 }
                 //Add the configuration type and the corresponding specification id to the map as well as it is a specification that should be considered
             Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(typeOfConfiguration,request.getSearchedComponentTypeId());
-            Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
-            specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(firstEntry.getKey(), firstEntry.getValue());
+            if(!componentPurposeAndSpecificationId.isEmpty()) {
+                Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
+                specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(firstEntry.getKey(), firstEntry.getValue());
+            }
             //Build a dynamic query including all filters for searching for components within the searched component type that satisfy all rules
             Specification<ComponentEntity> spec = ComponentRepository.dynamicSpecification(
                     request.getSearchedComponentTypeId(), specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues);
@@ -1408,7 +1418,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
         Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(typeOfConfiguration,request.getSearchedComponentTypeId());
         //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
-        if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+        if (getTheFilteringForTheSearchedComponentType.isEmpty())
         {
             //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
             elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
@@ -1457,6 +1467,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         double totalPowerConsumption = 0;
         double gpuCpuConsumptionFor12thRail = 0;
         boolean thereIsNextPage;
+        //this checks if the power supply supports the selected configuration type
+        specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationType,5L);
+
         for (Long componentId : notNullIds) {
             Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
             //This method checks if the configuration type in the request is the same as the configuration type of the current component
@@ -1528,7 +1541,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
             //If there aren't any, it means that it is not compatible
             if(allSpecificationsTheProvidedComponentHasForTheSpecification.isEmpty()){
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+                throw new ObjectNotFound("One of the selected components does not respect any of the rules between it and the searched one;");
             }
             //Get a list of objects each containing a specification2_id and value_of_second_specification for the searched component type, by provided component type 1 and 2 and specificationId (relation between component type and specification) for the first component and the values (Those objects can be for both manual and automatic compatibility)
             //* Lets assume that for specification type 1, the first component has values (DDR4-SDRAM and DDR5-SDRAM)
