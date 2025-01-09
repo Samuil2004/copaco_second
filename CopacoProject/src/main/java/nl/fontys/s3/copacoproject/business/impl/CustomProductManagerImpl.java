@@ -124,6 +124,33 @@ public class CustomProductManagerImpl implements CustomProductManager {
         updateComponents(productEntity, currentComponents, request.getComponentsIncluded());
     }
 
+    @Override
+    public int getTotalNumberOfCustomProductsByStatus(Long categoryId, String status) {
+        return customProductRepository.countCustomProductEntitiesByStatusAndCategoryId(
+                categoryId,StatusConverter.convertFromBaseToEntity(Status.valueOf(status)));
+    }
+
+    @Override
+    public int getTotalNumberOfProductsByConfigurationTypeAndStatus(String configurationType, String status) {
+        return customProductRepository.countCustomProductEntitiesByConfigurationTypeAndStatus(
+                configurationType, StatusConverter.convertFromBaseToEntity(Status.valueOf(status)));
+    }
+
+    @Override
+    public double getTotalIncome() {
+        return customProductRepository.sumTotalIncome();
+    }
+
+    @Override
+    public double getIncomeByConfigurationType(String configurationType) {
+        return customProductRepository.sumIncomeByConfigurationType(configurationType);
+    }
+
+    @Override
+    public double getAverageOrderPrice() {
+        return customProductRepository.calculateAverageFinishedProductPrice();
+    }
+
     private void validateCreateRequest(CreateCustomProductRequest request){
 
         if(!userRepository.existsById(request.getUserId())) {

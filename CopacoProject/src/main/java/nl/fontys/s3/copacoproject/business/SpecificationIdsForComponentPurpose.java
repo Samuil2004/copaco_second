@@ -8,5 +8,4 @@ public interface SpecificationIdsForComponentPurpose {
     List<String> getConfigurationTypesForSpecificationValueAndComponentType(String specificationValue, Long componentTypeId);
     Long getTheSpecificationIdWhereTheDifferentConfigurationTypesCanBeFoundForCategory(Long categoryId);
     List<Long> getAllDistinctSpecificationIdsThatHoldConfigurationType();
-
 }

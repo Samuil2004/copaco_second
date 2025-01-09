@@ -10,4 +10,11 @@ public interface CustomProductManager {
     int getNumberOfCustomProductsOfUserByStatus(long userId, long authenticatedUser,int statusId);
     void deleteCustomProduct(long productId, long authenticatedUserId);
     void updateCustomProduct(long productId, UpdateCustomTemplateRequest request, long authenticatedUserId);
+    int getTotalNumberOfCustomProductsByStatus(Long categoryId, String Status);
+    int getTotalNumberOfProductsByConfigurationTypeAndStatus(String configurationType, String Status);
+
+    //income
+    double getTotalIncome();
+    double getIncomeByConfigurationType(String configurationType);
+    double getAverageOrderPrice();
 }
