@@ -8,7 +8,6 @@ import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetDistCompTyp
 import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
-import nl.fontys.s3.copacoproject.persistence.ComponentTypeList_TemplateRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.TemplateRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
@@ -37,8 +36,6 @@ class ComponentTypeManagerImplTest {
     @Mock
     private CategoryRepository mockCategoryRepository;
     @Mock
-    private ComponentTypeList_TemplateRepository mockComponentTypeList_TemplateRepository;
-    @Mock
     private TemplateRepository mockTemplateRepository;
     @Mock
     private SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
@@ -49,7 +46,7 @@ class ComponentTypeManagerImplTest {
     @BeforeEach
     void setUp(){
         componentTypeManagerImplUnderTest = new ComponentTypeManagerImpl(mockComponentTypeRepository,
-                mockCategoryRepository, mockComponentTypeList_TemplateRepository, mockTemplateRepository,specificationIdsForComponentPurpose);
+                mockCategoryRepository, mockTemplateRepository,specificationIdsForComponentPurpose);
     }
 
     @Test

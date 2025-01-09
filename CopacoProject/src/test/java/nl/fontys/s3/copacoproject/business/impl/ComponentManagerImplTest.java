@@ -48,7 +48,7 @@ class ComponentManagerImplTest {
     @BeforeEach
     void setUp() {
         componentManagerImplUnderTest = new ComponentManagerImpl(mockComponentRepository,
-                mockComponentSpecificationListRepository, mockSpecificationTypeRepository, mockCategoryRepository,
+                mockComponentSpecificationListRepository, mockCategoryRepository,
                 mockComponentTypeRepository,specificationIdsForComponentPurpose);
     }
 

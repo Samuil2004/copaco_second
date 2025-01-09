@@ -1,8 +1,6 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigurationTypesResponse;
 import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -42,43 +40,8 @@ class SpecificationsManagerImplTest {
     @BeforeEach
     void setUp() {
         specificationsManagerImplUnderTest = new SpecificationsManagerImpl(mockComponentSpecificationListRepository,
-                mockComponentTypeRepository, mockSpecificationTypeList_ComponentTypeRepository);
+                mockComponentTypeRepository, mockSpecificationTypeList_ComponentTypeRepository, specificationIdsForComponentPurpose);
     }
-
-    @Test
-    void testGetDistinctConfigurationTypes() {
-        // Setup
-        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypes()).thenReturn(List.of("value"));
-
-        // Run the test
-        final GetConfigurationTypesResponse result = specificationsManagerImplUnderTest.getDistinctConfigurationTypes();
-
-        // Verify the results
-        assertThat(result).isNotNull();
-                mockComponentTypeRepository, mockSpecificationTypeList_ComponentTypeRepository,specificationIdsForComponentPurpose);
-    }
-
-//    @Test
-//    void testGetDistinctConfigurationTypes() {
-//        // Setup
-//        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypes()).thenReturn(List.of("value"));
-//
-//        // Run the test
-//        final GetConfigurationTypesResponse result = specificationsManagerImplUnderTest.getDistinctConfigurationTypes();
-//
-//        // Verify the results
-//    }
-//
-//    @Test
-//    void testGetDistinctConfigurationTypes_ComponentSpecificationListRepositoryReturnsNoItems() {
-//        // Setup
-//        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypes())
-//                .thenReturn(Collections.emptyList());
-//
-//        // Run the test
-//        assertThatThrownBy(() -> specificationsManagerImplUnderTest.getDistinctConfigurationTypes())
-//                .isInstanceOf(ObjectNotFound.class);
-//    }
 
     @Test
     void testGetSpecificationValuesOfSpecificationTypeByComponentType() {

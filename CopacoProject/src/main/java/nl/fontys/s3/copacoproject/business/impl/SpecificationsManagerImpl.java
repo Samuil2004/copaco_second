@@ -7,7 +7,6 @@ import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.SpecificationsManager;
 import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigTypesInCategRequest;
 import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfTypesInCategResponse;
-import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigurationTypesResponse;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;
@@ -27,15 +26,6 @@ public class SpecificationsManagerImpl implements SpecificationsManager {
     private final SpecificationTypeList_ComponentTypeRepository specificationTypeList_ComponentTypeRepository;
     private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
 
-//    @Override
-//    public GetConfigurationTypesResponse getDistinctConfigurationTypes() {
-//        List<String> distinctConfigurationTypes = componentSpecificationListRepository.getDistinctConfigurationTypes();
-//        if(distinctConfigurationTypes.isEmpty())
-//        {
-//            throw new ObjectNotFound("No configuration types were found");
-//        }
-//        return GetConfigurationTypesResponse.builder().distinctConfigurationTypes(distinctConfigurationTypes).build();
-//    }
 
     @Override
     public GetConfTypesInCategResponse getDistinctConfigurationTypesInCategory(GetConfigTypesInCategRequest request) {
