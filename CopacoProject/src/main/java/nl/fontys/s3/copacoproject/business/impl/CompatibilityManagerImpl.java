@@ -2,9 +2,9 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.CompatibilityError;
+import nl.fontys.s3.copacoproject.business.exception.ObjectExistsAlreadyException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.CompatibilityTypeConverter;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
@@ -13,7 +13,7 @@ import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoReque
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
+import nl.fontys.s3.copacoproject.business.dto.user_dto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
@@ -210,15 +210,13 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .rule(ruleBase)
                     .build();
 
-            GetAutomaticCompatibilityByIdResponse response = GetAutomaticCompatibilityByIdResponse.builder()
+            return GetAutomaticCompatibilityByIdResponse.builder()
                     .automaticCompatibilityId(automaticCompatibility.getId())
                     .componentType1Id(automaticCompatibility.getComponent1Id())
                     .componentType2Id(automaticCompatibility.getComponent2Id())
                     .specificationTypeFromComponentType1(automaticCompatibility.getRule().getSpecificationToConsider1Id().getComponentType().getSpecificationTypeList().stream().filter(specificationType -> specificationType.getSpecificationTypeId().equals(automaticCompatibility.getRule().getSpecificationToConsider1Id().getSpecificationType().getSpecificationTypeId())).findFirst().orElse(null))
                     .specificationTypeFromComponentType2(automaticCompatibility.getRule().getSpecificationToConsider2Id().getComponentType().getSpecificationTypeList().stream().filter(specificationType -> specificationType.getSpecificationTypeId().equals(automaticCompatibility.getRule().getSpecificationToConsider2Id().getSpecificationType().getSpecificationTypeId())).findFirst().orElse(null))
                     .build();
-
-            return response;
         }
         throw new ObjectNotFound("ERROR FINDING AUTOMATIC COMPATIBILITY");
 

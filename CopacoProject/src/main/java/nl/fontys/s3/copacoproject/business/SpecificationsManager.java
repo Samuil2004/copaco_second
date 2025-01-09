@@ -1,8 +1,8 @@
 package nl.fontys.s3.copacoproject.business;
 
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigTypesInCategRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfTypesInCategResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigurationTypesResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigTypesInCategRequest;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfTypesInCategResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigurationTypesResponse;
 
 import java.util.List;
 

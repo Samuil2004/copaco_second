@@ -1,8 +1,8 @@
 package nl.fontys.s3.copacoproject.business;
 
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.TemplateObjectResponse;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Template;
 import org.springframework.web.multipart.MultipartFile;
 

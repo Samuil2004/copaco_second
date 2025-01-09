@@ -1,9 +1,9 @@
 package nl.fontys.s3.copacoproject.business;
 
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetSpecificationTypeByComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.CreateSpecificationTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.CreateSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetSpecificationTypeByComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 
 import java.util.List;

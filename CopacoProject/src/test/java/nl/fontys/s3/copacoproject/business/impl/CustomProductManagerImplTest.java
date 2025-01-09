@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeInCustomResponse;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeInCustomResponse;
+import nl.fontys.s3.copacoproject.business.dto.custom_product_dto.*;
 import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,7 @@ class CustomProductManagerImplTest {
     private CustomProductManagerImpl customProductManagerImplUnderTest;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(){
         customProductManagerImplUnderTest = new CustomProductManagerImpl(mockCustomProductRepository,
                 mockAssemblingRepository, mockComponentRepository, mockUserRepository, mockTemplateRepository,
                 mockStatusRepository, mockComponentSpecificationListRepository);
@@ -440,135 +440,6 @@ class CustomProductManagerImplTest {
     }
 
 
-    /*@Test
-    void testGetCustomProductsOfUserByState_ComponentSpecificationListRepositoryReturnsNoItems() {
-        // Setup
-        final List<CustomProductResponse> expectedResult = List.of(CustomProductResponse.builder()
-                .userId(0L)
-                .customProductId(0L)
-                .templateId(0L)
-                .componentsIncluded(List.of(ComponentInConfigurationResponse.builder()
-                        .componentId(0L)
-                        .componentName("componentName")
-                        .componentImageUrl("componentImageUrl")
-                        .componentPrice(0.0)
-                        .componentType(ComponentTypeInCustomResponse.builder()
-                                .id(0L)
-                                .name("componentTypeName")
-                                .build())
-                        .build()))
-                .statusId(0L)
-                .build());
-        when(mockUserRepository.existsById(0L)).thenReturn(true);
-        when(mockStatusRepository.existsById(0)).thenReturn(true);
-        when(mockUserRepository.findUserEntityById(0L)).thenReturn(UserEntity.builder()
-                .id(0L)
-                .build());
-
-        // Configure CustomProductRepository.findCustomProductEntitiesByStatusAndUserId(...).
-        final Page<CustomProductEntity> customProductEntities = new PageImpl<>(List.of(CustomProductEntity.builder()
-                .id(0L)
-                .userId(UserEntity.builder()
-                        .id(0L)
-                        .build())
-                .template(TemplateEntity.builder()
-                        .id(0L)
-                        .build())
-                .status(StatusEntity.builder()
-                        .id(0)
-                        .name("name")
-                        .build())
-                .build()));
-        when(mockCustomProductRepository.findCustomProductEntitiesByStatusAndUserId(eq(StatusEntity.builder()
-                .id(0)
-                .name("name")
-                .build()), eq(UserEntity.builder()
-                .id(0L)
-                .build()), any(Pageable.class))).thenReturn(customProductEntities);
-
-        // Configure AssemblingRepository.findAssemblingEntitiesByCustomProductId(...).
-        final List<AssemblingEntity> assemblingEntities = List.of(AssemblingEntity.builder()
-                .customProductId(CustomProductEntity.builder()
-                        .id(0L)
-                        .userId(UserEntity.builder()
-                                .id(0L)
-                                .build())
-                        .template(TemplateEntity.builder()
-                                .id(0L)
-                                .build())
-                        .status(StatusEntity.builder()
-                                .id(0)
-                                .name("name")
-                                .build())
-                        .build())
-                .componentId(ComponentEntity.builder()
-                        .componentId(0L)
-                        .componentName("componentName")
-                        .componentType(ComponentTypeEntity.builder()
-                                .id(0L)
-                                .componentTypeName("componentTypeName")
-                                .componentTypeImageUrl("componentTypeImageUrl")
-                                .category(CategoryEntity.builder()
-                                        .id(0L)
-                                        .categoryName("categoryName")
-                                        .build())
-                                .configurationType("configurationType")
-                                .specifications(List.of(SpecficationTypeList_ComponentTypeEntity.builder()
-                                        .specificationType(SpecificationTypeEntity.builder()
-                                                .id(0L)
-                                                .specificationTypeName("specificationTypeName")
-                                                .build())
-                                        .build()))
-                                .build())
-                        .componentImageUrl("componentImageUrl")
-                        .componentPrice(0.0)
-                        .build())
-                .build());
-        when(mockAssemblingRepository.findAssemblingEntitiesByCustomProductId(CustomProductEntity.builder()
-                .id(0L)
-                .userId(UserEntity.builder()
-                        .id(0L)
-                        .build())
-                .template(TemplateEntity.builder()
-                        .id(0L)
-                        .build())
-                .status(StatusEntity.builder()
-                        .id(0)
-                        .name("name")
-                        .build())
-                .build())).thenReturn(assemblingEntities);
-
-        when(mockComponentSpecificationListRepository.findByComponentId(ComponentEntity.builder()
-                .componentId(0L)
-                .componentName("componentName")
-                .componentType(ComponentTypeEntity.builder()
-                        .id(0L)
-                        .componentTypeName("componentTypeName")
-                        .componentTypeImageUrl("componentTypeImageUrl")
-                        .category(CategoryEntity.builder()
-                                .id(0L)
-                                .categoryName("categoryName")
-                                .build())
-                        .configurationType("configurationType")
-                        .specifications(List.of(SpecficationTypeList_ComponentTypeEntity.builder()
-                                .specificationType(SpecificationTypeEntity.builder()
-                                        .id(0L)
-                                        .specificationTypeName("specificationTypeName")
-                                        .build())
-                                .build()))
-                        .build())
-                .componentImageUrl("componentImageUrl")
-                .componentPrice(0.0)
-                .build())).thenReturn(Collections.emptyList());
-
-        // Run the test
-        final List<CustomProductResponse> result = customProductManagerImplUnderTest.getCustomProductsOfUserByState(0L,
-                0L, 1, 10, 1);
-
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }*/
-
     @Test
     void testGetNumberOfCustomProductsOfUserByStatus() {
         // Setup
@@ -596,7 +467,7 @@ class CustomProductManagerImplTest {
         final int result = customProductManagerImplUnderTest.getNumberOfCustomProductsOfUserByStatus(0L, 0L, 0);
 
         // Verify the results
-        assertThat(result).isEqualTo(0);
+        assertThat(result).isZero();
     }
 
     @Test
@@ -721,10 +592,10 @@ class CustomProductManagerImplTest {
         when(mockComponentRepository.existsById(0L)).thenReturn(true);
         when(mockComponentRepository.findComponentEntityByComponentId(0L)).thenReturn(componentEntity);
 
-        when(mockAssemblingRepository.findAssemblingEntitiesByCustomProductId(eq(productEntity)))
+        when(mockAssemblingRepository.findAssemblingEntitiesByCustomProductId((productEntity)))
                 .thenReturn(Collections.emptyList());
 
-        when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId(eq(componentEntity), eq(productEntity)))
+        when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId((componentEntity),(productEntity)))
                 .thenReturn(false);
 
         // Run the test
@@ -807,7 +678,7 @@ class CustomProductManagerImplTest {
         // Mock repository behavior
         when(mockCustomProductRepository.findById(0L)).thenReturn(productEntity);
         when(mockCustomProductRepository.existsById(0L)).thenReturn(true);
-        when(mockAssemblingRepository.findAssemblingEntitiesByCustomProductId(eq(productEntity)))
+        when(mockAssemblingRepository.findAssemblingEntitiesByCustomProductId((productEntity)))
                 .thenReturn(Collections.emptyList());
         when(mockComponentRepository.existsById(0L)).thenReturn(true);
         when(mockComponentRepository.findComponentEntityByComponentId(0L)).thenReturn(componentEntity);
@@ -865,7 +736,7 @@ class CustomProductManagerImplTest {
         when(mockComponentSpecificationListRepository.findByComponentId(componentEntity))
                 .thenReturn(Collections.emptyList());
 
-        when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId(eq(componentEntity), eq(productEntity)))
+        when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId((componentEntity), (productEntity)))
                 .thenReturn(false);
 
         // Run the test

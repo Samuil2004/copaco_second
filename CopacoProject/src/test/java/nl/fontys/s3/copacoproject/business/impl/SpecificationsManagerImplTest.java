@@ -1,10 +1,8 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfTypesInCategResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigTypesInCategRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigurationTypesResponse;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigurationTypesResponse;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;
@@ -53,6 +51,7 @@ class SpecificationsManagerImplTest {
         final GetConfigurationTypesResponse result = specificationsManagerImplUnderTest.getDistinctConfigurationTypes();
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -65,37 +64,6 @@ class SpecificationsManagerImplTest {
         assertThatThrownBy(() -> specificationsManagerImplUnderTest.getDistinctConfigurationTypes())
                 .isInstanceOf(ObjectNotFound.class);
     }
-
-//    @Test
-//    void testGetDistinctConfigurationTypesInCategory() {
-//        // Setup
-//        final GetConfigTypesInCategRequest request = GetConfigTypesInCategRequest.builder()
-//                .categoryId(0L)
-//                .build();
-//        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypesInCategory(0L))
-//                .thenReturn(List.of("value"));
-//
-//        // Run the test
-//        final GetConfTypesInCategResponse result = specificationsManagerImplUnderTest.getDistinctConfigurationTypesInCategory(
-//                request);
-//
-//        // Verify the results
-//    }
-
-//    @Test
-//    void testGetDistinctConfigurationTypesInCategory_ComponentSpecificationListRepositoryReturnsNoItems() {
-//        // Setup
-//        final GetConfigTypesInCategRequest request = GetConfigTypesInCategRequest.builder()
-//                .categoryId(0L)
-//                .build();
-//        when(mockComponentSpecificationListRepository.getDistinctConfigurationTypesInCategory(0L))
-//                .thenReturn(Collections.emptyList());
-//
-//        // Run the test
-//        assertThatThrownBy(
-//                () -> specificationsManagerImplUnderTest.getDistinctConfigurationTypesInCategory(request))
-//                .isInstanceOf(ObjectNotFound.class);
-//    }
 
     @Test
     void testGetSpecificationValuesOfSpecificationTypeByComponentType() {

@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetAllComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetDistCompTypesByTyOfConfRequest;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeList_TemplateRepository;
@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +43,7 @@ class ComponentTypeManagerImplTest {
     private ComponentTypeManagerImpl componentTypeManagerImplUnderTest;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(){
         componentTypeManagerImplUnderTest = new ComponentTypeManagerImpl(mockComponentTypeRepository,
                 mockCategoryRepository, mockComponentTypeList_TemplateRepository, mockTemplateRepository);
     }
@@ -75,6 +74,7 @@ class ComponentTypeManagerImplTest {
         final GetAllComponentTypeResponse result = componentTypeManagerImplUnderTest.getAllComponentTypes();
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -86,6 +86,9 @@ class ComponentTypeManagerImplTest {
         final GetAllComponentTypeResponse result = componentTypeManagerImplUnderTest.getAllComponentTypes();
 
         // Verify the results
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(GetAllComponentTypeResponse.class);
     }
 
     @Test
@@ -114,6 +117,7 @@ class ComponentTypeManagerImplTest {
         final ComponentType result = componentTypeManagerImplUnderTest.getComponentTypeById(0L);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -164,6 +168,7 @@ class ComponentTypeManagerImplTest {
         final List<ComponentType> result = componentTypeManagerImplUnderTest.getComponentTypesByCategory(0L);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test

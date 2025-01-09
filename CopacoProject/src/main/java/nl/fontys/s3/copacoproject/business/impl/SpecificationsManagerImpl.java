@@ -1,12 +1,12 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.AllArgsConstructor;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.SpecificationsManager;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigTypesInCategRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfTypesInCategResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigurationTypesResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigTypesInCategRequest;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfTypesInCategResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigurationTypesResponse;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;

@@ -4,6 +4,8 @@ import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 
 public final class SpecificationTypeConverter {
+
+    private SpecificationTypeConverter() {}
     public static SpecificationType convertFromEntityToBase(SpecificationTypeEntity entity) {
         return SpecificationType.builder()
                 .specificationTypeId(entity.getId())

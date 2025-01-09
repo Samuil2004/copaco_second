@@ -1,16 +1,15 @@
 package nl.fontys.s3.copacoproject.controller;
 
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.TemplateObjectResponse;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.Template;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,18 +27,6 @@ public class TemplateController {
     private final TemplateManager templateManager;
     private final ComponentTypeManager componentTypeManager;
 
-//    @PostMapping(value = "",consumes = "multipart/form-data")
-//    @RolesAllowed({"ADMIN"})
-//    public ResponseEntity<Void> createTemplate(
-//            @RequestPart(value = "file", required = false) MultipartFile file,
-//            @RequestPart("request") @Valid CreateTemplateRequest request) {
-//        try {
-//            templateManager.createTemplate(request, file);
-//            return ResponseEntity.ok().build();
-//        } catch (IOException e) {
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }
 @PostMapping(value = "")
 @RolesAllowed({"ADMIN"})
 public ResponseEntity<Void> createTemplate(
@@ -49,7 +36,6 @@ public ResponseEntity<Void> createTemplate(
         @RequestParam(value = "name") String name,
         @RequestParam(value = "componentTypes") List<Long> componentTypes){
 
-        //@RequestPart("request") @Valid CreateTemplateRequest request) {
     try {
         CreateTemplateRequest request1 = CreateTemplateRequest.builder()
             .categoryId(categoryId)

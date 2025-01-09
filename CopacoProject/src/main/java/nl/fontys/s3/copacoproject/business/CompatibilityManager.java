@@ -6,7 +6,7 @@ import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoReque
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
+import nl.fontys.s3.copacoproject.business.dto.user_dto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 
 import java.util.List;

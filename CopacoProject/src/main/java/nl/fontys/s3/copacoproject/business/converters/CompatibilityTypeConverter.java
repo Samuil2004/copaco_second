@@ -5,6 +5,8 @@ import nl.fontys.s3.copacoproject.persistence.entity.CompatibilityTypeEntity;
 
 public final class CompatibilityTypeConverter {
 
+    private CompatibilityTypeConverter() {}
+
     public static CompatibilityType convertFromEntityToBase(CompatibilityTypeEntity compatibilityTypeEntity) {
         return CompatibilityType.builder()
                 .id(compatibilityTypeEntity.getId())

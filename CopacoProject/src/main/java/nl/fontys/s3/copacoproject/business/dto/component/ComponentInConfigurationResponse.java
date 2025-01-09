@@ -1,7 +1,7 @@
 package nl.fontys.s3.copacoproject.business.dto.component;
 
 import lombok.*;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeInCustomResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeInCustomResponse;
 
 
 @Builder

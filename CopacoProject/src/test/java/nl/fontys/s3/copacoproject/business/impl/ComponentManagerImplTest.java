@@ -1,7 +1,7 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse;
 import nl.fontys.s3.copacoproject.domain.Category;
@@ -36,8 +36,6 @@ class ComponentManagerImplTest {
     @Mock
     private ComponentSpecificationListRepository mockComponentSpecificationListRepository;
     @Mock
-    private SpecificationTypeRepository mockSpecificationTypeRepository;
-    @Mock
     private CategoryRepository mockCategoryRepository;
     @Mock
     private ComponentTypeRepository mockComponentTypeRepository;
@@ -47,7 +45,7 @@ class ComponentManagerImplTest {
     @BeforeEach
     void setUp() {
         componentManagerImplUnderTest = new ComponentManagerImpl(mockComponentRepository,
-                mockComponentSpecificationListRepository, mockSpecificationTypeRepository, mockCategoryRepository,
+                mockComponentSpecificationListRepository, mockCategoryRepository,
                 mockComponentTypeRepository);
     }
 
@@ -133,7 +131,7 @@ class ComponentManagerImplTest {
         when(mockComponentRepository.findAll()).thenReturn(List.of(mockComponentEntity));
 
         // Mock specification list repository to return no specifications
-        when(mockComponentSpecificationListRepository.findByComponentId(eq(mockComponentEntity)))
+        when(mockComponentSpecificationListRepository.findByComponentId(mockComponentEntity))
                 .thenReturn(Collections.emptyList());
 
         // Expected result
@@ -481,7 +479,7 @@ class ComponentManagerImplTest {
                 "configurationTypeId");
 
         // Verify the results
-        assertThat(result).isEqualTo(0);
+        assertThat(result).isZero();
     }
 
     @Test

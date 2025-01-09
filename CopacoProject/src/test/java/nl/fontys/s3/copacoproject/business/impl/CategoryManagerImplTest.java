@@ -1,6 +1,6 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;

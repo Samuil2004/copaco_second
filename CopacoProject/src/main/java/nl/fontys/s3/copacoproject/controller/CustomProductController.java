@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
+import nl.fontys.s3.copacoproject.business.dto.custom_product_dto.*;
 import nl.fontys.s3.copacoproject.configuration.security.auth.RequestAuthenticatedUserProvider;
 import nl.fontys.s3.copacoproject.configuration.security.token.AccessToken;
 import org.springframework.http.HttpStatus;

@@ -2,12 +2,12 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import jakarta.persistence.EntityManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectExistsAlreadyException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.TemplateObjectResponse;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
@@ -1038,8 +1038,8 @@ class TemplateManagerImplTest {
         verify(mockComponentTypeListRepository).save(captor.capture());
         ComponentTypeList_Template captured = captor.getValue();
 
-        assertThat(captured.getTemplate().getId()).isEqualTo(0L);
-        assertThat(captured.getComponentType().getId()).isEqualTo(0L);
+        assertThat(captured.getTemplate().getId()).isZero();
+        assertThat(captured.getComponentType().getId()).isZero();
 
     }
 

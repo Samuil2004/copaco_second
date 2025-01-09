@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.controller;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse;
 import nl.fontys.s3.copacoproject.domain.Component;

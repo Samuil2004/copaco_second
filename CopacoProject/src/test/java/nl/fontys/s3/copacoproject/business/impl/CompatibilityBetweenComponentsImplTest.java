@@ -1,10 +1,9 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.CompatibilityError;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
 import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
-import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -124,7 +123,6 @@ class CompatibilityBetweenComponentsImplTest {
     ConfiguratorRequest requestWithProvidedComponentIdTheSameAsSearchedOne;
     ConfiguratorRequest requestWithMaxProvidedComponentsAndLastSearchedPSU;
     ConfiguratorRequest requestWithMaxProvidedComponentsAndLastSearchedPSU2;
-    ConfiguratorRequest requestWithProvidedProcessorAndSearchedSSD;
 
     ConfiguratorRequest requestProcessorAndGraphicsCardProvidedRamSearchedPC;
     ConfiguratorRequest requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC;
@@ -1481,7 +1479,6 @@ class CompatibilityBetweenComponentsImplTest {
         when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),specification1and2ForProcessor2)).thenReturn(objectResponseProcessorRam2);
 
         when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(tenRams);
-        //when(componentRepository.findAll(any(Specification.class),pageableCheckNextPage)).thenReturn(oneRam);
 
         List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
         assertEquals(expectedResponseSearchedRamsForProcessorWithoutNextPage.get(0), actualResponse.get(0));

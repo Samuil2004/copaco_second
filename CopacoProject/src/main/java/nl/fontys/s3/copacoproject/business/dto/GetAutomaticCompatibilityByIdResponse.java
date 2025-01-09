@@ -14,9 +14,4 @@ public class GetAutomaticCompatibilityByIdResponse {
     private long componentType2Id;
     private SpecificationType specificationTypeFromComponentType1;
     private SpecificationType specificationTypeFromComponentType2;
-
-//    private long specificationToConsiderFromComponentType1Id;
-//    private String specificationToConsiderFromComponentType1Name;
-//    private long specificationToConsiderFromComponentType2Id;
-//    private String specificationToConsiderFromComponentType2Name;
 }

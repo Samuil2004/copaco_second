@@ -1,6 +1,6 @@
 package nl.fontys.s3.copacoproject.business;
 
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
+import nl.fontys.s3.copacoproject.business.dto.custom_product_dto.*;
 
 import java.util.List;
 

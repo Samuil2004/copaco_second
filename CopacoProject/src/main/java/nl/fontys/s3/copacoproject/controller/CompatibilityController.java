@@ -9,7 +9,6 @@ import nl.fontys.s3.copacoproject.business.CompatibilityManager;
 import nl.fontys.s3.copacoproject.business.dto.*;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +33,7 @@ public class CompatibilityController {
     @PostMapping("/createAutomaticCompatibility")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createAutomaticCompatibility(@RequestBody @Valid CreateAutomaticCompatibilityDtoRequest request) {
-        CreateAutomaticCompatibilityDtoResponse response = compatibilityManager.createAutomaticCompatibility(request);
+        compatibilityManager.createAutomaticCompatibility(request);
 
         return ResponseEntity.noContent().build();
 
@@ -43,7 +42,7 @@ public class CompatibilityController {
     @PostMapping("/createManualCompatibility")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Void> createManualCompatibility(@RequestBody @Valid CreateManualCompatibilityDtoRequest request) {
-        CreateManualCompatibilityDtoResponse response = compatibilityManager.createManualCompatibility(request);
+        compatibilityManager.createManualCompatibility(request);
         return ResponseEntity.noContent().build();
     }
 

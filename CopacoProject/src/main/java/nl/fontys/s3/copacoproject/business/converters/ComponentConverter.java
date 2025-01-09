@@ -9,6 +9,9 @@ import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
 import java.util.*;
 
 public final class ComponentConverter {
+
+    private ComponentConverter() {}
+
     public static Component convertFromEntityToBase(ComponentEntity entity, Map<SpecificationTypeEntity, List<String>> specificationEntityList)
     {
         Map<SpecificationType, List<String>> baseMap = new HashMap<>();

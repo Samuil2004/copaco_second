@@ -4,6 +4,9 @@ import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
 
 public final class CategoryConverter {
+
+    private CategoryConverter() {}
+
     public static Category convertFromEntityToBase(CategoryEntity categoryEntity) {
         return Category.builder()
                 .categoryId(categoryEntity.getId())

@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 import nl.fontys.s3.copacoproject.business.AddressManager;
-import nl.fontys.s3.copacoproject.business.dto.addressDto.AddressConverter;
-import nl.fontys.s3.copacoproject.business.dto.addressDto.CreateNewAddressRequest;
-import nl.fontys.s3.copacoproject.business.dto.addressDto.CreateNewAddressResponse;
-import nl.fontys.s3.copacoproject.business.dto.addressDto.UpdateAddressRequest;
+import nl.fontys.s3.copacoproject.business.dto.address_dto.AddressConverter;
+import nl.fontys.s3.copacoproject.business.dto.address_dto.CreateNewAddressRequest;
+import nl.fontys.s3.copacoproject.business.dto.address_dto.CreateNewAddressResponse;
+import nl.fontys.s3.copacoproject.business.dto.address_dto.UpdateAddressRequest;
 import nl.fontys.s3.copacoproject.domain.Address;
 import nl.fontys.s3.copacoproject.persistence.AddressRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.AddressEntity;

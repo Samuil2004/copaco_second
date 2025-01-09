@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetSpecificationTypeByComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.CreateSpecificationTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.CreateSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetSpecificationTypeByComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -102,7 +102,7 @@ class SpecificationTypeManagerImplTest {
 
         // Verify the results
         assertThat(result).isNotNull();
-        assertThat(result.getSpecificationTypeId()).isEqualTo(0L);
+        assertThat(result.getSpecificationTypeId()).isZero();
     }
 
     @Test
@@ -219,6 +219,7 @@ class SpecificationTypeManagerImplTest {
                 0L, 1, 10);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -254,6 +255,7 @@ class SpecificationTypeManagerImplTest {
                 0L, 1, 10);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
