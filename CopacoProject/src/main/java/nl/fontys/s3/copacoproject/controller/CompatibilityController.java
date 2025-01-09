@@ -93,36 +93,57 @@ public class CompatibilityController {
         return new ResponseEntity<>(updatedRule, HttpStatus.OK);
     }
 
-    @GetMapping("/configurator")
-    public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsFromAGivenComponentTypeAndSpecification(
-            @RequestParam("firstComponentId") Long firstComponentId,
-            @RequestParam(value = "secondComponentId", required = false) Long secondComponentId,
-            @RequestParam(value = "thirdComponentId", required = false) Long thirdComponentId,
-            @RequestParam(value = "fourthComponentId", required = false) Long fourthComponentId,
-            @RequestParam(value = "fifthComponentId", required = false) Long fifthComponentId,
-            @RequestParam(value = "sixthComponentId", required = false) Long sixthComponentId,
-            @RequestParam(value = "seventhComponentId", required = false) Long seventhComponentId,
-            @RequestParam("searchedComponentsType") Long searchedComponentsType,
-            @RequestParam("pageNumber") Integer pageNumber,
-            @RequestParam("typeOfConfiguration") String typeOfConfiguration
-            ){
-        ConfiguratorRequest request = ConfiguratorRequest.builder()
-                .firstComponentId(firstComponentId)
-                .secondComponentId(secondComponentId)
-                .thirdComponentId(thirdComponentId)
-                .fourthComponentId(fourthComponentId)
-                .fifthComponentId(fifthComponentId)
-                .sixthComponentId(sixthComponentId)
-                .seventhComponentId(seventhComponentId)
-                .searchedComponentTypeId(searchedComponentsType)
-                .pageNumber(pageNumber)
-                .typeOfConfiguration(typeOfConfiguration)
-                .build();
-        List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
+//    @GetMapping("/configurator")
+//    public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsFromAGivenComponentTypeAndSpecification(
+//            @RequestParam("firstComponentId") Long firstComponentId,
+//            @RequestParam(value = "secondComponentId", required = false) Long secondComponentId,
+//            @RequestParam(value = "thirdComponentId", required = false) Long thirdComponentId,
+//            @RequestParam(value = "fourthComponentId", required = false) Long fourthComponentId,
+//            @RequestParam(value = "fifthComponentId", required = false) Long fifthComponentId,
+//            @RequestParam(value = "sixthComponentId", required = false) Long sixthComponentId,
+//            @RequestParam(value = "seventhComponentId", required = false) Long seventhComponentId,
+//            @RequestParam("searchedComponentsType") Long searchedComponentsType,
+//            @RequestParam("pageNumber") Integer pageNumber,
+//            @RequestParam("typeOfConfiguration") String typeOfConfiguration
+//            ){
+//        ConfiguratorRequest request = ConfiguratorRequest.builder()
+//                .firstComponentId(firstComponentId)
+//                .secondComponentId(secondComponentId)
+//                .thirdComponentId(thirdComponentId)
+//                .fourthComponentId(fourthComponentId)
+//                .fifthComponentId(fifthComponentId)
+//                .sixthComponentId(sixthComponentId)
+//                .seventhComponentId(seventhComponentId)
+//                .searchedComponentTypeId(searchedComponentsType)
+//                .pageNumber(pageNumber)
+//                .typeOfConfiguration(typeOfConfiguration)
+//                .build();
+//        List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
+//
+//        return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
+//
+//    }
+@GetMapping("/configurator")
+public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsFromAGivenComponentTypeAndSpecification(
+        @Valid @RequestBody ConfiguratorRequest request
+){
+//    ConfiguratorRequest request = ConfiguratorRequest.builder()
+//            .firstComponentId(firstComponentId)
+//            .secondComponentId(secondComponentId)
+//            .thirdComponentId(thirdComponentId)
+//            .fourthComponentId(fourthComponentId)
+//            .fifthComponentId(fifthComponentId)
+//            .sixthComponentId(sixthComponentId)
+//            .seventhComponentId(seventhComponentId)
+//            .searchedComponentTypeId(searchedComponentsType)
+//            .pageNumber(pageNumber)
+//            .typeOfConfiguration(typeOfConfiguration)
+//            .build();
+    List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
 
-        return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
+    return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
 
-    }
+}
 
 
 }

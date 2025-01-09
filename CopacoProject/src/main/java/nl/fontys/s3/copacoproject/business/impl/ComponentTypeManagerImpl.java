@@ -6,6 +6,7 @@ import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetDistCompTypesByTyOfConfRequest;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetAllComponentTypeResponse;
@@ -27,6 +28,7 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
     private final ComponentTypeRepository componentTypeRepository;
     private final CategoryRepository categoryRepository;
     private final TemplateRepository templateRepository;
+    private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
 
     @Override
     public GetAllComponentTypeResponse getAllComponentTypes() {
@@ -64,7 +66,8 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
 
     @Override
     public List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request) {
-        List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration());
+       List<Long> allDistinctSpecificationIdsThatHoldConfigurationType =specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType();
+        List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration(),allDistinctSpecificationIdsThatHoldConfigurationType);
         if(allDistinctComponentTypesFromConfigurationType.isEmpty()) {
             throw new ObjectNotFound("DISTINCT_COMPONENT_TYPE_NOT_FOUND");
         }
