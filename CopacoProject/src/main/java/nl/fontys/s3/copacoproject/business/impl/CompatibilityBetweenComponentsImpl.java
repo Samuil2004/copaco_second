@@ -1223,6 +1223,7 @@ import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
 import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
 import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
@@ -1250,6 +1251,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
+    private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
     private final SpecificationTypeComponentTypeRepository specificationTypeComponentTypeRepository;
 
     private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
@@ -1271,6 +1273,24 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             throw new ObjectNotFound("Components not found: " + missingIds);
         }
         return notNullIds;
+    }
+
+    private void checkIfCongfigurationTypeChanged(String configurationTypeFromRequest,Long componentTypeId,Long componentId)
+    {
+        Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationTypeFromRequest,componentTypeId);
+        if(componentPurposeAndSpecificationId.isEmpty())
+        {
+            throw new CompatibilityError("One of the selected components does not support this type of configuration");
+        }
+        Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
+        //this query checks if the configuration type the current component is meant for is the same with the one provided in the
+        //request (ex: if the first selected component is for PC and the endpoint request is corrupted and instead of PC, Server is passed as configuration type, it should throw an error)
+        boolean sameConfigurationType = componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(componentId,firstEntry.getKey(),firstEntry.getValue());
+        if(!sameConfigurationType)
+        {
+            throw new CompatibilityError("One of the selected components is meant to be used in a different configuration");
+        }
+        //return sameConfigurationType;
     }
 
 
@@ -1313,7 +1333,8 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     if (Objects.equals(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId())) {
                         throw new CompatibilityError("Once a component is selected, other components from the same category can not be searched.");
                     }
-
+                    //This method checks if the configuration type in the request is the same as the configuration type of the current component
+                    checkIfCongfigurationTypeChanged(typeOfConfiguration,componentTypeIdOfProvidedComponent,componentId);
                     //Get all distinct specification ids(from the rules table) that should be considered between the current component type and the searched component type
                     List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(),typeOfConfiguration);
 
@@ -1347,7 +1368,11 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     Map<Long,List<String>> updatedIdsAndValues = addFilteringCriteriaForSearchedComponentBasedOnRuleBetweenProvidedComponentTypeAdnSearchedComponentType(allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,componentId,componentTypeIdOfProvidedComponent,request.getSearchedComponentTypeId(),specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,typeOfConfiguration);
                     specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = updatedIdsAndValues;
                 }
-                //Build a dynamic query including all filters for searching for components within the searched component type that satisfy all rules
+                //Add the configuration type and the corresponding specification id to the map as well as it is a specification that should be considered
+            Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(typeOfConfiguration,request.getSearchedComponentTypeId());
+            Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
+            specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(firstEntry.getKey(), firstEntry.getValue());
+            //Build a dynamic query including all filters for searching for components within the searched component type that satisfy all rules
             Specification<ComponentEntity> spec = ComponentRepository.dynamicSpecification(
                     request.getSearchedComponentTypeId(), specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues);
 
@@ -1386,7 +1411,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
 
         //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
-        Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
+        Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(typeOfConfiguration,request.getSearchedComponentTypeId());
         //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
         if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
         {
@@ -1450,6 +1475,9 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         boolean thereIsNextPage;
         for (Long componentId : notNullIds) {
             Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
+            //This method checks if the configuration type in the request is the same as the configuration type of the current component
+            checkIfCongfigurationTypeChanged(configurationType,componentTypeIdOfProvidedComponent,componentId);
+
             Map<String,Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeIdOfProvidedComponent);
             Iterator<Map.Entry<String, Long>> iterator = idOrValueToBeConsidered.entrySet().iterator();
             Map.Entry<String, Long> firstEntry = iterator.next();
@@ -1586,7 +1614,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     //.componentTypeName(componentEntity.getComponentType().getComponentTypeName())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .price(componentEntity.getComponentPrice())
-                    //.componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
+                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
@@ -1631,187 +1659,187 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     }
 
 
-    private Map<Long,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
-    {
-        //Component voor - 1070 - Hardware
-        //Bedoel voor - 947 - Hardware
-        //Soort - 954 - Hardware
-        //Bike type - 1792 - Hardware
-        Map<Long, List<String>> serverConfig = new HashMap<>();
-        if(componentTypeId == 1)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 2)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 4)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 5)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(947L, List.of("Server","server"));
-                    break;
-                case "PC":
-                    serverConfig.put(947L, List.of("PC"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(947L, List.of("PC"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 6)
-        {
-            switch(configurationType)
-            {
-                case "PC":
-                    serverConfig.put(954L, List.of("PC"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 7)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(954L, List.of("Fan","Fan module"));
-                    break;
-                case "PC":
-                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(954L, List.of("Thermal paste"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 8)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(954L, List.of("Fan","Fan tray","Cooler"));
-                    break;
-                case "PC":
-                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(954L, List.of("Thermal paste"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 10)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 11)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation","workstation"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-            }
-            return serverConfig;
-        }
-        if(componentTypeId == 12)
-        {
-            switch(configurationType)
-            {
-                case "CITY BIKE":
-                    serverConfig.put(1792L, List.of("CITY BIKE"));
-                    break;
-                case "DOWNHILL":
-                    serverConfig.put(1792L, List.of("DOWNHILL"));
-                    break;
-            }
-            return serverConfig;
-        }
-        if(componentTypeId == 13)
-        {
-            switch(configurationType)
-            {
-                case "CITY BIKE":
-                    serverConfig.put(1792L, List.of("CITY BIKE"));
-                    break;
-                case "DOWNHILL":
-                    serverConfig.put(1792L, List.of("DOWNHILL"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else {
-            return null;
-        }
-    }
+//    private Map<Long,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
+//    {
+//        //Component voor - 1070 - Hardware
+//        //Bedoel voor - 947 - Hardware
+//        //Soort - 954 - Hardware
+//        //Bike type - 1792 - Hardware
+//        Map<Long, List<String>> serverConfig = new HashMap<>();
+//        if(componentTypeId == 1)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(1070L, List.of("Server"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(1070L, List.of("Workstation"));
+//                    break;
+//                case "Workstation":
+//                    serverConfig.put(1070L, List.of("Workstation"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 2)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(1070L, List.of("Server"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(1070L, List.of("PC"));
+//                    break;
+//                case "Workstation":
+//                    serverConfig.put(1070L, List.of("Workstation"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 4)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(1070L, List.of("Server"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(1070L, List.of("PC"));
+//                    break;
+//                case "Workstation":
+//                    serverConfig.put(1070L, List.of("Workstation"));
+//                    break;
+//                case "Laptop":
+//                    serverConfig.put(1070L, List.of("Notebook"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 5)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(947L, List.of("Server","server"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(947L, List.of("PC"));
+//                    break;
+//                case "Workstation":
+//                    serverConfig.put(947L, List.of("PC"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 6)
+//        {
+//            switch(configurationType)
+//            {
+//                case "PC":
+//                    serverConfig.put(954L, List.of("PC"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 7)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(954L, List.of("Fan","Fan module"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
+//                    break;
+//                case "Laptop":
+//                    serverConfig.put(954L, List.of("Thermal paste"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 8)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(954L, List.of("Fan","Fan tray","Cooler"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
+//                    break;
+//                case "Laptop":
+//                    serverConfig.put(954L, List.of("Thermal paste"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 10)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(1070L, List.of("Server"));
+//                    break;
+//                case "Workstation":
+//                    serverConfig.put(1070L, List.of("Workstation"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(1070L, List.of("PC"));
+//                    break;
+//                case "Laptop":
+//                    serverConfig.put(1070L, List.of("Notebook"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else if(componentTypeId == 11)
+//        {
+//            switch(configurationType)
+//            {
+//                case "Server":
+//                    serverConfig.put(1070L, List.of("Server"));
+//                    break;
+//                case "Workstation":
+//                    serverConfig.put(1070L, List.of("Workstation","workstation"));
+//                    break;
+//                case "PC":
+//                    serverConfig.put(1070L, List.of("PC"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        if(componentTypeId == 12)
+//        {
+//            switch(configurationType)
+//            {
+//                case "CITY BIKE":
+//                    serverConfig.put(1792L, List.of("CITY BIKE"));
+//                    break;
+//                case "DOWNHILL":
+//                    serverConfig.put(1792L, List.of("DOWNHILL"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        if(componentTypeId == 13)
+//        {
+//            switch(configurationType)
+//            {
+//                case "CITY BIKE":
+//                    serverConfig.put(1792L, List.of("CITY BIKE"));
+//                    break;
+//                case "DOWNHILL":
+//                    serverConfig.put(1792L, List.of("DOWNHILL"));
+//                    break;
+//            }
+//            return serverConfig;
+//        }
+//        else {
+//            return null;
+//        }
+//    }
 
 
     private Map<String,Long> defineValuesForPowerConsumptionSpecifications(Long componentTypeId)

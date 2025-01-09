@@ -7,7 +7,7 @@ import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigura
 import java.util.List;
 
 public interface SpecificationsManager {
-    GetConfigurationTypesResponse getDistinctConfigurationTypes();
+    //GetConfigurationTypesResponse getDistinctConfigurationTypes();
     GetConfTypesInCategResponse getDistinctConfigurationTypesInCategory(GetConfigTypesInCategRequest request);
     List<String> getSpecificationValuesOfSpecificationTypeByComponentType(Long componentTypeId, Long specificationTypeId, int currentPage, int itemsPerPage);
 }

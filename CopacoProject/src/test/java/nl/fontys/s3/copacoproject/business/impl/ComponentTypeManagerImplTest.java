@@ -2,6 +2,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
@@ -40,13 +41,16 @@ class ComponentTypeManagerImplTest {
     private ComponentTypeList_TemplateRepository mockComponentTypeList_TemplateRepository;
     @Mock
     private TemplateRepository mockTemplateRepository;
+    @Mock
+    private SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
+
 
     private ComponentTypeManagerImpl componentTypeManagerImplUnderTest;
 
     @BeforeEach
     void setUp() throws Exception {
         componentTypeManagerImplUnderTest = new ComponentTypeManagerImpl(mockComponentTypeRepository,
-                mockCategoryRepository, mockComponentTypeList_TemplateRepository, mockTemplateRepository);
+                mockCategoryRepository, mockComponentTypeList_TemplateRepository, mockTemplateRepository,specificationIdsForComponentPurpose);
     }
 
     @Test
@@ -243,7 +247,7 @@ class ComponentTypeManagerImplTest {
                         .build()))
                 .build());
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-                "typeOfConfiguration")).thenReturn(componentTypeEntities);
+                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
 
         // Run the test
         final List<ComponentTypeResponse> result = componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(
@@ -260,7 +264,7 @@ class ComponentTypeManagerImplTest {
                 .typeOfConfiguration("typeOfConfiguration")
                 .build();
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-                "typeOfConfiguration")).thenReturn(Collections.emptyList());
+                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(Collections.emptyList());
 
         // Run the test
         assertThatThrownBy(() -> componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
 import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
@@ -28,6 +29,7 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
     private final CategoryRepository categoryRepository;
     private final ComponentTypeList_TemplateRepository componentTypeList_TemplateRepository;
     private final TemplateRepository templateRepository;
+    private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
 
     @Override
     public GetAllComponentTypeResponse getAllComponentTypes() {
@@ -94,7 +96,8 @@ public class ComponentTypeManagerImpl implements ComponentTypeManager {
     @Override
     public List<ComponentTypeResponse> findDistinctComponentTypesByTypeOfConfiguration(GetDistCompTypesByTyOfConfRequest request) {
         //List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = new ArrayList<>();
-        List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration());
+        List<Long> allDistinctSpecificationIdsThatHoldConfigurationType =specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType();
+        List<ComponentTypeEntity> allDistinctComponentTypesFromConfigurationType = componentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(request.getTypeOfConfiguration(),allDistinctSpecificationIdsThatHoldConfigurationType);
         if(allDistinctComponentTypesFromConfigurationType.isEmpty()) {
             throw new ObjectNotFound("DISTINCT_COMPONENT_TYPE_NOT_FOUND");
         }

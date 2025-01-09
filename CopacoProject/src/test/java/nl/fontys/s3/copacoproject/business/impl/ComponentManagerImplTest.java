@@ -2,6 +2,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse;
 import nl.fontys.s3.copacoproject.domain.Category;
@@ -41,6 +42,8 @@ class ComponentManagerImplTest {
     private CategoryRepository mockCategoryRepository;
     @Mock
     private ComponentTypeRepository mockComponentTypeRepository;
+    @Mock
+    private SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
 
     private ComponentManagerImpl componentManagerImplUnderTest;
 
@@ -48,7 +51,7 @@ class ComponentManagerImplTest {
     void setUp() {
         componentManagerImplUnderTest = new ComponentManagerImpl(mockComponentRepository,
                 mockComponentSpecificationListRepository, mockSpecificationTypeRepository, mockCategoryRepository,
-                mockComponentTypeRepository);
+                mockComponentTypeRepository,specificationIdsForComponentPurpose);
     }
 
     @Test
@@ -435,7 +438,7 @@ class ComponentManagerImplTest {
                 .componentPrice(0.0)
                 .build()));
         when(mockComponentRepository.findComponentEntityByComponentTypeAndConfigurationType(eq(0L),
-                eq("configurationType"), any(Pageable.class))).thenReturn(componentEntities);
+                eq("configurationType"),List.of(947L, 954L, 1070L,1792L), any(Pageable.class))).thenReturn(componentEntities);
 
         // Run the test
         final List<SimpleComponentResponse> result = componentManagerImplUnderTest.getComponentsByComponentTypeAndConfigurationType(
@@ -460,7 +463,7 @@ class ComponentManagerImplTest {
         // Setup
         when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
         when(mockComponentRepository.findComponentEntityByComponentTypeAndConfigurationType(eq(0L),
-                eq("configurationType"), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+                eq("configurationType"),List.of(947L, 954L, 1070L,1792L), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Run the test
         final List<SimpleComponentResponse> result = componentManagerImplUnderTest.getComponentsByComponentTypeAndConfigurationType(
@@ -474,7 +477,7 @@ class ComponentManagerImplTest {
     void testGetComponentCountByComponentTypeAndConfigurationType() {
         // Setup
         when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
-        when(mockComponentRepository.countByComponentTypeAndConfigurationType(0L, "configurationTypeId")).thenReturn(0);
+        when(mockComponentRepository.countByComponentTypeAndConfigurationType(0L, "configurationTypeId",List.of(947L, 954L, 1070L,1792L))).thenReturn(0);
 
         // Run the test
         final Integer result = componentManagerImplUnderTest.getComponentCountByComponentTypeAndConfigurationType(0L,

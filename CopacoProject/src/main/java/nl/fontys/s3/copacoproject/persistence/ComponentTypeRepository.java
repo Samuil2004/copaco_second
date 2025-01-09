@@ -20,10 +20,11 @@ public interface ComponentTypeRepository extends JpaRepository<ComponentTypeEnti
             "FROM ComponentTypeEntity ct " +
             "JOIN ComponentEntity c ON c.componentType.id = ct.id " +
             "JOIN Component_SpecificationList csl ON csl.componentId.componentId = c.componentId " +
-            "WHERE csl.specificationType.id IN (1070,1792,947,954) " +
+            "WHERE csl.specificationType.id IN :allDistinctSpecificationIdsThatHoldConfigurationType " +
             "AND csl.value = :value")
     List<ComponentTypeEntity> findDistinctComponentTypesByTypeOfConfiguration(
-            @Param("value") String value);
+            @Param("value") String value,
+            @Param("allDistinctSpecificationIdsThatHoldConfigurationType") List<Long> allDistinctSpecificationIdsThatHoldConfigurationType);
 
 //    @Query("SELECT DISTINCT ct " +
 //            "FROM ComponentTypeEntity ct " +

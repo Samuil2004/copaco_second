@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentManager;
 import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse;
@@ -32,6 +33,7 @@ public class ComponentManagerImpl implements ComponentManager {
     private final SpecificationTypeRepository specificationTypeRepository;
     private final CategoryRepository categoryRepository;
     private final ComponentTypeRepository componentTypeRepository;
+    private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
 
     @Override
     public List<GetComponentResponse> getAllComponents() {
@@ -185,7 +187,8 @@ public class ComponentManagerImpl implements ComponentManager {
         }
 
         Pageable pageable = PageRequest.of(currentPage-1, 10, Sort.by("c.componentName").ascending());
-        Page<ComponentEntity> entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, configurationType, pageable);
+        List<Long> allDistinctSpecificationIdsThatHoldConfigurationType =  specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType();
+        Page<ComponentEntity> entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, configurationType,allDistinctSpecificationIdsThatHoldConfigurationType, pageable);
         List<SimpleComponentResponse> components = new ArrayList<>();
         for (ComponentEntity componentEntity : entities.getContent()) {
             components.add(SimpleComponentResponse.builder()
@@ -203,7 +206,9 @@ public class ComponentManagerImpl implements ComponentManager {
         if(!componentTypeRepository.existsById(componentTypeId)){
             throw new InvalidInputException("Component type does not exist");
         }
-        return componentRepository.countByComponentTypeAndConfigurationType(componentTypeId, configurationTypeId);
+        List<Long> allDistinctSpecificationIdsThatHoldConfigurationType =  specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType();
+
+        return componentRepository.countByComponentTypeAndConfigurationType(componentTypeId, configurationTypeId,allDistinctSpecificationIdsThatHoldConfigurationType);
     }
 
 

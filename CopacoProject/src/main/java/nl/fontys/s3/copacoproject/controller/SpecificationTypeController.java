@@ -78,12 +78,12 @@ public class SpecificationTypeController {
         return specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
     }
 
-    @GetMapping("/getDistinctConfigurationTypes")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<GetConfigurationTypesResponse> getDistinctConfigurationTypes(){
-        GetConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+//    @GetMapping("/getDistinctConfigurationTypes")
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    public ResponseEntity<GetConfigurationTypesResponse> getDistinctConfigurationTypes(){
+//        GetConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
 
 
     @GetMapping("/getDistinctConfigurationTypesInCategory")
