@@ -1256,23 +1256,23 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
     private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
-        List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
-                        request.getSecondComponentId(),
-                        request.getThirdComponentId(),
-                        request.getFourthComponentId(),
-                        request.getFifthComponentId(),
-                        request.getSixthComponentId(),
-                        request.getSeventhComponentId())
-                .filter(Objects::nonNull)
-                .toList();
+//        List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
+//                        request.getSecondComponentId(),
+//                        request.getThirdComponentId(),
+//                        request.getFourthComponentId(),
+//                        request.getFifthComponentId(),
+//                        request.getSixthComponentId(),
+//                        request.getSeventhComponentId())
+//                .filter(Objects::nonNull)
+//                .toList();
 
-        List<Long> missingIds = notNullIds.stream()
+        List<Long> nonExistingIds = request.getComponentIds().stream()
                 .filter(id -> !componentRepository.existsById(id))
                 .toList();
-        if (!missingIds.isEmpty()) {
-            throw new ObjectNotFound("Components not found: " + missingIds);
+        if (!nonExistingIds.isEmpty()) {
+            throw new ObjectNotFound("Components not found: " + nonExistingIds);
         }
-        return notNullIds;
+        return request.getComponentIds();
     }
 
     private void checkIfCongfigurationTypeChanged(String configurationTypeFromRequest,Long componentTypeId,Long componentId)
@@ -1290,7 +1290,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         {
             throw new CompatibilityError("One of the selected components is meant to be used in a different configuration");
         }
-        //return sameConfigurationType;
     }
 
 
