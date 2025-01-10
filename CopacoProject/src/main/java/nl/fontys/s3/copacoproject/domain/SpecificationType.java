@@ -1,6 +1,5 @@
 package nl.fontys.s3.copacoproject.domain;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 
 @Builder
