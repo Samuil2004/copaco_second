@@ -1368,7 +1368,6 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(twoRams);
 
         List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
-//        assertEquals(Set.copyOf(expectedResponseSearchedRamsForProcessor), Set.copyOf(actualResponse));
         assertEquals(expectedResponseSearchedRamsForProcessor.get(0).getComponentName(), actualResponse.get(0).getComponentName());
 
     }
@@ -1506,5 +1505,5 @@ class CompatibilityBetweenComponentsImplTest {
         assertEquals(expectedResponseSearchedRamsForProcessorWithoutNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
 
     }
-    
+
 }

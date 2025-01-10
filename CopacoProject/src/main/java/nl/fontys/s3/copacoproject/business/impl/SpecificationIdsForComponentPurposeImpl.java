@@ -5,7 +5,6 @@ import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -243,91 +242,6 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         else {
             return serverConfig;
         }
-    }
-
-    @Override
-    public List<String> getConfigurationTypesForSpecificationValueAndComponentType(String specificationValue, Long componentTypeId) {
-        List<String> configurationTypes = new ArrayList<>();
-
-        if (componentTypeId == 1) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("PC");
-                configurationTypes.add("Workstation");
-            }
-        } else if (componentTypeId == 2) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            }
-        } else if (componentTypeId == 4) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            } else if (List.of("Notebook").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 5) {
-            if (List.of("Server", "server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-                configurationTypes.add("Workstation");
-            }
-        } else if (componentTypeId == 6) {
-            if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            }
-        } else if (componentTypeId == 7) {
-            if (List.of("Fan", "Fan module").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Liquid cooling kit", "Heatsink", "Radiatior", "Air cooler", "Radiator block", "Cooler", "All-in-one liquid cooler", "Cooler").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Thermal paste").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 8) {
-            if (List.of("Fan", "Fan tray", "Cooler").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Liquid cooling kit", "Heatsink", "Radiatior", "Air cooler", "Radiator block", "Cooler", "All-in-one liquid cooler").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Thermal paste").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 10) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Notebook").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 11) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Workstation", "workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            }
-        } else if (componentTypeId == 12 || componentTypeId == 13) {
-            if (List.of("CITY BIKE").contains(specificationValue)) {
-                configurationTypes.add("CITY BIKE");
-            } else if (List.of("DOWNHILL").contains(specificationValue)) {
-                configurationTypes.add("DOWNHILL");
-            }
-        }
-
-        return configurationTypes.isEmpty() ? null : configurationTypes;
     }
 
     @Override

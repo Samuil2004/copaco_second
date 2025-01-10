@@ -1242,7 +1242,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -1256,16 +1255,6 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
     private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
-//        List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
-//                        request.getSecondComponentId(),
-//                        request.getThirdComponentId(),
-//                        request.getFourthComponentId(),
-//                        request.getFifthComponentId(),
-//                        request.getSixthComponentId(),
-//                        request.getSeventhComponentId())
-//                .filter(Objects::nonNull)
-//                .toList();
-
         List<Long> nonExistingIds = request.getComponentIds().stream()
                 .filter(id -> !componentRepository.existsById(id))
                 .toList();

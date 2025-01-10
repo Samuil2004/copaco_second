@@ -20,10 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -217,61 +215,64 @@ class ComponentTypeManagerImplTest {
         assertThat(result).isEqualTo(Collections.emptyList());
     }
 
-//    @Test
-//    void testFindDistinctComponentTypesByTypeOfConfiguration() {
-//        // Setup
-//        final GetDistCompTypesByTyOfConfRequest request = GetDistCompTypesByTyOfConfRequest.builder()
-//                .typeOfConfiguration("typeOfConfiguration")
-//                .build();
-//        final List<ComponentTypeResponse> expectedResult = List.of(ComponentTypeResponse.builder()
-//                .id(0L)
-//                .componentTypeName("componentTypeName")
-//                .componentTypeImageUrl("componentTypeImageUrl")
-//                .categoryName("categoryName")
-//                .configurationType("configurationType")
-//                .build());
-//
-//        // Configure ComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(...).
-//        final List<ComponentTypeEntity> componentTypeEntities = List.of(ComponentTypeEntity.builder()
-//                .id(0L)
-//                .componentTypeName("componentTypeName")
-//                .componentTypeImageUrl("componentTypeImageUrl")
-//                .category(CategoryEntity.builder()
-//                        .id(0L)
-//                        .categoryName("categoryName")
-//                        .build())
-//                .configurationType("configurationType")
-//                .specifications(List.of(SpecficationTypeList_ComponentTypeEntity.builder()
-//                        .specificationType(SpecificationTypeEntity.builder()
-//                                .id(0L)
-//                                .specificationTypeName("specificationTypeName")
-//                                .build())
-//                        .build()))
-//                .build());
-//        when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-//                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
-//
-//        // Run the test
-//        final List<ComponentTypeResponse> result = componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(
-//                request);
-//
-//        // Verify the results
-//        assertThat(result).isEqualTo(expectedResult);
-//    }
+    @Test
+    void testFindDistinctComponentTypesByTypeOfConfiguration() {
+        // Setup
+        final GetDistCompTypesByTyOfConfRequest request = GetDistCompTypesByTyOfConfRequest.builder()
+                .typeOfConfiguration("typeOfConfiguration")
+                .build();
+        final List<ComponentTypeResponse> expectedResult = List.of(ComponentTypeResponse.builder()
+                .id(0L)
+                .componentTypeName("componentTypeName")
+                .componentTypeImageUrl("componentTypeImageUrl")
+                .categoryName("categoryName")
+                .configurationType("configurationType")
+                .build());
 
-//    @Test
-//    void testFindDistinctComponentTypesByTypeOfConfiguration_ComponentTypeRepositoryReturnsNoItems() {
-//        // Setup
-//        final GetDistCompTypesByTyOfConfRequest request = GetDistCompTypesByTyOfConfRequest.builder()
-//                .typeOfConfiguration("typeOfConfiguration")
-//                .build();
-//        when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-//                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(Collections.emptyList());
-//
-//        // Run the test
-//        assertThatThrownBy(() -> componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(
-//                request)).isInstanceOf(ObjectNotFound.class);
-//    }
+        // Configure ComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(...).
+        final List<ComponentTypeEntity> componentTypeEntities = List.of(ComponentTypeEntity.builder()
+                .id(0L)
+                .componentTypeName("componentTypeName")
+                .componentTypeImageUrl("componentTypeImageUrl")
+                .category(CategoryEntity.builder()
+                        .id(0L)
+                        .categoryName("categoryName")
+                        .build())
+                .configurationType("configurationType")
+                .specifications(List.of(SpecficationTypeList_ComponentTypeEntity.builder()
+                        .specificationType(SpecificationTypeEntity.builder()
+                                .id(0L)
+                                .specificationTypeName("specificationTypeName")
+                                .build())
+                        .build()))
+                .build());
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(Arrays.asList(947L, 954L, 1070L,1792L));
+        when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
+                "typeOfConfiguration", Arrays.asList(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
+
+        // Run the test
+        final List<ComponentTypeResponse> result = componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(
+                request);
+
+        // Verify the results
+        assertThat(result).isEqualTo(expectedResult);
+    }
+
+    @Test
+    void testFindDistinctComponentTypesByTypeOfConfiguration_ComponentTypeRepositoryReturnsNoItems() {
+        // Setup
+        final GetDistCompTypesByTyOfConfRequest request = GetDistCompTypesByTyOfConfRequest.builder()
+                .typeOfConfiguration("typeOfConfiguration")
+                .build();
+
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(Arrays.asList(947L, 954L, 1070L,1792L));
+        when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
+                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(Collections.emptyList());
+
+        // Run the test
+        assertThatThrownBy(() -> componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(
+                request)).isInstanceOf(ObjectNotFound.class);
+    }
 
     @Test
     void testGetComponentTypesByTemplateId() {
