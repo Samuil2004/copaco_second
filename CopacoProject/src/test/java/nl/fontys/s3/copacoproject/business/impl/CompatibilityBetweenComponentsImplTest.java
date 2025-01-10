@@ -543,7 +543,7 @@ class CompatibilityBetweenComponentsImplTest {
       processorProvidedRamSearchedServer.setTypeOfConfiguration("Server");
 
       processorProvidedRamSearchedLaptop = new ConfiguratorRequest();
-      processorProvidedRamSearchedLaptop.setComponentIds(Arrays.asList(1L));
+      processorProvidedRamSearchedLaptop.setComponentIds(List.of(1L));
       processorProvidedRamSearchedLaptop.setSearchedComponentTypeId(4L);
       processorProvidedRamSearchedLaptop.setPageNumber(1);
       processorProvidedRamSearchedLaptop.setTypeOfConfiguration("Laptop");
@@ -555,55 +555,55 @@ class CompatibilityBetweenComponentsImplTest {
       requestWithProcessorProvidedSSDSearchedPC.setTypeOfConfiguration("PC");
 
       requestWithProcessorProvidedSSDSearchedWorkstation = new ConfiguratorRequest();
-      requestWithProcessorProvidedSSDSearchedWorkstation.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedSSDSearchedWorkstation.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedSSDSearchedWorkstation.setSearchedComponentTypeId(10L);
       requestWithProcessorProvidedSSDSearchedWorkstation.setPageNumber(1);
       requestWithProcessorProvidedSSDSearchedWorkstation.setTypeOfConfiguration("Workstation");
 
       requestWithProcessorProvidedSSDSearchedServer = new ConfiguratorRequest();
-      requestWithProcessorProvidedSSDSearchedServer.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedSSDSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedSSDSearchedServer.setSearchedComponentTypeId(10L);
       requestWithProcessorProvidedSSDSearchedServer.setPageNumber(1);
       requestWithProcessorProvidedSSDSearchedServer.setTypeOfConfiguration("Server");
 
       requestWithProcessorProvidedSSDSearchedLaptop = new ConfiguratorRequest();
-      requestWithProcessorProvidedSSDSearchedLaptop.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedSSDSearchedLaptop.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedSSDSearchedLaptop.setSearchedComponentTypeId(10L);
       requestWithProcessorProvidedSSDSearchedLaptop.setPageNumber(1);
       requestWithProcessorProvidedSSDSearchedLaptop.setTypeOfConfiguration("Laptop");
 
       requestWithProcessorProvidedHardDriveSearchedPC = new ConfiguratorRequest();
-      requestWithProcessorProvidedHardDriveSearchedPC.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedHardDriveSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedHardDriveSearchedPC.setSearchedComponentTypeId(11L);
       requestWithProcessorProvidedHardDriveSearchedPC.setPageNumber(1);
       requestWithProcessorProvidedHardDriveSearchedPC.setTypeOfConfiguration("PC");
 
       requestWithProcessorProvidedHardDriveSearchedWorkstation = new ConfiguratorRequest();
-      requestWithProcessorProvidedHardDriveSearchedWorkstation.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedHardDriveSearchedWorkstation.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedHardDriveSearchedWorkstation.setSearchedComponentTypeId(11L);
       requestWithProcessorProvidedHardDriveSearchedWorkstation.setPageNumber(1);
       requestWithProcessorProvidedHardDriveSearchedWorkstation.setTypeOfConfiguration("Workstation");
 
       requestWithProcessorProvidedHardDriveSearchedServer = new ConfiguratorRequest();
-      requestWithProcessorProvidedHardDriveSearchedServer.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedHardDriveSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedHardDriveSearchedServer.setSearchedComponentTypeId(11L);
       requestWithProcessorProvidedHardDriveSearchedServer.setPageNumber(1);
       requestWithProcessorProvidedHardDriveSearchedServer.setTypeOfConfiguration("Server");
 
       requestWithProcessorProvidedCoolingSearchedPC = new ConfiguratorRequest();
-      requestWithProcessorProvidedCoolingSearchedPC.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedCoolingSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedCoolingSearchedPC.setSearchedComponentTypeId(8L);
       requestWithProcessorProvidedCoolingSearchedPC.setPageNumber(1);
       requestWithProcessorProvidedCoolingSearchedPC.setTypeOfConfiguration("PC");
 
       requestWithProcessorProvidedCoolingSearchedLaptop = new ConfiguratorRequest();
-      requestWithProcessorProvidedCoolingSearchedLaptop.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedCoolingSearchedLaptop.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedCoolingSearchedLaptop.setSearchedComponentTypeId(8L);
       requestWithProcessorProvidedCoolingSearchedLaptop.setPageNumber(1);
       requestWithProcessorProvidedCoolingSearchedLaptop.setTypeOfConfiguration("Laptop");
 
       requestWithProcessorProvidedCoolingSearchedServer = new ConfiguratorRequest();
-      requestWithProcessorProvidedCoolingSearchedServer.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedCoolingSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedCoolingSearchedServer.setSearchedComponentTypeId(8L);
       requestWithProcessorProvidedCoolingSearchedServer.setPageNumber(1);
       requestWithProcessorProvidedCoolingSearchedServer.setTypeOfConfiguration("Server");
@@ -614,100 +614,100 @@ class CompatibilityBetweenComponentsImplTest {
 
 
       requestWithProcessorProvidedProcessorCoolingSearchedPC = new ConfiguratorRequest();
-      requestWithProcessorProvidedProcessorCoolingSearchedPC.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedProcessorCoolingSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedProcessorCoolingSearchedPC.setSearchedComponentTypeId(7L);
       requestWithProcessorProvidedProcessorCoolingSearchedPC.setPageNumber(1);
       requestWithProcessorProvidedProcessorCoolingSearchedPC.setTypeOfConfiguration("PC");
 
       requestWithProcessorProvidedProcessorCoolingSearchedLaptop = new ConfiguratorRequest();
-      requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setSearchedComponentTypeId(7L);
       requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setPageNumber(1);
       requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setTypeOfConfiguration("Laptop");
 
       requestWithProcessorProvidedProcessorCoolingSearchedServer = new ConfiguratorRequest();
-      requestWithProcessorProvidedProcessorCoolingSearchedServer.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedProcessorCoolingSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedProcessorCoolingSearchedServer.setSearchedComponentTypeId(7L);
       requestWithProcessorProvidedProcessorCoolingSearchedServer.setPageNumber(1);
       requestWithProcessorProvidedProcessorCoolingSearchedServer.setTypeOfConfiguration("Server");
 
       requestWithProcessorProvidedComputerCaseSearchedPC = new ConfiguratorRequest();
-      requestWithProcessorProvidedComputerCaseSearchedPC.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedComputerCaseSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedComputerCaseSearchedPC.setSearchedComponentTypeId(6L);
       requestWithProcessorProvidedComputerCaseSearchedPC.setPageNumber(1);
       requestWithProcessorProvidedComputerCaseSearchedPC.setTypeOfConfiguration("PC");
 
       requestWithProcessorProvidedPowerSupplySearchedPC = new ConfiguratorRequest();
-      requestWithProcessorProvidedPowerSupplySearchedPC.setComponentIds(Arrays.asList(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedPowerSupplySearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
       requestWithProcessorProvidedPowerSupplySearchedPC.setSearchedComponentTypeId(5L);
       requestWithProcessorProvidedPowerSupplySearchedPC.setPageNumber(1);
       requestWithProcessorProvidedPowerSupplySearchedPC.setTypeOfConfiguration("PC");
 
       requestWithProcessorProvidedPowerSupplySearchedWorkstation = new ConfiguratorRequest();
-      requestWithProcessorProvidedPowerSupplySearchedWorkstation.setComponentIds(Arrays.asList(1L));
+      requestWithProcessorProvidedPowerSupplySearchedWorkstation.setComponentIds(List.of(1L));
       requestWithProcessorProvidedPowerSupplySearchedWorkstation.setSearchedComponentTypeId(5L);
       requestWithProcessorProvidedPowerSupplySearchedWorkstation.setPageNumber(1);
       requestWithProcessorProvidedPowerSupplySearchedWorkstation.setTypeOfConfiguration("Workstation");
 
 // Request: Processor Provided Power Supply Searched for Server
       requestWithProcessorProvidedPowerSupplySearchedServer = new ConfiguratorRequest();
-      requestWithProcessorProvidedPowerSupplySearchedServer.setComponentIds(Arrays.asList(1L));
+      requestWithProcessorProvidedPowerSupplySearchedServer.setComponentIds(List.of(1L));
       requestWithProcessorProvidedPowerSupplySearchedServer.setSearchedComponentTypeId(5L);
       requestWithProcessorProvidedPowerSupplySearchedServer.setPageNumber(1);
       requestWithProcessorProvidedPowerSupplySearchedServer.setTypeOfConfiguration("Server");
 
 // Request: Processor Provided Graphics Card Searched for PC
       requestWithProcessorProvidedGraphicsCardSearchedPC = new ConfiguratorRequest();
-      requestWithProcessorProvidedGraphicsCardSearchedPC.setComponentIds(Arrays.asList(1L));
+      requestWithProcessorProvidedGraphicsCardSearchedPC.setComponentIds(List.of(1L));
       requestWithProcessorProvidedGraphicsCardSearchedPC.setSearchedComponentTypeId(3L);
       requestWithProcessorProvidedGraphicsCardSearchedPC.setPageNumber(1);
       requestWithProcessorProvidedGraphicsCardSearchedPC.setTypeOfConfiguration("PC");
 
 // Request: Graphics Card Provided Processor Searched for PC
       requestWithGraphicsCardProvidedProcessorSearchedPC = new ConfiguratorRequest();
-      requestWithGraphicsCardProvidedProcessorSearchedPC.setComponentIds(Arrays.asList(3L));
+      requestWithGraphicsCardProvidedProcessorSearchedPC.setComponentIds(List.of(3L));
       requestWithGraphicsCardProvidedProcessorSearchedPC.setSearchedComponentTypeId(1L);
       requestWithGraphicsCardProvidedProcessorSearchedPC.setPageNumber(1);
       requestWithGraphicsCardProvidedProcessorSearchedPC.setTypeOfConfiguration("PC");
 
 // Request: Graphics Card Provided Processor Searched for Server
       requestWithGraphicsCardProvidedProcessorSearchedServer = new ConfiguratorRequest();
-      requestWithGraphicsCardProvidedProcessorSearchedServer.setComponentIds(Arrays.asList(3L));
+      requestWithGraphicsCardProvidedProcessorSearchedServer.setComponentIds(List.of(3L));
       requestWithGraphicsCardProvidedProcessorSearchedServer.setSearchedComponentTypeId(1L);
       requestWithGraphicsCardProvidedProcessorSearchedServer.setPageNumber(1);
       requestWithGraphicsCardProvidedProcessorSearchedServer.setTypeOfConfiguration("Server");
 
 // Request: Graphics Card Provided Processor Searched for Workstation
       requestWithGraphicsCardProvidedProcessorSearchedWorkstation = new ConfiguratorRequest();
-      requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setComponentIds(Arrays.asList(3L));
+      requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setComponentIds(List.of(3L));
       requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setSearchedComponentTypeId(1L);
       requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setPageNumber(1);
       requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setTypeOfConfiguration("Workstation");
 
 // Request: Graphics Card Provided Motherboard Searched for PC
       requestWithGraphicsCardProvidedMotherboardSearchedPC = new ConfiguratorRequest();
-      requestWithGraphicsCardProvidedMotherboardSearchedPC.setComponentIds(Arrays.asList(3L));
+      requestWithGraphicsCardProvidedMotherboardSearchedPC.setComponentIds(List.of(3L));
       requestWithGraphicsCardProvidedMotherboardSearchedPC.setSearchedComponentTypeId(2L);
       requestWithGraphicsCardProvidedMotherboardSearchedPC.setPageNumber(1);
       requestWithGraphicsCardProvidedMotherboardSearchedPC.setTypeOfConfiguration("PC");
 
 
         requestWithGraphicsCardProvidedMotherboardSearchedServer = new ConfiguratorRequest();
-        requestWithGraphicsCardProvidedMotherboardSearchedServer.setComponentIds(Arrays.asList(3L));
+        requestWithGraphicsCardProvidedMotherboardSearchedServer.setComponentIds(List.of(3L));
         requestWithGraphicsCardProvidedMotherboardSearchedServer.setSearchedComponentTypeId(2L);
         requestWithGraphicsCardProvidedMotherboardSearchedServer.setPageNumber(1);
         requestWithGraphicsCardProvidedMotherboardSearchedServer.setTypeOfConfiguration("Server");
 
 // Request: Graphics Card Provided Motherboard Searched for Workstation
         requestWithGraphicsCardProvidedMotherboardSearchedWorkstation = new ConfiguratorRequest();
-        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setComponentIds(Arrays.asList(3L));
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setComponentIds(List.of(3L));
         requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setSearchedComponentTypeId(2L);
         requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setPageNumber(1);
         requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setTypeOfConfiguration("Workstation");
 
 // Request: Provided Component ID Same as Searched One
         requestWithProvidedComponentIdTheSameAsSearchedOne = new ConfiguratorRequest();
-        requestWithProvidedComponentIdTheSameAsSearchedOne.setComponentIds(Arrays.asList(1L));
+        requestWithProvidedComponentIdTheSameAsSearchedOne.setComponentIds(List.of(1L));
         requestWithProvidedComponentIdTheSameAsSearchedOne.setSearchedComponentTypeId(1L);
         requestWithProvidedComponentIdTheSameAsSearchedOne.setPageNumber(1);
         requestWithProvidedComponentIdTheSameAsSearchedOne.setTypeOfConfiguration("PC");
@@ -846,9 +846,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
         when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(false);
 
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
-        });
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("One of the selected components is meant to be used in a different configuration", exception.getReason());
 
     }
@@ -861,9 +859,7 @@ class CompatibilityBetweenComponentsImplTest {
         //requestOneComponentProvided
         when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(false);
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
-        });
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("Components not found: [1]", exception.getReason());
     }
 
@@ -875,9 +871,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
         when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(false);
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
-        });
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("Component type not found", exception.getReason());
     }
 
@@ -893,9 +887,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentTypeRepository.existsById(requestWithProvidedComponentIdTheSameAsSearchedOne.getSearchedComponentTypeId())).thenReturn(true);
         when(componentRepository.findComponentTypeIdByComponentId(requestWithProvidedComponentIdTheSameAsSearchedOne.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
 
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(requestWithProvidedComponentIdTheSameAsSearchedOne);
-        });
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestWithProvidedComponentIdTheSameAsSearchedOne));
         assertEquals("Once a component is selected, other components from the same category can not be searched.", exception.getReason());
     }
 
@@ -1018,8 +1010,7 @@ class CompatibilityBetweenComponentsImplTest {
 
         when(componentRepository.findComponentsBySpecificationsNative(120.0,typeOfConfigurationPC,10.0,pageableFirstPage)).thenReturn(List.of());
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(requestWithMaxProvidedComponentsAndLastSearchedPSU2);});
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestWithMaxProvidedComponentsAndLastSearchedPSU2));
         assertEquals("PSUs that can handle the power consumption were not found", exception.getReason());
     }
 
@@ -1157,8 +1148,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentRepository.existsById(processorProvidedRamSearchedLaptop.getComponentIds().get(0))).thenReturn(true);
         when(componentTypeRepository.existsById(processorProvidedRamSearchedLaptop.getSearchedComponentTypeId())).thenReturn(true);
         when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedLaptop.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedLaptop);});
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedLaptop));
         assertEquals("COMPONENTS_FROM_CATEGORY_NOT_FOUND", exception.getReason());
     }
 
@@ -1392,8 +1382,7 @@ class CompatibilityBetweenComponentsImplTest {
 
         when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(List.of());
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);});
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("One of the selected components does not respect any of the rules between it and the searched one;", exception.getReason());
 
     }
@@ -1424,8 +1413,7 @@ class CompatibilityBetweenComponentsImplTest {
         when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor);
         when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),specification1and2ForProcessor)).thenReturn(List.of());
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);});
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("Compatible components from searched component type were not found;", exception.getReason());
 
     }
@@ -1463,8 +1451,7 @@ class CompatibilityBetweenComponentsImplTest {
 
         when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(new PageImpl<>(List.of(),pageableFirstPage, 2));
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
-            compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);});
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("Compatible components from searched component type were not found;", exception.getReason());
     }
 
