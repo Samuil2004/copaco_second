@@ -1426,7 +1426,7 @@ class CompatibilityBetweenComponentsImplTest {
 
         ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
             compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);});
-        assertEquals("Compatible components from searched component type were not found", exception.getReason());
+        assertEquals("Compatible components from searched component type were not found;", exception.getReason());
 
     }
 
@@ -1465,7 +1465,7 @@ class CompatibilityBetweenComponentsImplTest {
 
         ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> {
             compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);});
-        assertEquals("Compatible components from searched component type were not found", exception.getReason());
+        assertEquals("Compatible components from searched component type were not found;", exception.getReason());
     }
 
     @Test

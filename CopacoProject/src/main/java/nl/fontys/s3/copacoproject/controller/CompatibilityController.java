@@ -132,7 +132,6 @@ public ResponseEntity<List<GetAutomaticCompatibilityResponse>> getAllComponentsF
     List<GetAutomaticCompatibilityResponse> automaticCompatibility = compatibilityBetweenComponents.automaticCompatibility(request);
 
     return new ResponseEntity<>(automaticCompatibility, HttpStatus.OK);
-
 }
 
 

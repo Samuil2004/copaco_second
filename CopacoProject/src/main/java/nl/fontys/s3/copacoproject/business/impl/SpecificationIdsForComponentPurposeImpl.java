@@ -12,6 +12,14 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 public class SpecificationIdsForComponentPurposeImpl implements SpecificationIdsForComponentPurpose {
+    private static final String LAPTOP = "Laptop";
+    private static final String SERVER = "Server";
+    private static final String PC = "PC";
+    private static final String WORKSTATION = "Workstation";
+    private static final String NOTEBOOK = "Notebook";
+    private static final String CITY_BIKE = "CITY BIKE";
+    private static final String DOWNHILL = "DOWNHILL";
+
     @Override
     public Map<Long, List<String>> getSpecificationIdAndValuesForComponentPurpose(String configurationType, Long componentTypeId) {
         //Component voor - 1070 - Hardware
@@ -23,14 +31,14 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case PC:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -41,14 +49,14 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -59,11 +67,11 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
+                case SERVER:
                     return serverConfig;
-                case "PC":
+                case PC:
                     return serverConfig;
-                case "Workstation":
+                case WORKSTATION:
                     return serverConfig;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -74,17 +82,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
+                case LAPTOP:
+                    serverConfig.put(1070L, List.of(NOTEBOOK));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -95,14 +103,14 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(947L, List.of("Server","server"));
+                case SERVER:
+                    serverConfig.put(947L, List.of(SERVER,"server"));
                     break;
-                case "PC":
-                    serverConfig.put(947L, List.of("PC"));
+                case PC:
+                    serverConfig.put(947L, List.of(PC));
                     break;
-                case "Workstation":
-                    serverConfig.put(947L, List.of("PC"));
+                case WORKSTATION:
+                    serverConfig.put(947L, List.of(PC));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -113,8 +121,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "PC":
-                    serverConfig.put(954L, List.of("PC"));
+                case PC:
+                    serverConfig.put(954L, List.of(PC));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -125,13 +133,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
+                case SERVER:
                     serverConfig.put(954L, List.of("Fan","Fan module"));
                     break;
-                case "PC":
+                case PC:
                     serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
                     break;
-                case "Laptop":
+                case LAPTOP:
                     serverConfig.put(954L, List.of("Thermal paste"));
                     break;
                 default:
@@ -143,13 +151,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
+                case SERVER:
                     serverConfig.put(954L, List.of("Fan","Fan tray","Cooler"));
                     break;
-                case "PC":
+                case PC:
                     serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
                     break;
-                case "Laptop":
+                case LAPTOP:
                     serverConfig.put(954L, List.of("Thermal paste"));
                     break;
                 default:
@@ -161,9 +169,9 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Workstation":
+                case WORKSTATION:
                     return serverConfig;
-                case "PC":
+                case PC:
                     return serverConfig;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -173,17 +181,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
+                case LAPTOP:
+                    serverConfig.put(1070L, List.of(NOTEBOOK));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -194,14 +202,14 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation","workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION,"workstation"));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -212,11 +220,11 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "CITY BIKE":
-                    serverConfig.put(1792L, List.of("CITY BIKE"));
+                case CITY_BIKE:
+                    serverConfig.put(1792L, List.of(CITY_BIKE));
                     break;
-                case "DOWNHILL":
-                    serverConfig.put(1792L, List.of("DOWNHILL"));
+                case DOWNHILL:
+                    serverConfig.put(1792L, List.of(DOWNHILL));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -227,11 +235,11 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "CITY BIKE":
-                    serverConfig.put(1792L, List.of("CITY BIKE"));
+                case CITY_BIKE:
+                    serverConfig.put(1792L, List.of(CITY_BIKE));
                     break;
-                case "DOWNHILL":
-                    serverConfig.put(1792L, List.of("DOWNHILL"));
+                case DOWNHILL:
+                    serverConfig.put(1792L, List.of(DOWNHILL));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");

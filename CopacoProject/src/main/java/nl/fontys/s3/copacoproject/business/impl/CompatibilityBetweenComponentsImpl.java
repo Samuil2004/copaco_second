@@ -1252,6 +1252,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
     private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
     private final SpecificationTypeComponentTypeRepository specificationTypeComponentTypeRepository;
+    private static final String VALUE_KEY = "value";
+    private static final String ID_KEY = "id";
+    private static final String ID2_KEY = "id2";
+    private static final String COMPATIBLE_COMPONENTS_NOT_FOUND = "Compatible components from searched component type were not found;";
 
     private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
@@ -1293,7 +1297,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         Pageable checkNextPageSinceComponent = PageRequest.of((request.getPageNumber()+1)*10, 1);
 
         String typeOfConfiguration = request.getTypeOfConfiguration();
-        List<ComponentEntity> foundComponentsThatSatisfyAllFilters = new ArrayList<>();
+        List<ComponentEntity> foundComponentsThatSatisfyAllFilters;
         long startTime = System.nanoTime();
         Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = new HashMap<>();
         try {
@@ -1325,14 +1329,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(),typeOfConfiguration);
 
                     if (allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes.isEmpty()) {
-                        if (notNullIds.indexOf(componentId) == 0) {
+                        if (notNullIds.indexOf(componentId) == 0 && notNullIds.size() == 1) {
                             //If there are no compatibility rules and there is only one componentId provided, return first ten components from the searched component type
-                            if (notNullIds.size() == 1) {
                                 FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
                                 return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
-
-                            }
-                            continue;
                         }
                         if (notNullIds.indexOf(componentId) == notNullIds.size() - 1) {
                             //If there are no compatibility rules, there are not foundComponents until now and it is the last provided component id, return first ten components from the searched component type
@@ -1345,13 +1345,8 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                             {
                                 FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
                                 return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
-
-                                //return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
                             }
                             break;
-
-
-
                         }
                         continue;
                     }
@@ -1373,7 +1368,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             Page<ComponentEntity> page = componentRepository.findAll(spec, pageable);
             foundComponentsThatSatisfyAllFilters = page.getContent();
             if(foundComponentsThatSatisfyAllFilters.isEmpty()){
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+                throw new ObjectNotFound(COMPATIBLE_COMPONENTS_NOT_FOUND);
             }
             if(foundComponentsThatSatisfyAllFilters.size() < 10)
             {
@@ -1422,14 +1417,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
 
         //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-        //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
         if (elevenComponentsFromTheSearchedComponentType.isEmpty()) {
             throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
         }
         //If there are 11 components, this means that there is at least 1 component for the next page
         if(elevenComponentsFromTheSearchedComponentType.size() >= 10)
         {
-            List<ComponentEntity> nextPageCheck = new ArrayList<>();
+            List<ComponentEntity> nextPageCheck;
             if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
             {
                 //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
@@ -1463,27 +1457,8 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //This method checks if the configuration type in the request is the same as the configuration type of the current component
             checkIfCongfigurationTypeChanged(configurationType,componentTypeIdOfProvidedComponent,componentId);
 
-            Map<String,Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeIdOfProvidedComponent);
-            Iterator<Map.Entry<String, Long>> iterator = idOrValueToBeConsidered.entrySet().iterator();
-            Map.Entry<String, Long> firstEntry = iterator.next();
-            //Double valueForPowerConsumption;
-            Double valueForPowerConsumption;
-            if(Objects.equals(firstEntry.getKey(), "id"))
-            {
-                valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,firstEntry.getValue());
-                if(valueForPowerConsumption == null)
-                {
-                    if(iterator.hasNext()) {
-                        Map.Entry<String, Long> secondEntry = iterator.next();
-                        //if (secondEntry != null) {
-                            valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId, secondEntry.getValue());
-                       // }
-                    }
-                }
-            }
-            else {
-                valueForPowerConsumption = (double)idOrValueToBeConsidered.get("value");
-            }
+            Double valueForPowerConsumption = calculatePowerConsumption(componentId, componentTypeIdOfProvidedComponent);
+
             if(valueForPowerConsumption == null)
             {
                 continue;
@@ -1516,12 +1491,32 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return FilterComponentsResult.builder().components(foundPSUs).thereIsNextPage(thereIsNextPage).build();
     }
 
+    private Double calculatePowerConsumption(Long componentId, Long componentTypeId) {
+        Map<String, Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeId);
+        Iterator<Map.Entry<String, Long>> iterator = idOrValueToBeConsidered.entrySet().iterator();
+
+        Map.Entry<String, Long> firstEntry = iterator.next();
+        Double valueForPowerConsumption;
+
+        if (Objects.equals(firstEntry.getKey(), ID_KEY)) {
+            valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId, firstEntry.getValue());
+
+            // Try second entry if the first value is null
+            if (valueForPowerConsumption == null && iterator.hasNext()) {
+                Map.Entry<String, Long> secondEntry = iterator.next();
+                valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId, secondEntry.getValue());
+            }
+        } else {
+            valueForPowerConsumption = (double) idOrValueToBeConsidered.get(VALUE_KEY);
+        }
+
+        return valueForPowerConsumption;
+    }
 
 
 
     private Map<Long,List<String>> addFilteringCriteriaForSearchedComponentBasedOnRuleBetweenProvidedComponentTypeAdnSearchedComponentType(List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId, Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,String typeOfConfiguration)
     {
-        Long specificationTypeId = null;
         for(Long specificationId : allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes) {
 
             //Get all values the provided component has for the specification
@@ -1552,7 +1547,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
             //If the list is empty, this means that eventhough the component has the specification, the values it has for this specification is not compatible with any other specification types, which means not compatible
             if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.isEmpty()){
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+                throw new ObjectNotFound(COMPATIBLE_COMPONENTS_NOT_FOUND);
             }
             for (SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
                 Long specificationIdToBeConsideredForSecondSpecification = specificationTypeAndValuesForIt.getSpecification2Id();
@@ -1649,27 +1644,27 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         // or value, if we know concrete value (ex.motherboards power consumption that does not have a specification for the power consumption, but in general it should be around 50W))
         Map<String,Long> specificationTypeId = new LinkedHashMap<>();
         if (componentTypeId == 1L) {
-            specificationTypeId.put("id", 1120L);
+            specificationTypeId.put(ID_KEY, 1120L);
         } else if (componentTypeId == 2L) {
-            specificationTypeId.put("value", 50L);
+            specificationTypeId.put(VALUE_KEY, 50L);
         } else if (componentTypeId == 3L) {
-            specificationTypeId.put("id", 937L);
+            specificationTypeId.put(ID_KEY, 937L);
         } else if (componentTypeId == 4L) {
-            specificationTypeId.put("value", 10L);
+            specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 7L) {
-            specificationTypeId.put("value", 10L);
+            specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 8L) {
-            specificationTypeId.put("value", 10L);
+            specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 9L) {
-            specificationTypeId.put("value", 30L);
+            specificationTypeId.put(VALUE_KEY, 30L);
         } else if (componentTypeId == 10L) {
-            specificationTypeId.put("id", 1144L);
-            specificationTypeId.put("id2", 1145L);
+            specificationTypeId.put(ID_KEY, 1144L);
+            specificationTypeId.put(ID2_KEY, 1145L);
         } else if (componentTypeId == 11L) {
-            specificationTypeId.put("id", 1144L);
-            specificationTypeId.put("id2", 922L);
+            specificationTypeId.put(ID_KEY, 1144L);
+            specificationTypeId.put(ID2_KEY, 922L);
         } else {
-            specificationTypeId.put("id", 1120L);
+            specificationTypeId.put(ID_KEY, 1120L);
         }
         return specificationTypeId;
     }
