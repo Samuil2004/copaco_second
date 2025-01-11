@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,14 @@ public class StatisticsController {
     private final CustomProductManager customProductManager;
     private final SpecificationsManager specificationsManager;
 
+    @Operation(
+            summary = "Get total number of custom products by category",
+            description = """
+                    Retrieves the total number of custom products in a specific category with a given status.
+                    For the graph we need the status to be FINISHED, so that we can see how many products have been ordered
+                    It can also be used in the bar graph, to see how many DRAFTS are created by users""",
+            tags = {"Statistics"}
+    )
     @RolesAllowed({"ADMIN"})
     @GetMapping("/countTotalRevenue/{categoryId}/{status}")
     public ResponseEntity<Integer> getTotalNumberOfFinishedProductsByStatus(
@@ -35,6 +44,15 @@ public class StatisticsController {
         return ResponseEntity.ok().body(totalNumberOfProducts);
     }
 
+    @Operation(
+            summary = "Get number of items and earnings from a configuration type ",
+            description = """
+                    Retrieves a list of objects that hold the configuration type, number of items sold \
+                    and the earnings form that configuration.\s
+                    Can be used in the pie graph to display in each slice details about selected specification\s
+                    EXAMPLE: {PC, 300 items sold, earned 6000$}""",
+            tags = {"Statistics"}
+    )
     @RolesAllowed({"ADMIN"})
     @GetMapping("/countRevenuePerConfigurationType/{categoryId}/{status}")
     public ResponseEntity<List<RevenueInfoItem>> getTotalNumberOfFinishedProductsPerConfigurationType(
@@ -56,6 +74,11 @@ public class StatisticsController {
         return ResponseEntity.ok().body(info);
     }
 
+    @Operation(
+            summary = "Get total income",
+            description = "Retrieves the total income gained form all the categories and configuration types",
+            tags = {"Statistics"}
+    )
     @GetMapping("/income/total")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Double> getTotalIncome(){
@@ -63,6 +86,11 @@ public class StatisticsController {
         return ResponseEntity.ok().body(value);
     }
 
+    @Operation(
+            summary = "Get income by configuration type",
+            description = "Retrieves the income gained form selling products from a specific configuration type",
+            tags = {"Statistics"}
+    )
     @GetMapping("/income/{configurationType}")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<Double> getIncomeByConfigurationType(@PathVariable String configurationType){
@@ -70,9 +98,14 @@ public class StatisticsController {
         return ResponseEntity.ok().body(value);
     }
 
+    @Operation(
+            summary = "Get average income per configuration type",
+            description = "Retrieves the average sum spent by a customer when buying a custom product",
+            tags = {"Statistics"}
+    )
     @RolesAllowed({"ADMIN"})
     @GetMapping("/income/average")
-    public ResponseEntity<Double> getAverageIncomePerConfigurationType(){
+    public ResponseEntity<Double> getAverageIncome(){
         double value = customProductManager.getAverageOrderPrice();
         return ResponseEntity.ok().body(value);
     }
