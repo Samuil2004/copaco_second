@@ -1,26 +1,33 @@
-# Use a lightweight JDK 17 image with Gradle
-FROM gradle:7.5.0-jdk17 as build
+# Use a Gradle base image with Java 17
+FROM gradle:7.5.0-jdk17 AS build
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-# Copy the project files to the container
-COPY . .
+# Copy Gradle wrapper and related files
+COPY CopacoProject/gradlew CopacoProject/gradlew.bat settings.gradle build.gradle /app/
+COPY CopacoProject/gradle /app/gradle
 
-# Build the Spring Boot application using the Gradle wrapper
+# Make Gradle wrapper executable
+RUN chmod +x gradlew
+
+# Copy source code
+COPY CopacoProject/src /app/src
+
+# Build the Spring Boot application
 RUN ./gradlew clean build -x test
 
 # Use a smaller base image for running the app
 FROM openjdk:17-jdk-slim
 
 # Set the working directory
-WORKDIR /opt/app
+WORKDIR /app
 
-# Copy the built JAR file from the build stage
-COPY --from=build /app/build/libs/CopacoProject-0.0.1-SNAPSHOT.jar ./app.jar
+# Copy the JAR file from the builder stage
+COPY --from=build /app/build/libs/*.jar app.jar
 
-# Expose the port the app runs on
+# Expose the default port
 EXPOSE 8080
 
-# Set the default command to run the JAR
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
