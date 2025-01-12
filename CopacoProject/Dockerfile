@@ -4,8 +4,8 @@ FROM gradle:7.5.0-jdk17 AS build
 # Set the working directory
 WORKDIR /app
 
-# Copy Gradle wrapper and related files
-COPY CopacoProject/gradlew CopacoProject/gradlew.bat settings.gradle build.gradle /app/
+# Copy Gradle wrapper and related files from the CopacoProject folder
+COPY CopacoProject/gradlew CopacoProject/gradlew.bat CopacoProject/settings.gradle CopacoProject/build.gradle /app/
 COPY CopacoProject/gradle /app/gradle
 
 # Make Gradle wrapper executable
