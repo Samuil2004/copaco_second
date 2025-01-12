@@ -435,8 +435,9 @@ class ComponentManagerImplTest {
                 .componentImageUrl("componentImageUrl")
                 .componentPrice(0.0)
                 .build()));
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
         when(mockComponentRepository.findComponentEntityByComponentTypeAndConfigurationType(eq(0L),
-                eq("configurationType"),List.of(947L, 954L, 1070L,1792L), any(Pageable.class))).thenReturn(componentEntities);
+                eq("configurationType"),eq(List.of(947L, 954L, 1070L,1792L)), any(Pageable.class))).thenReturn(componentEntities);
 
         // Run the test
         final List<SimpleComponentResponse> result = componentManagerImplUnderTest.getComponentsByComponentTypeAndConfigurationType(
@@ -460,8 +461,9 @@ class ComponentManagerImplTest {
     void testGetComponentsByComponentTypeAndConfigurationType_ComponentRepositoryReturnsNoItems() {
         // Setup
         when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
         when(mockComponentRepository.findComponentEntityByComponentTypeAndConfigurationType(eq(0L),
-                eq("configurationType"),List.of(947L, 954L, 1070L,1792L), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+                eq("configurationType"),eq(List.of(947L, 954L, 1070L,1792L)), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Run the test
         final List<SimpleComponentResponse> result = componentManagerImplUnderTest.getComponentsByComponentTypeAndConfigurationType(
@@ -475,6 +477,7 @@ class ComponentManagerImplTest {
     void testGetComponentCountByComponentTypeAndConfigurationType() {
         // Setup
         when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
         when(mockComponentRepository.countByComponentTypeAndConfigurationType(0L, "configurationTypeId",List.of(947L, 954L, 1070L,1792L))).thenReturn(0);
 
         // Run the test

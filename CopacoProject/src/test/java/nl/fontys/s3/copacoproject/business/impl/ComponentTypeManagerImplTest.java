@@ -20,10 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -248,6 +245,7 @@ class ComponentTypeManagerImplTest {
                                 .build())
                         .build()))
                 .build());
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
                 "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
 
@@ -265,6 +263,7 @@ class ComponentTypeManagerImplTest {
         final GetDistCompTypesByTyOfConfRequest request = GetDistCompTypesByTyOfConfRequest.builder()
                 .typeOfConfiguration("typeOfConfiguration")
                 .build();
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
                 "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(Collections.emptyList());
 

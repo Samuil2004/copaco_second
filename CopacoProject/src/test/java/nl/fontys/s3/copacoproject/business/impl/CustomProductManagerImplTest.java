@@ -1,10 +1,12 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
+import nl.fontys.s3.copacoproject.business.converters.StatusConverter;
 import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
 import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeInCustomResponse;
 import nl.fontys.s3.copacoproject.business.dto.custom_product_dto.*;
+import nl.fontys.s3.copacoproject.domain.enums.Status;
 import nl.fontys.s3.copacoproject.persistence.*;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -830,6 +832,80 @@ class CustomProductManagerImplTest {
 
         // Verify
         verify(mockAssemblingRepository).deleteAll(anyList());
+    }
+
+    @Test
+    void testGetTotalNumberOfCustomProductsByStatus() {
+        // Arrange
+        Long categoryId = 1L;
+        String status = "FINISHED";
+        int expectedCount = 10;
+        when(mockCustomProductRepository.countCustomProductEntitiesByStatusAndCategoryId(
+                categoryId, StatusConverter.convertFromBaseToEntity(Status.valueOf(status))
+        )).thenReturn(expectedCount);
+
+        // Act
+        int result = customProductManagerImplUnderTest.getTotalNumberOfCustomProductsByStatus(categoryId, status);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedCount);
+    }
+
+    @Test
+    void testGetTotalNumberOfProductsByConfigurationTypeAndStatus() {
+        // Arrange
+        String configurationType = "PC";
+        String status = "FINISHED";
+        int expectedCount = 5;
+        when(mockCustomProductRepository.countCustomProductEntitiesByConfigurationTypeAndStatus(
+                configurationType, StatusConverter.convertFromBaseToEntity(Status.valueOf(status))
+        )).thenReturn(expectedCount);
+
+        // Act
+        int result = customProductManagerImplUnderTest.getTotalNumberOfProductsByConfigurationTypeAndStatus(configurationType, status);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedCount);
+    }
+
+    @Test
+    void testGetTotalIncome() {
+        // Arrange
+        double expectedIncome = 5000.00;
+        when(mockCustomProductRepository.sumTotalIncome()).thenReturn(expectedIncome);
+
+        // Act
+        double result = customProductManagerImplUnderTest.getTotalIncome();
+
+        // Assert
+        assertThat(result).isEqualTo(expectedIncome);
+    }
+
+    @Test
+    void testGetIncomeByConfigurationType() {
+        // Arrange
+        String configurationType = "DOWNHILL";
+        double expectedIncome = 2000.00;
+        when(mockCustomProductRepository.sumIncomeByConfigurationType(configurationType)).thenReturn(expectedIncome);
+
+        // Act
+        double result = customProductManagerImplUnderTest.getIncomeByConfigurationType(configurationType);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedIncome);
+    }
+
+    @Test
+    void testGetAverageOrderPrice() {
+        // Arrange
+        double expectedAveragePrice = 250.00;
+        when(mockCustomProductRepository.calculateAverageFinishedProductPrice()).thenReturn(expectedAveragePrice);
+
+        // Act
+        double result = customProductManagerImplUnderTest.getAverageOrderPrice();
+
+        // Assert
+        assertThat(result).isEqualTo(expectedAveragePrice);
     }
 
 
