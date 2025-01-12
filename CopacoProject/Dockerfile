@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy the project files to the container
 COPY . .
 
-# Build the Spring Boot application
-RUN gradle clean build -x test
+# Build the Spring Boot application using the Gradle wrapper
+RUN ./gradlew clean build -x test
 
 # Use a smaller base image for running the app
 FROM openjdk:17-jdk-slim
