@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
+import nl.fontys.s3.copacoproject.business.WebHookManager;
 import nl.fontys.s3.copacoproject.business.converters.StatusConverter;
 import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
@@ -43,6 +44,8 @@ class CustomProductManagerImplTest {
     private StatusRepository mockStatusRepository;
     @Mock
     private ComponentSpecificationListRepository mockComponentSpecificationListRepository;
+    @Mock
+    private WebHookManager mockWebHookManager;
 
     private CustomProductManagerImpl customProductManagerImplUnderTest;
 
@@ -50,7 +53,7 @@ class CustomProductManagerImplTest {
     void setUp(){
         customProductManagerImplUnderTest = new CustomProductManagerImpl(mockCustomProductRepository,
                 mockAssemblingRepository, mockComponentRepository, mockUserRepository, mockTemplateRepository,
-                mockStatusRepository, mockComponentSpecificationListRepository);
+                mockStatusRepository, mockComponentSpecificationListRepository, mockWebHookManager);
     }
 
     @Test

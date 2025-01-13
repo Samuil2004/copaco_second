@@ -3,6 +3,7 @@ package nl.fontys.s3.copacoproject.business.impl;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
+import nl.fontys.s3.copacoproject.business.WebHookManager;
 import nl.fontys.s3.copacoproject.business.exception.ActionDeniedException;
 import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
@@ -35,6 +36,8 @@ public class CustomProductManagerImpl implements CustomProductManager {
     private final StatusRepository statusRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
 
+    private final WebHookManager webHookManager;
+
     private final String unauthorizedText = "You are not authorized to perform this operation";
 
 
@@ -57,6 +60,12 @@ public class CustomProductManagerImpl implements CustomProductManager {
                 .build();
         CustomProductEntity productEntity = customProductRepository.save(customProductEntity);
         assemble(request.getComponentsIncluded(), productEntity);
+
+        List<ComponentInConfigurationResponse> componentInConfigurationResponses = getComponentInConfigurationResponses(productEntity);
+        if (Objects.equals(productEntity.getStatus().getName(), Status.FINISHED.name())) {
+            webHookManager.sendWebhook(productEntity, componentInConfigurationResponses);
+        }
+
         return CreateCustomProductResponse.builder().createdProductId(productEntity.getId()).build();
     }
 
@@ -129,6 +138,12 @@ public class CustomProductManagerImpl implements CustomProductManager {
         if(request.getStatusId() != productEntity.getStatus().getId()){
             productEntity.setStatus(StatusConverter.convertFromBaseToEntity(Status.fromValue(request.getStatusId())));
             customProductRepository.save(productEntity);
+        }
+
+        List<ComponentInConfigurationResponse> componentInConfigurationResponses = getComponentInConfigurationResponses(productEntity);
+
+        if (Objects.equals(productEntity.getStatus().getName(), Status.FINISHED.name())) {
+            webHookManager.sendWebhook(productEntity, componentInConfigurationResponses);
         }
     }
 
@@ -228,6 +243,15 @@ public class CustomProductManagerImpl implements CustomProductManager {
         }
 
         return components;
+    }
+
+    private List<ComponentInConfigurationResponse> getComponentInConfigurationResponses(CustomProductEntity productEntity) {
+        List<Component> components = getComponentsOfCustomProductEntity(productEntity);
+        List<ComponentInConfigurationResponse> componentInConfigurationResponses = new ArrayList<>();
+        for(Component component : components) {
+            componentInConfigurationResponses.add(ComponentConverter.convertFromBaseToResponse(component));
+        }
+        return componentInConfigurationResponses;
     }
 
     private void validate(long productId, long authenticatedUserId, CustomProductEntity productEntity) {

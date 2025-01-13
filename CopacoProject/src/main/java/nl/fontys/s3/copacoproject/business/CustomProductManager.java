@@ -12,7 +12,6 @@ public interface CustomProductManager {
     void updateCustomProduct(long productId, UpdateCustomTemplateRequest request, long authenticatedUserId);
     int getTotalNumberOfCustomProductsByStatus(Long categoryId, String Status);
     int getTotalNumberOfProductsByConfigurationTypeAndStatus(String configurationType, String Status);
-
     //income
     double getTotalIncome();
     double getIncomeByConfigurationType(String configurationType);
