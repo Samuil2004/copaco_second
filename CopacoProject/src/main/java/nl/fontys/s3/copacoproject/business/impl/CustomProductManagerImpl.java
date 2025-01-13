@@ -122,6 +122,10 @@ public class CustomProductManagerImpl implements CustomProductManager {
 
         List<Component> currentComponents = getComponentsOfCustomProductEntity(productEntity);
         updateComponents(productEntity, currentComponents, request.getComponentsIncluded());
+        if(request.getStatusId() != productEntity.getStatus().getId()){
+            productEntity.setStatus(StatusConverter.convertFromBaseToEntity(Status.fromValue(request.getStatusId())));
+            customProductRepository.save(productEntity);
+        }
     }
 
     @Override
