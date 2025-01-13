@@ -118,6 +118,10 @@ public class CustomProductManagerImpl implements CustomProductManager {
         if(productEntity == null) {
             throw new ObjectNotFound("Custom product not found");
         }
+        if(!templateRepository.existsActiveTemplateEntityById(productEntity.getTemplate().getId())) {
+            throw new ObjectNotFound("Active template not found");
+        }
+
         validate(productId, authenticatedUserId, productEntity);
 
         List<Component> currentComponents = getComponentsOfCustomProductEntity(productEntity);
@@ -160,8 +164,8 @@ public class CustomProductManagerImpl implements CustomProductManager {
         if(!userRepository.existsById(request.getUserId())) {
             throw new ObjectNotFound("User not found");
         }
-        if(!templateRepository.existsById(request.getTemplateId())) {
-            throw new ObjectNotFound("Template not found");
+        if(!templateRepository.existsActiveTemplateEntityById(request.getTemplateId())) {
+            throw new ObjectNotFound("Active template not found");
         }
         if(!statusRepository.existsById(request.getStatusId())){
             throw new ObjectNotFound("Status not found");
