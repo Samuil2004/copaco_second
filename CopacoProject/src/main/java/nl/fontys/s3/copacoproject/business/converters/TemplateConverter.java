@@ -19,6 +19,7 @@ public final class TemplateConverter {
                 .configurationType(entity.getConfigurationType())
                 .image(entity.getImage())
                 .components(ComponentTypeList_TemplateConverter.convertFromEntityToBase(componentTypeEntities))
+                .active(entity.isActive())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public final class TemplateConverter {
                 .category(CategoryConverter.convertFromBaseToEntity(template.getCategory()))
                 .configurationType(template.getConfigurationType())
                 .image(template.getImage())
+                .active(template.isActive())
                 .build();
     }
 
@@ -40,6 +42,7 @@ public final class TemplateConverter {
                 .name(templateEntity.getName())
                 .components(componentTypes)
                 .configurationType(templateEntity.getConfigurationType())
+                .active(templateEntity.isActive())
                 .build();
     }
 }

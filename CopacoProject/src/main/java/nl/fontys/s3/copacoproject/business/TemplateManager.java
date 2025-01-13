@@ -11,11 +11,11 @@ import java.util.List;
 
 public interface TemplateManager {
     void createTemplate(CreateTemplateRequest request, MultipartFile file) throws IOException;
-    void deleteTemplate(long id);
     TemplateObjectResponse getTemplateById(long id);
     List<Template> getTemplates();
     List<Template> getTemplatesByName(String name);
     List<TemplateObjectResponse> getFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType);
     int getNumberOfTemplates(Long categoryId, String configurationType);
     void updateTemplate(long templateId, UpdateTemplateRequest request, MultipartFile file) throws IOException;
+    void updateTemplateStatus(Long id, boolean active);
 }

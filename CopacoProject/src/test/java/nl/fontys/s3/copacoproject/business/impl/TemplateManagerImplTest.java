@@ -31,12 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TemplateManagerImplTest {
@@ -224,29 +224,6 @@ class TemplateManagerImplTest {
         ComponentTypeList_Template savedItem = captor.getValue();
         assertThat(savedItem.getTemplate()).isEqualTo(templateEntity);
         assertThat(savedItem.getComponentType()).isEqualTo(componentTypeEntity);
-    }
-
-
-    @Test
-    void testDeleteTemplate() {
-        // Setup
-        when(mockTemplateRepository.existsById(0L)).thenReturn(true);
-
-        // Run the test
-        templateManagerImplUnderTest.deleteTemplate(0L);
-
-        // Verify the results
-        verify(mockComponentTypeListRepository).deleteByTemplateId(0L);
-        verify(mockTemplateRepository).deleteById(0L);
-    }
-
-    @Test
-    void testDeleteTemplate_TemplateRepositoryExistsByIdReturnsFalse() {
-        // Setup
-        when(mockTemplateRepository.existsById(0L)).thenReturn(false);
-
-        // Run the test
-        assertThatThrownBy(() -> templateManagerImplUnderTest.deleteTemplate(0L)).isInstanceOf(ObjectNotFound.class);
     }
 
     @Test
@@ -1094,5 +1071,58 @@ class TemplateManagerImplTest {
         verify(mockTemplateRepository).save(templateEntity);
         verify(mockComponentTypeListRepository).save(any());
     }
+
+    @Test
+    void testUpdateTemplateStatus_TemplateExists_ActiveTrue() {
+        // Arrange
+        TemplateEntity templateEntity = TemplateEntity.builder()
+                .id(1L)
+                .active(false)
+                .build();
+
+        when(mockTemplateRepository.findById(1L)).thenReturn(Optional.of(templateEntity));
+
+        // Act
+        templateManagerImplUnderTest.updateTemplateStatus(1L, true);
+
+        // Assert
+        assertThat(templateEntity.isActive()).isTrue();
+        verify(mockTemplateRepository, times(1)).findById(1L);
+        verify(mockTemplateRepository, times(1)).save(templateEntity);
+    }
+
+    @Test
+    void testUpdateTemplateStatus_TemplateExists_ActiveFalse() {
+        // Arrange
+        TemplateEntity templateEntity = TemplateEntity.builder()
+                .id(1L)
+                .active(true)
+                .build();
+
+        when(mockTemplateRepository.findById(1L)).thenReturn(Optional.of(templateEntity));
+
+        // Act
+        templateManagerImplUnderTest.updateTemplateStatus(1L, false);
+
+        // Assert
+        assertThat(templateEntity.isActive()).isFalse();
+        verify(mockTemplateRepository, times(1)).findById(1L);
+        verify(mockTemplateRepository, times(1)).save(templateEntity);
+    }
+
+    @Test
+    void testUpdateTemplateStatus_TemplateDoesNotExist() {
+        // Arrange
+        when(mockTemplateRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> templateManagerImplUnderTest.updateTemplateStatus(1L, true))
+                .isInstanceOf(ObjectNotFound.class)
+                .hasMessageContaining("Template not found");
+
+        verify(mockTemplateRepository, times(1)).findById(1L);
+        verify(mockTemplateRepository, never()).save(any(TemplateEntity.class));
+    }
+
 
 }

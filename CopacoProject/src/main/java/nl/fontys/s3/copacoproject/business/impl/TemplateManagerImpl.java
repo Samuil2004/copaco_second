@@ -68,6 +68,7 @@ public class TemplateManagerImpl implements TemplateManager {
                 .category(category)
                 .configurationType(request.getConfigurationType())
                 .image(imageInByte)
+                .active(true)
                 .build();
 
         TemplateEntity templateEntity = TemplateConverter.convertFromBaseToEntity(template);
@@ -120,17 +121,6 @@ public class TemplateManagerImpl implements TemplateManager {
         }
     }
 
-
-
-    @Override
-    @Transactional
-    public void deleteTemplate(long id) {
-        if(templateRepository.existsById(id)){
-            componentTypeListRepository.deleteByTemplateId(id);
-            templateRepository.deleteById(id);
-        }
-        else throw new ObjectNotFound("Template not found");
-    }
     @Override
     public TemplateObjectResponse getTemplateById(long id) {
         if(!templateRepository.existsById(id)) {
@@ -241,6 +231,17 @@ public class TemplateManagerImpl implements TemplateManager {
 
         updateTemplateData(templateEntity, request.getName(), CategoryConverter.convertFromBaseToEntity(category), imageInBytes);
         updateTemplateComponents(templateEntity, request.getComponentTypes());
+    }
+
+    @Override
+    public void updateTemplateStatus(Long id, boolean active) {
+        TemplateEntity templateEntity = templateRepository.findById(id).orElse(null);
+        if(templateEntity == null) {
+            throw new ObjectNotFound("Template not found");
+        }
+
+        templateEntity.setActive(active);
+        templateRepository.save(templateEntity);
     }
 
     private void updateTemplateData(TemplateEntity templateEntity, String newName, CategoryEntity category, byte[] newImage) {

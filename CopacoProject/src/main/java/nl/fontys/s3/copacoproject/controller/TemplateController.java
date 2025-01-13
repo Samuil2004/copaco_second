@@ -4,6 +4,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.UpdateTemplateStatusRequest;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.dto.template_dto.CreateTemplateRequest;
@@ -98,18 +99,6 @@ public ResponseEntity<Void> createTemplate(
         return ResponseEntity.ok().body(numberOfTemplates);
     }
 
-    @DeleteMapping("/{id}")
-    @RolesAllowed({"ADMIN"})
-    public ResponseEntity<Void> deleteTemplate(@PathVariable long id) {
-        try{
-            templateManager.deleteTemplate(id);
-            return ResponseEntity.ok().build();
-        }
-        catch(ObjectNotFound e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<String> updateTemplate(
@@ -123,6 +112,15 @@ public ResponseEntity<Void> createTemplate(
         catch(IOException e){
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @PutMapping(value = "/{id}/status")
+    @RolesAllowed({"ADMIN"})
+    public ResponseEntity<Void> updateTemplateStatus(
+            @PathVariable long id,
+            @RequestBody @Validated UpdateTemplateStatusRequest request) {
+        templateManager.updateTemplateStatus(id, request.isActive());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{templateId}/componentTypes")

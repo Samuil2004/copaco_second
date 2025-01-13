@@ -1,5 +1,6 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
+import nl.fontys.s3.copacoproject.business.WebHookManager;
 import nl.fontys.s3.copacoproject.business.converters.StatusConverter;
 import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
@@ -43,6 +44,8 @@ class CustomProductManagerImplTest {
     private StatusRepository mockStatusRepository;
     @Mock
     private ComponentSpecificationListRepository mockComponentSpecificationListRepository;
+    @Mock
+    private WebHookManager mockWebHookManager;
 
     private CustomProductManagerImpl customProductManagerImplUnderTest;
 
@@ -50,7 +53,7 @@ class CustomProductManagerImplTest {
     void setUp(){
         customProductManagerImplUnderTest = new CustomProductManagerImpl(mockCustomProductRepository,
                 mockAssemblingRepository, mockComponentRepository, mockUserRepository, mockTemplateRepository,
-                mockStatusRepository, mockComponentSpecificationListRepository);
+                mockStatusRepository, mockComponentSpecificationListRepository, mockWebHookManager);
     }
 
     @Test
@@ -70,7 +73,6 @@ class CustomProductManagerImplTest {
                 .build();
 
         when(mockUserRepository.existsById(1L)).thenReturn(true);
-        when(mockTemplateRepository.existsById(0L)).thenReturn(true);
         when(mockStatusRepository.existsById(1)).thenReturn(true);
 
         // Ensure this matches the actual ID being used in the implementation
@@ -81,6 +83,7 @@ class CustomProductManagerImplTest {
         // Configure TemplateRepository.findTemplateEntityById(...)
         final TemplateEntity templateEntity = TemplateEntity.builder()
                 .id(0L)
+                .active(true)
                 .build();
         when(mockTemplateRepository.findTemplateEntityById(0L)).thenReturn(templateEntity);
 
@@ -126,6 +129,7 @@ class CustomProductManagerImplTest {
                 .componentPrice(0.0)
                 .build();
         when(mockComponentRepository.findComponentEntityByComponentId(0L)).thenReturn(componentEntity);
+        when(mockTemplateRepository.existsActiveTemplateEntityById(templateEntity.getId())).thenReturn(true);
 
         // Run the test
         final CreateCustomProductResponse result = customProductManagerImplUnderTest.createCustomProduct(request, 1L);
@@ -164,8 +168,6 @@ class CustomProductManagerImplTest {
                         .build()))
                 .statusId(0)
                 .build();
-        when(mockUserRepository.existsById(0L)).thenReturn(true);
-        when(mockTemplateRepository.existsById(0L)).thenReturn(false);
 
         // Run the test
         assertThatThrownBy(() -> customProductManagerImplUnderTest.createCustomProduct(request, 0L))
@@ -184,7 +186,7 @@ class CustomProductManagerImplTest {
                 .statusId(0)
                 .build();
         when(mockUserRepository.existsById(0L)).thenReturn(true);
-        when(mockTemplateRepository.existsById(0L)).thenReturn(true);
+        when(mockTemplateRepository.existsActiveTemplateEntityById(0L)).thenReturn(true);
         when(mockStatusRepository.existsById(0)).thenReturn(false);
 
         // Run the test
@@ -205,35 +207,6 @@ class CustomProductManagerImplTest {
                 .build();
 
         when(mockUserRepository.existsById(0L)).thenReturn(true);
-        when(mockTemplateRepository.existsById(0L)).thenReturn(true);
-        when(mockStatusRepository.existsById(1)).thenReturn(true);
-        when(mockUserRepository.findUserEntityById(0L)).thenReturn(UserEntity.builder()
-                .id(0L)
-                .build());
-
-        // Configure TemplateRepository.findTemplateEntityById(...)
-        final TemplateEntity templateEntity = TemplateEntity.builder()
-                .id(0L)
-                .build();
-        when(mockTemplateRepository.findTemplateEntityById(0L)).thenReturn(templateEntity);
-
-        // Configure CustomProductRepository.save(...) with a flexible matcher
-        final CustomProductEntity productEntity = CustomProductEntity.builder()
-                .id(0L)
-                .userId(UserEntity.builder()
-                        .id(0L)
-                        .build())
-                .template(TemplateEntity.builder()
-                        .id(0L)
-                        .build())
-                .status(StatusEntity.builder()
-                        .id(1)
-                        .name("DRAFT")
-                        .build())
-                .build();
-        when(mockCustomProductRepository.save(any(CustomProductEntity.class))).thenReturn(productEntity);
-
-        when(mockComponentRepository.existsById(0L)).thenReturn(false);
 
         // Run the test
         assertThatThrownBy(() -> customProductManagerImplUnderTest.createCustomProduct(request, 0L))
@@ -577,6 +550,7 @@ class CustomProductManagerImplTest {
                 .componentsIncluded(List.of(ComponentInCustomProductInput.builder()
                         .componentId(0L)
                         .build()))
+                .statusId(1)
                 .build();
 
         // Create consistent objects
@@ -584,7 +558,7 @@ class CustomProductManagerImplTest {
         final CustomProductEntity productEntity = CustomProductEntity.builder()
                 .id(0L)
                 .userId(UserEntity.builder().id(0L).build())
-                .template(TemplateEntity.builder().id(0L).build())
+                .template(TemplateEntity.builder().id(0L).active(true).build())
                 .status(StatusEntity.builder().id(1).name("DRAFT").build())
                 .build();
 
@@ -599,6 +573,7 @@ class CustomProductManagerImplTest {
 
         when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId((componentEntity),(productEntity)))
                 .thenReturn(false);
+        when(mockTemplateRepository.existsActiveTemplateEntityById(0L)).thenReturn(true);
 
         // Run the test
         customProductManagerImplUnderTest.updateCustomProduct(0L, request, 0L);
@@ -628,6 +603,39 @@ class CustomProductManagerImplTest {
     }
 
     @Test
+    void testUpdateCustomProduct_TemplateNotActive() {
+        // Arrange
+        long productId = 1L;
+        long authenticatedUserId = 2L;
+
+        // Mock product retrieval
+        CustomProductEntity productEntity = CustomProductEntity.builder()
+                .id(productId)
+                .template(TemplateEntity.builder().id(3L).build())
+                .status(StatusEntity.builder().id(1).build())
+                .build();
+        when(mockCustomProductRepository.findById(productId)).thenReturn(productEntity);
+
+        // Mock active template check
+        when(mockTemplateRepository.existsActiveTemplateEntityById(3L)).thenReturn(false);
+
+        UpdateCustomTemplateRequest request = UpdateCustomTemplateRequest.builder()
+                .statusId(2)
+                .componentsIncluded(Collections.emptyList())
+                .build();
+
+        // Act & Assert
+        assertThatThrownBy(() -> customProductManagerImplUnderTest.updateCustomProduct(productId, request, authenticatedUserId))
+                .isInstanceOf(ObjectNotFound.class)
+                .hasMessageContaining("Active template not found");
+
+        verify(mockCustomProductRepository, times(1)).findById(productId);
+        verify(mockTemplateRepository, times(1)).existsActiveTemplateEntityById(3L);
+        verifyNoMoreInteractions(mockCustomProductRepository, mockTemplateRepository);
+    }
+
+
+    @Test
     void testUpdateCustomProduct_CustomProductRepositoryExistsByIdReturnsFalse() {
         // Setup
         final UpdateCustomTemplateRequest request = UpdateCustomTemplateRequest.builder()
@@ -652,8 +660,6 @@ class CustomProductManagerImplTest {
                 .build();
         when(mockCustomProductRepository.findById(0L)).thenReturn(productEntity);
 
-        when(mockCustomProductRepository.existsById(0L)).thenReturn(false);
-
         // Run the test
         assertThatThrownBy(() -> customProductManagerImplUnderTest.updateCustomProduct(0L, request, 0L))
                 .isInstanceOf(ObjectNotFound.class);
@@ -666,6 +672,7 @@ class CustomProductManagerImplTest {
                 .componentsIncluded(List.of(ComponentInCustomProductInput.builder()
                         .componentId(0L)
                         .build()))
+                .statusId(1)
                 .build();
 
         // Create default entities
@@ -688,6 +695,7 @@ class CustomProductManagerImplTest {
         // Use any() matcher for complex objects in strict mode
         when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId(any(), eq(productEntity)))
                 .thenReturn(false);
+        when(mockTemplateRepository.existsActiveTemplateEntityById(0L)).thenReturn(true);
 
         // Run the test
         customProductManagerImplUnderTest.updateCustomProduct(0L, request, 0L);
@@ -708,11 +716,12 @@ class CustomProductManagerImplTest {
                 .componentsIncluded(List.of(ComponentInCustomProductInput.builder()
                         .componentId(1L)
                         .build()))
+                .statusId(1)
                 .build();
 
         // Create default entities
         final CustomProductEntity productEntity = CustomProductEntity.builder()
-                .id(0L)
+                .id(1L)
                 .userId(UserEntity.builder().id(0L).build())
                 .template(TemplateEntity.builder().id(0L).build())
                 .status(StatusEntity.builder().id(1).name("DRAFT").build())
@@ -727,8 +736,8 @@ class CustomProductManagerImplTest {
                 .build();
 
         // Stub repository methods
-        when(mockCustomProductRepository.findById(0L)).thenReturn(productEntity);
-        when(mockCustomProductRepository.existsById(0L)).thenReturn(true);
+        when(mockCustomProductRepository.findById(1L)).thenReturn(productEntity);
+        when(mockCustomProductRepository.existsById(1L)).thenReturn(true);
         when(mockComponentRepository.existsById(1L)).thenReturn(true);
         when(mockComponentRepository.findComponentEntityByComponentId(1L)).thenReturn(componentEntity);
 
@@ -741,8 +750,10 @@ class CustomProductManagerImplTest {
         when(mockAssemblingRepository.existsAssemblingEntityByComponentIdAndCustomProductId((componentEntity), (productEntity)))
                 .thenReturn(false);
 
+        when(mockTemplateRepository.existsActiveTemplateEntityById(0L)).thenReturn(true);
+
         // Run the test
-        customProductManagerImplUnderTest.updateCustomProduct(0L, request, 0L);
+        customProductManagerImplUnderTest.updateCustomProduct(1L, request, 0L);
 
         // Verify interactions
         verify(mockAssemblingRepository).deleteAll(argThat(argument ->
@@ -768,6 +779,7 @@ class CustomProductManagerImplTest {
                 .componentsIncluded(List.of(ComponentInCustomProductInput.builder()
                         .componentId(0L)
                         .build()))
+                .statusId(1)
                 .build();
 
         final CustomProductEntity productEntity = CustomProductEntity.builder()
@@ -778,18 +790,13 @@ class CustomProductManagerImplTest {
                 .build();
         when(mockCustomProductRepository.findById(0L)).thenReturn(productEntity);
 
-        when(mockCustomProductRepository.existsById(0L)).thenReturn(true);
-
         final ComponentEntity defaultComponentEntity = createDefaultComponentEntity();
-
-        when(mockComponentRepository.existsById(0L)).thenReturn(false);
 
         // Run the test
         assertThatThrownBy(() -> customProductManagerImplUnderTest.updateCustomProduct(0L, request, 0L))
                 .isInstanceOf(ObjectNotFound.class);
 
         // Verify
-        verify(mockComponentRepository).existsById(0L);
         verify(mockComponentSpecificationListRepository, never()).findByComponentId(defaultComponentEntity);
     }
 
@@ -799,18 +806,20 @@ class CustomProductManagerImplTest {
         // Setup
         final UpdateCustomTemplateRequest request = UpdateCustomTemplateRequest.builder()
                 .componentsIncluded(List.of(ComponentInCustomProductInput.builder()
-                        .componentId(0L) // Ensure this matches stubbed data
+                        .componentId(0L)
                         .build()))
+                .statusId(1)
                 .build();
 
         final CustomProductEntity productEntity = CustomProductEntity.builder()
                 .id(0L)
                 .userId(UserEntity.builder().id(0L).build())
-                .template(TemplateEntity.builder().id(0L).build())
+                .template(TemplateEntity.builder().id(0L).active(true).build())
                 .status(StatusEntity.builder().id(1).name("DRAFT").build())
                 .build();
         when(mockCustomProductRepository.findById(0L)).thenReturn(productEntity);
         when(mockCustomProductRepository.existsById(0L)).thenReturn(true);
+        when(mockTemplateRepository.existsActiveTemplateEntityById(0L)).thenReturn(true);
 
         final ComponentEntity componentEntity = ComponentEntity.builder()
                 .componentId(0L) // Matches the ID in the request

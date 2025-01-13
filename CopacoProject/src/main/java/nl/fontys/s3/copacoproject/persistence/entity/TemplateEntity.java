@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "template")  // Ensure the table name matches the database
+@Table(name = "template")
 public class TemplateEntity {
 
     @Id
@@ -36,4 +36,8 @@ public class TemplateEntity {
     @Lob
     @Column(name = "image", columnDefinition = "VARBINARY(MAX)")
     private byte[] image;
+
+    @Column(name="active")
+    @NotNull
+    private boolean active;
 }
