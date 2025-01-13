@@ -18,4 +18,5 @@ public class Template {
     private String configurationType;
     private byte[] image;
     private List<ComponentType> components;
+    private boolean active;
 }

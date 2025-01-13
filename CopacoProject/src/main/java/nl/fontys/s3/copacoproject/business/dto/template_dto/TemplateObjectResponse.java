@@ -19,4 +19,5 @@ public class TemplateObjectResponse {
     private String configurationType;
     private byte[] image;
     private List<String> components;
+    private boolean active;
 }
