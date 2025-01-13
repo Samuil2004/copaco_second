@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.3.3'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'jacoco'
+    id "org.sonarqube" version "5.1.0.4882"
 }
 
 group = 'nl.fontys.s3'
@@ -28,6 +29,17 @@ configurations {
 
 repositories {
     mavenCentral()
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "copaco")
+        property("sonar.projectName", "copaco")
+        property("sonar.host.url", "http://localhost:9000")
+        property("sonar.token", "sqp_5daf6275312c253fa0b42828a8223404380d2a1e")
+        property "sonar.coverage.exclusions", "**/src/main/java/nl/fontys/s3/copacoproject/configuration/**,**/src/main/java/nl/fontys/s3/copacoproject/controller/**,**/src/main/java/nl/fontys/s3/copacoproject/domain/**,**/src/main/java/nl/fontys/s3/copacoproject/persistance/**"
+    }
+
 }
 
 dependencies {
@@ -59,6 +71,12 @@ dependencies {
 
     //Mssql
     implementation 'com.microsoft.sqlserver:mssql-jdbc'
+
+    //MySQL deployment
+    implementation 'mysql:mysql-connector-java:8.0.32'
+
+    //PostgreSql
+    implementation 'org.postgresql:postgresql:42.5.1'
 
     //swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'

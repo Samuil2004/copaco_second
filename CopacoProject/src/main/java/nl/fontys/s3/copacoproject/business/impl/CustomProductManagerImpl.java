@@ -3,14 +3,14 @@ package nl.fontys.s3.copacoproject.business.impl;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CustomProductManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ActionDeniedException;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.Exceptions.UnauthorizedException;
+import nl.fontys.s3.copacoproject.business.exception.ActionDeniedException;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.UnauthorizedException;
 import nl.fontys.s3.copacoproject.business.converters.ComponentConverter;
 import nl.fontys.s3.copacoproject.business.converters.StatusConverter;
 import nl.fontys.s3.copacoproject.business.dto.component.ComponentInConfigurationResponse;
-import nl.fontys.s3.copacoproject.business.dto.customProductDto.*;
+import nl.fontys.s3.copacoproject.business.dto.custom_product_dto.*;
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.enums.Status;
 import nl.fontys.s3.copacoproject.persistence.*;
@@ -35,12 +35,14 @@ public class CustomProductManagerImpl implements CustomProductManager {
     private final StatusRepository statusRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
 
+    private final String unauthorizedText = "You are not authorized to perform this operation";
+
 
     @Override
     @Transactional
     public CreateCustomProductResponse createCustomProduct(CreateCustomProductRequest request, long authenticatedUserId) {
         if(request.getUserId() != authenticatedUserId) {
-            throw new UnauthorizedException("You are not authorized to perform this operation");
+            throw new UnauthorizedException(unauthorizedText);
         }
 
         validateCreateRequest(request);
@@ -120,6 +122,37 @@ public class CustomProductManagerImpl implements CustomProductManager {
 
         List<Component> currentComponents = getComponentsOfCustomProductEntity(productEntity);
         updateComponents(productEntity, currentComponents, request.getComponentsIncluded());
+        if(request.getStatusId() != productEntity.getStatus().getId()){
+            productEntity.setStatus(StatusConverter.convertFromBaseToEntity(Status.fromValue(request.getStatusId())));
+            customProductRepository.save(productEntity);
+        }
+    }
+
+    @Override
+    public int getTotalNumberOfCustomProductsByStatus(Long categoryId, String status) {
+        return customProductRepository.countCustomProductEntitiesByStatusAndCategoryId(
+                categoryId,StatusConverter.convertFromBaseToEntity(Status.valueOf(status)));
+    }
+
+    @Override
+    public int getTotalNumberOfProductsByConfigurationTypeAndStatus(String configurationType, String status) {
+        return customProductRepository.countCustomProductEntitiesByConfigurationTypeAndStatus(
+                configurationType, StatusConverter.convertFromBaseToEntity(Status.valueOf(status)));
+    }
+
+    @Override
+    public double getTotalIncome() {
+        return customProductRepository.sumTotalIncome();
+    }
+
+    @Override
+    public double getIncomeByConfigurationType(String configurationType) {
+        return customProductRepository.sumIncomeByConfigurationType(configurationType);
+    }
+
+    @Override
+    public double getAverageOrderPrice() {
+        return customProductRepository.calculateAverageFinishedProductPrice();
     }
 
     private void validateCreateRequest(CreateCustomProductRequest request){
@@ -154,7 +187,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
     private void validateGetRequest( long userId,long authenticatedUserId, int statusId) {
 
         if(userId != authenticatedUserId) {
-            throw new UnauthorizedException("You are not authorized to perform this operation");
+            throw new UnauthorizedException(unauthorizedText);
         }
         if(!userRepository.existsById(userId)) {
             throw new ObjectNotFound("User not found");
@@ -195,7 +228,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
 
     private void validate(long productId, long authenticatedUserId, CustomProductEntity productEntity) {
         if(authenticatedUserId != productEntity.getUserId().getId()) {
-            throw new UnauthorizedException("You are not authorized to perform this operation");
+            throw new UnauthorizedException(unauthorizedText);
         }
         if(!customProductRepository.existsById(productId)) {
             throw new ObjectNotFound("Custom product not found");

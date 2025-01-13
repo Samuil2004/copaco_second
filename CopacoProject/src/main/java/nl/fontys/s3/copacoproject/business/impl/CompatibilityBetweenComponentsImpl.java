@@ -337,7 +337,7 @@
 //        //Add the specification type that should be considered for the searched component type and the values that should relate to this specification type, in order
 //        //to be compatible with the selected component
 //        allSpecificationsThatShouldBeConsideredFromTheSecondComponentSide.put(specificationForTheSearchedComponents, specMap.entrySet().iterator().next().getValue());
-//
+
 //        //if it is the first component from the provided ones in the request and there are no compatible components (because it is the first one,
 //        //then take the first ten components from the searched component type that satisfy the rule [later, they will be filtered, but now in this if statement]
 //        if (indexOfProvidedComponent == 0 && compatibleComponentsSoFar.isEmpty()) {
@@ -1221,11 +1221,12 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityBetweenComponents;
-import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
+import nl.fontys.s3.copacoproject.business.exception.CompatibilityError;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
@@ -1241,7 +1242,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -1250,36 +1250,54 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentRepository componentRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
+    private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
     private final SpecificationTypeComponentTypeRepository specificationTypeComponentTypeRepository;
+    private static final String VALUE_KEY = "value";
+    private static final String ID_KEY = "id";
+    private static final String ID2_KEY = "id2";
+    private static final String COMPATIBLE_COMPONENTS_NOT_FOUND = "Compatible components from searched component type were not found;";
 
-    private List<Long> checkIfGivenIdsExistInDatabase(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
-        List<Long> notNullIds = Stream.of(request.getFirstComponentId(),
-                        request.getSecondComponentId(),
-                        request.getThirdComponentId(),
-                        request.getFourthComponentId(),
-                        request.getFifthComponentId(),
-                        request.getSixthComponentId(),
-                        request.getSeventhComponentId())
-                .filter(Objects::nonNull)
-                .toList();
-
-        List<Long> missingIds = notNullIds.stream()
+        List<Long> nonExistingIds = request.getComponentIds().stream()
                 .filter(id -> !componentRepository.existsById(id))
                 .toList();
-        if (!missingIds.isEmpty()) {
-            throw new ObjectNotFound("Components not found: " + missingIds);
+        if (!nonExistingIds.isEmpty()) {
+            throw new ObjectNotFound("Components not found: " + nonExistingIds);
         }
-        return notNullIds;
+        return request.getComponentIds();
     }
 
+    private void checkIfCongfigurationTypeChanged(String configurationTypeFromRequest,Long componentTypeId,Long componentId)
+    {
+        Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationTypeFromRequest,componentTypeId);
+        //This is for the unique cases like graphics card, where the graphics card do not have specification for their purpose, which means that they are compatible with
+        // all configuration types that are in the switch statements (PC,WORKSTATION,NOTEBOOK)but not (City Bike and Downhill)
+        if(componentPurposeAndSpecificationId.isEmpty())
+        {
+            return;
+        }
+        Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
+        //this query checks if the configuration type the current component is meant for is the same with the one provided in the
+        //request (ex: if the first selected component is for PC and the endpoint request is corrupted and instead of PC, Server is passed as configuration type, it should throw an error)
+        boolean sameConfigurationType = componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(componentId,firstEntry.getKey(),firstEntry.getValue());
+        if(!sameConfigurationType)
+        {
+            throw new CompatibilityError("One of the selected components is meant to be used in a different configuration");
+        }
+    }
+
+
+
     @Override
-    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request)
+    public List<GetAutomaticCompatibilityResponse> automaticCompatibility(ConfiguratorRequest request)
     {
         boolean thereIsNextPage = true;
-        Pageable pageable = PageRequest.of(request.getPageNumber(), 11);
+        Pageable pageable = PageRequest.of(request.getPageNumber(), 10);
+        Pageable checkNextPageSinceComponent = PageRequest.of((request.getPageNumber()+1)*10, 1);
+
         String typeOfConfiguration = request.getTypeOfConfiguration();
-        List<ComponentEntity> foundComponentsThatSatisfyAllFilters = new ArrayList<>();
+        List<ComponentEntity> foundComponentsThatSatisfyAllFilters;
         long startTime = System.nanoTime();
         Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = new HashMap<>();
         try {
@@ -1292,16 +1310,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             //Handle PSU
             if(request.getSearchedComponentTypeId() == 5)
             {
-                List<ComponentEntity> foundPowerSupplies = handlePowerSupply(notNullIds,typeOfConfiguration,pageable);
-                if(foundPowerSupplies.isEmpty())
-                {
-                    throw new ObjectNotFound("Compatible components from searched component type were not found");
-                }
-                if(foundPowerSupplies.size() < 11)
-                {
-                    thereIsNextPage = false;
-                }
-                return buildResponse(foundPowerSupplies.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+                FilterComponentsResult foundPowerSupplies = handlePowerSupply(notNullIds,typeOfConfiguration,pageable,checkNextPageSinceComponent);
+                List<ComponentEntity> foundPSUs = foundPowerSupplies.getComponents();
+
+                return buildResponse(foundPSUs,foundPowerSupplies.getThereIsNextPage());
             }
 
                 for (Long componentId : notNullIds) {
@@ -1311,23 +1323,28 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     if (Objects.equals(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId())) {
                         throw new CompatibilityError("Once a component is selected, other components from the same category can not be searched.");
                     }
-
+                    //This method checks if the configuration type in the request is the same as the configuration type of the current component
+                    checkIfCongfigurationTypeChanged(typeOfConfiguration,componentTypeIdOfProvidedComponent,componentId);
                     //Get all distinct specification ids(from the rules table) that should be considered between the current component type and the searched component type
                     List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeIdOfProvidedComponent, request.getSearchedComponentTypeId(),typeOfConfiguration);
 
                     if (allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes.isEmpty()) {
-                        if (notNullIds.indexOf(componentId) == 0) {
+                        if (notNullIds.indexOf(componentId) == 0 && notNullIds.size() == 1) {
                             //If there are no compatibility rules and there is only one componentId provided, return first ten components from the searched component type
-                            if (notNullIds.size() == 1) {
-                                return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
-                            }
-                            continue;
+                                FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
+                                return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
                         }
                         if (notNullIds.indexOf(componentId) == notNullIds.size() - 1) {
                             //If there are no compatibility rules, there are not foundComponents until now and it is the last provided component id, return first ten components from the searched component type
-                            if(foundComponentsThatSatisfyAllFilters.isEmpty())
+
+
+                            //If there are no rules to be considered and it is the last component from the list of provided components, then get without filtering,otherwise,if there are rules
+                            //and it is the last components (in this case for this last component, there aren't rules), then we should break the loop for the ids, and go to the custom query to consider the rules,
+                            //and fetch the searched components that satisfy the rules
+                            if(specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.isEmpty())
                             {
-                                return fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable);
+                                FilterComponentsResult foundComponents = fetchComponentsWithoutFiltering(typeOfConfiguration,request,pageable,checkNextPageSinceComponent);
+                                return buildResponse(foundComponents.getComponents(),foundComponents.getThereIsNextPage());
                             }
                             break;
                         }
@@ -1337,7 +1354,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     Map<Long,List<String>> updatedIdsAndValues = addFilteringCriteriaForSearchedComponentBasedOnRuleBetweenProvidedComponentTypeAdnSearchedComponentType(allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,componentId,componentTypeIdOfProvidedComponent,request.getSearchedComponentTypeId(),specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,typeOfConfiguration);
                     specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = updatedIdsAndValues;
                 }
-                //Build a dynamic query including all filters for searching for components within the searched component type that satisfy all rules
+                //Add the configuration type and the corresponding specification id to the map as well as it is a specification that should be considered
+            Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(typeOfConfiguration,request.getSearchedComponentTypeId());
+            if(!componentPurposeAndSpecificationId.isEmpty()) {
+                Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
+                specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(firstEntry.getKey(), firstEntry.getValue());
+            }
+            //Build a dynamic query including all filters for searching for components within the searched component type that satisfy all rules
             Specification<ComponentEntity> spec = ComponentRepository.dynamicSpecification(
                     request.getSearchedComponentTypeId(), specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues);
 
@@ -1345,11 +1368,21 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             Page<ComponentEntity> page = componentRepository.findAll(spec, pageable);
             foundComponentsThatSatisfyAllFilters = page.getContent();
             if(foundComponentsThatSatisfyAllFilters.isEmpty()){
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+                throw new ObjectNotFound(COMPATIBLE_COMPONENTS_NOT_FOUND);
             }
-            if(foundComponentsThatSatisfyAllFilters.size() < 11)
+            if(foundComponentsThatSatisfyAllFilters.size() < 10)
             {
                 thereIsNextPage = false;
+            }
+            else {
+                Page<ComponentEntity> checkForNextPage = componentRepository.findAll(spec,checkNextPageSinceComponent);
+                if(checkForNextPage.getContent().size() == 1)
+                {
+                    thereIsNextPage = true;
+                }
+                else {
+                    thereIsNextPage = false;
+                }
             }
 
         }finally {
@@ -1360,15 +1393,15 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         return buildResponse(foundComponentsThatSatisfyAllFilters.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
     }
 
-    private List<GetAutomaticCompatibilityResponse> fetchComponentsWithoutFiltering(String typeOfConfiguration,GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest request,Pageable pageable)
+    private FilterComponentsResult fetchComponentsWithoutFiltering(String typeOfConfiguration,ConfiguratorRequest request,Pageable pageable,Pageable checkNextPageSinceComponent)
     {
         boolean thereIsNextPage = false;
         List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = new ArrayList<>();
 
         //Get the specification "meant for"[purpose] (most of the components have specification such as PC or Server or Workstation which helps to filter only the components for the selected type of configuration
-        Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = defineValuesForComponentsFilteringBasedOnConfigurationType(typeOfConfiguration,request.getSearchedComponentTypeId());
+        Map<Long,List<String>> getTheFilteringForTheSearchedComponentType = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(typeOfConfiguration,request.getSearchedComponentTypeId());
         //If it is empty (in case fo video card and dvd because they do not have such specifications), just get eleven components from the searched component type based on the page number
-        if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+        if (getTheFilteringForTheSearchedComponentType.isEmpty())
         {
             //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
             elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
@@ -1384,66 +1417,106 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         //if not get all component without filtering (case: videocard [only for PCs and Workstations] and dvd)
 
         //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
-        //List<ComponentEntity> elevenComponentsFromTheSearchedComponentType = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), pageable);
         if (elevenComponentsFromTheSearchedComponentType.isEmpty()) {
             throw new CompatibilityError("COMPONENTS_FROM_CATEGORY_NOT_FOUND");
         }
         //If there are 11 components, this means that there is at least 1 component for the next page
-        if (elevenComponentsFromTheSearchedComponentType.size() == 11) {
-            thereIsNextPage = true;
-        } else {
-            thereIsNextPage = false;
+        if(elevenComponentsFromTheSearchedComponentType.size() >= 10)
+        {
+            List<ComponentEntity> nextPageCheck;
+            if (getTheFilteringForTheSearchedComponentType == null || getTheFilteringForTheSearchedComponentType.isEmpty())
+            {
+                //Get 11 components from the searched category based on the pageable (page num and size). We need eleven in order to know if there is at least one more component for the next page
+                nextPageCheck = componentRepository.findByComponentType_Id(request.getSearchedComponentTypeId(), checkNextPageSinceComponent);
+            }
+            //If it is not null, consider the configuration type (ex: if the configuration is for PC, only components within the searched component type that are meant for PC should be retrieved)
+            else
+            {
+                //Get 11 components from the searched category based on the pageable (page num and size) and the configuration type. We need eleven in order to know if there is at least one more component for the next page
+                Map.Entry<Long, List<String>> firstEntry = getTheFilteringForTheSearchedComponentType.entrySet().iterator().next();
+                nextPageCheck = componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(request.getSearchedComponentTypeId(),firstEntry.getKey(),firstEntry.getValue(),checkNextPageSinceComponent);
+            }
+            if(nextPageCheck.size() == 1)
+            {
+                thereIsNextPage = true;
+            }
         }
-        //If it is the only component in the request, immediately return the first ten components from the searched category
-        //return only the first ten
-        return buildResponse(elevenComponentsFromTheSearchedComponentType.stream().limit(10).collect(Collectors.toList()),thereIsNextPage);
+
+        return FilterComponentsResult.builder().components(elevenComponentsFromTheSearchedComponentType).thereIsNextPage(thereIsNextPage).build();
     }
 
-    private List<ComponentEntity> handlePowerSupply(List<Long> notNullIds,String configurationType,Pageable pageable) {
+    private FilterComponentsResult handlePowerSupply(List<Long> notNullIds,String configurationType,Pageable pageable,Pageable checkNextPageSinceComponent) {
         double totalPowerConsumption = 0;
         double gpuCpuConsumptionFor12thRail = 0;
+        boolean thereIsNextPage;
+        //this checks if the power supply supports the selected configuration type
+        specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationType,5L);
 
         for (Long componentId : notNullIds) {
             Long componentTypeIdOfProvidedComponent = componentRepository.findComponentTypeIdByComponentId(componentId);
-            Map<String,Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeIdOfProvidedComponent);
-            Iterator<Map.Entry<String, Long>> iterator = idOrValueToBeConsidered.entrySet().iterator();
-            Map.Entry<String, Long> firstEntry = iterator.next();
-            //Double valueForPowerConsumption;
-            Double valueForPowerConsumption;
-            if(Objects.equals(firstEntry.getKey(), "id"))
-            {
-                valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,firstEntry.getValue());
-                if(valueForPowerConsumption == null)
-                {
-                    Map.Entry<String, Long> secondEntry = iterator.next();
-                    if(secondEntry != null)
-                    {
-                        valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId,secondEntry.getValue());
-                    }
-                }
-            }
-            else {
-                valueForPowerConsumption = (double)idOrValueToBeConsidered.get("value");
-            }
+            //This method checks if the configuration type in the request is the same as the configuration type of the current component
+            checkIfCongfigurationTypeChanged(configurationType,componentTypeIdOfProvidedComponent,componentId);
+
+            Double valueForPowerConsumption = calculatePowerConsumption(componentId, componentTypeIdOfProvidedComponent);
+
             if(valueForPowerConsumption == null)
             {
                 continue;
             }
             totalPowerConsumption += valueForPowerConsumption;
-            if(componentTypeIdOfProvidedComponent == 2 || componentTypeIdOfProvidedComponent == 3)
+            if(componentTypeIdOfProvidedComponent == 1 || componentTypeIdOfProvidedComponent == 3)
             {
                 gpuCpuConsumptionFor12thRail += valueForPowerConsumption;
             }
         }
-        return componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
+        List<ComponentEntity> foundPSUs = componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,pageable);
+        if(foundPSUs.isEmpty())
+        {
+            throw new ObjectNotFound("PSUs that can handle the power consumption were not found");
+        }
+        if(foundPSUs.size() < 10)
+        {
+            thereIsNextPage = false;
+        }
+        else {
+            List<ComponentEntity> nextPageCheck = componentRepository.findComponentsBySpecificationsNative(totalPowerConsumption,configurationType,gpuCpuConsumptionFor12thRail,checkNextPageSinceComponent);
+            if(nextPageCheck.size() == 1)
+            {
+                thereIsNextPage = true;
+            }
+            else {
+                thereIsNextPage = false;
+            }
+        }
+        return FilterComponentsResult.builder().components(foundPSUs).thereIsNextPage(thereIsNextPage).build();
     }
 
+    private Double calculatePowerConsumption(Long componentId, Long componentTypeId) {
+        Map<String, Long> idOrValueToBeConsidered = defineValuesForPowerConsumptionSpecifications(componentTypeId);
+        Iterator<Map.Entry<String, Long>> iterator = idOrValueToBeConsidered.entrySet().iterator();
+
+        Map.Entry<String, Long> firstEntry = iterator.next();
+        Double valueForPowerConsumption;
+
+        if (Objects.equals(firstEntry.getKey(), ID_KEY)) {
+            valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId, firstEntry.getValue());
+
+            // Try second entry if the first value is null
+            if (valueForPowerConsumption == null && iterator.hasNext()) {
+                Map.Entry<String, Long> secondEntry = iterator.next();
+                valueForPowerConsumption = componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(componentId, secondEntry.getValue());
+            }
+        } else {
+            valueForPowerConsumption = (double) idOrValueToBeConsidered.get(VALUE_KEY);
+        }
+
+        return valueForPowerConsumption;
+    }
 
 
 
     private Map<Long,List<String>> addFilteringCriteriaForSearchedComponentBasedOnRuleBetweenProvidedComponentTypeAdnSearchedComponentType(List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,Long providedComponentId,Long providedComponentComponentTypeId,Long searchedComponentTypeId, Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,String typeOfConfiguration)
     {
-        Long specificationTypeId = null;
         for(Long specificationId : allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes) {
 
             //Get all values the provided component has for the specification
@@ -1451,7 +1524,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
             //If there aren't any, it means that it is not compatible
             if(allSpecificationsTheProvidedComponentHasForTheSpecification.isEmpty()){
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+                throw new ObjectNotFound("One of the selected components does not respect any of the rules between it and the searched one;");
             }
             //Get a list of objects each containing a specification2_id and value_of_second_specification for the searched component type, by provided component type 1 and 2 and specificationId (relation between component type and specification) for the first component and the values (Those objects can be for both manual and automatic compatibility)
             //* Lets assume that for specification type 1, the first component has values (DDR4-SDRAM and DDR5-SDRAM)
@@ -1470,9 +1543,11 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     ))
                     .collect(Collectors.toList());
 
+
+
             //If the list is empty, this means that eventhough the component has the specification, the values it has for this specification is not compatible with any other specification types, which means not compatible
             if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.isEmpty()){
-                throw new ObjectNotFound("Compatible components from searched component type were not found");
+                throw new ObjectNotFound(COMPATIBLE_COMPONENTS_NOT_FOUND);
             }
             for (SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
                 Long specificationIdToBeConsideredForSecondSpecification = specificationTypeAndValuesForIt.getSpecification2Id();
@@ -1563,190 +1638,33 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
     }
 
-
-    private Map<Long,List<String>> defineValuesForComponentsFilteringBasedOnConfigurationType(String configurationType, Long componentTypeId)
-    {
-        //Component voor - 1070
-        //Bedoel voor - 947
-        //Soort - 954
-        Map<Long, List<String>> serverConfig = new HashMap<>();
-        if(componentTypeId == 1)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1073L, List.of("Server"));
-                    break;
-                case "PC":
-                    serverConfig.put(1073L, List.of("Workstation"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1073L, List.of("Workstation"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 2)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 4)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 5)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(947L, List.of("Server","server"));
-                    break;
-                case "PC":
-                    serverConfig.put(947L, List.of("PC"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(947L, List.of("PC"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 6)
-        {
-            switch(configurationType)
-            {
-                case "PC":
-                    serverConfig.put(954L, List.of("PC"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 7)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(954L, List.of("Fan","Fan module"));
-                    break;
-                case "PC":
-                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(954L, List.of("Thermal paste"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 8)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(954L, List.of("Fan","Fan tray","Cooler"));
-                    break;
-                case "PC":
-                    serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(954L, List.of("Thermal paste"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 10)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else if(componentTypeId == 11)
-        {
-            switch(configurationType)
-            {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
-                    break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation","workstation"));
-                    break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
-                    break;
-            }
-            return serverConfig;
-        }
-        else {
-            return null;
-        }
-    }
-
-
     private Map<String,Long> defineValuesForPowerConsumptionSpecifications(Long componentTypeId)
     {
         //The map should store a string (the string should be either id if the long is an id of a specification,
         // or value, if we know concrete value (ex.motherboards power consumption that does not have a specification for the power consumption, but in general it should be around 50W))
         Map<String,Long> specificationTypeId = new LinkedHashMap<>();
         if (componentTypeId == 1L) {
-            specificationTypeId.put("id", 1120L);
+            specificationTypeId.put(ID_KEY, 1120L);
         } else if (componentTypeId == 2L) {
-            specificationTypeId.put("value", 50L);
+            specificationTypeId.put(VALUE_KEY, 50L);
         } else if (componentTypeId == 3L) {
-            specificationTypeId.put("id", 937L);
+            specificationTypeId.put(ID_KEY, 937L);
         } else if (componentTypeId == 4L) {
-            specificationTypeId.put("value", 10L);
+            specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 7L) {
-            specificationTypeId.put("value", 10L);
+            specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 8L) {
-            specificationTypeId.put("value", 10L);
+            specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 9L) {
-            specificationTypeId.put("value", 30L);
+            specificationTypeId.put(VALUE_KEY, 30L);
         } else if (componentTypeId == 10L) {
-            specificationTypeId.put("id", 1144L);
-            specificationTypeId.put("id2", 1145L);
+            specificationTypeId.put(ID_KEY, 1144L);
+            specificationTypeId.put(ID2_KEY, 1145L);
         } else if (componentTypeId == 11L) {
-            specificationTypeId.put("id", 1144L);
-            specificationTypeId.put("id2", 922L);
+            specificationTypeId.put(ID_KEY, 1144L);
+            specificationTypeId.put(ID2_KEY, 922L);
         } else {
-            specificationTypeId.put("id", 1120L);
+            specificationTypeId.put(ID_KEY, 1120L);
         }
         return specificationTypeId;
     }

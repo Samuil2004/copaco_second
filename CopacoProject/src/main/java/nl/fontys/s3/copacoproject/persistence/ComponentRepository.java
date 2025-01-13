@@ -1,5 +1,4 @@
 package nl.fontys.s3.copacoproject.persistence;
-import java.util.*;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.*;
 
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.Component_SpecificationList;
-import nl.fontys.s3.copacoproject.persistence.entity.supportingEntities.SpecificationTypeAndValuesForIt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +15,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -247,18 +243,23 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN (947, 954, 1070)
+    AND cs.specificationType.id IN :allDistinctSpecificationIdsThatHoldConfigurationType
     AND cs.value = :configurationType
     """)
-    Page<ComponentEntity> findComponentEntityByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, Pageable pageable);
+    Page<ComponentEntity> findComponentEntityByComponentTypeAndConfigurationType(@Param("componentTypeId") Long componentTypeId,
+                                                                                 @Param("configurationType") String configurationType,
+                                                                                 @Param("allDistinctSpecificationIdsThatHoldConfigurationType") List<Long> allDistinctSpecificationIdsThatHoldConfigurationType,
+                                                                                 Pageable pageable);
 
     @Query("""
     SELECT COUNT(c)
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN (947, 954, 1070)
+    AND cs.specificationType.id IN :allDistinctSpecificationIdsThatHoldConfigurationType
     AND cs.value = :configurationType
     """)
-    Integer countByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType);
+    Integer countByComponentTypeAndConfigurationType(@Param("componentTypeId") Long componentTypeId,
+                                                     @Param("configurationType") String configurationType,
+                                                     @Param("allDistinctSpecificationIdsThatHoldConfigurationType") List<Long> allDistinctSpecificationIdsThatHoldConfigurationType);
 }

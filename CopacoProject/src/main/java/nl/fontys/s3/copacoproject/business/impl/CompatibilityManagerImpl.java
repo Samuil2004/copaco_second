@@ -2,9 +2,9 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CompatibilityManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.CompatibilityError;
+import nl.fontys.s3.copacoproject.business.exception.ObjectExistsAlreadyException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.converters.CompatibilityTypeConverter;
 import nl.fontys.s3.copacoproject.business.converters.ComponentTypeConverter;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
@@ -12,7 +12,8 @@ import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRe
 import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
+import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
+import nl.fontys.s3.copacoproject.business.dto.user_dto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.*;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
@@ -209,15 +210,13 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
                     .rule(ruleBase)
                     .build();
 
-            GetAutomaticCompatibilityByIdResponse response = GetAutomaticCompatibilityByIdResponse.builder()
+            return GetAutomaticCompatibilityByIdResponse.builder()
                     .automaticCompatibilityId(automaticCompatibility.getId())
                     .componentType1Id(automaticCompatibility.getComponent1Id())
                     .componentType2Id(automaticCompatibility.getComponent2Id())
                     .specificationTypeFromComponentType1(automaticCompatibility.getRule().getSpecificationToConsider1Id().getComponentType().getSpecificationTypeList().stream().filter(specificationType -> specificationType.getSpecificationTypeId().equals(automaticCompatibility.getRule().getSpecificationToConsider1Id().getSpecificationType().getSpecificationTypeId())).findFirst().orElse(null))
                     .specificationTypeFromComponentType2(automaticCompatibility.getRule().getSpecificationToConsider2Id().getComponentType().getSpecificationTypeList().stream().filter(specificationType -> specificationType.getSpecificationTypeId().equals(automaticCompatibility.getRule().getSpecificationToConsider2Id().getSpecificationType().getSpecificationTypeId())).findFirst().orElse(null))
                     .build();
-
-            return response;
         }
         throw new ObjectNotFound("ERROR FINDING AUTOMATIC COMPATIBILITY");
 
@@ -283,6 +282,37 @@ public class CompatibilityManagerImpl implements CompatibilityManager {
     public List<RuleResponse> getRulesByCategoryAndConfigurationType(String compatibilityType, int currentPage, int itemsPerPage) {
         Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
         return compatibilityRepository.findRulesByConfigurationType(compatibilityType, pageable).getContent();
+    }
+
+    @Override
+    public RuleResponse getRuleById(Long ruleId) {
+        Optional<RuleResponse> foundRuleById = compatibilityRepository.findRuleById(ruleId);
+        if(foundRuleById.isPresent()) {
+            return foundRuleById.get();
+        }
+        throw new ObjectNotFound("Rule has not been found");
+    }
+
+    @Override
+    public void deleteRuleById(Long ruleId) {
+        Optional<CompatibilityEntity> foundCompatibilityByRuleId = compatibilityRepository.findByRuleId(ruleId);
+        if(foundCompatibilityByRuleId.isPresent()) {
+            compatibilityRepository.deleteById(foundCompatibilityByRuleId.get().getId());
+            ruleEntityRepository.deleteById(ruleId);
+        }
+    }
+
+    @Override
+    public RuleResponse updateRuleById(UpdateRuleRequest request) {
+        Optional<RuleEntity> foundRuleById = ruleEntityRepository.findById(request.getRuleId());
+        if(foundRuleById.isPresent()) {
+            foundRuleById.get().setValueOfFirstSpecification(request.getValueForTheFirstSpecification());
+            String commaSeparated = String.join(",", request.getValuesForTheSecondSpecification());
+            foundRuleById.get().setValueOfSecondSpecification(commaSeparated);
+            ruleEntityRepository.save(foundRuleById.get());
+            return getRuleById(foundRuleById.get().getId());
+        }
+        throw new ObjectNotFound("Rule has not been found");
     }
 
 }

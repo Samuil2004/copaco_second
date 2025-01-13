@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.CompatibilityError;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
+import nl.fontys.s3.copacoproject.business.exception.CompatibilityError;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityResponse;
-import nl.fontys.s3.copacoproject.business.dto.GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest;
-import nl.fontys.s3.copacoproject.domain.SpecificationType;
+import nl.fontys.s3.copacoproject.business.dto.ConfiguratorRequest;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -15,6 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.*;
 
@@ -39,590 +44,1453 @@ class CompatibilityBetweenComponentsImplTest {
     @Mock
     ComponentSpecificationListRepository componentSpecificationListRepository;
 
-    ComponentEntity givenComponent1;
-    ComponentEntity givenComponent2;
-    ComponentEntity givenComponent3;
+    @Mock
+    SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
+
+    //Components
+    ComponentEntity ram1;
+    ComponentEntity ram2;
+    ComponentEntity psu1;
+    ComponentEntity psu2;
+    ComponentEntity ssd1;
+    ComponentEntity graphicsCard1;
+    ComponentEntity processor1;
+    ComponentEntity motherboard1;
+    ComponentEntity hardDrive;
+    ComponentEntity cooling;
+    ComponentEntity processorCooling;
+    ComponentEntity computerCase;
+    ComponentEntity powerSupply;
+
+    //List of Components
+    List<ComponentEntity> listOfPsu1;
+    List<ComponentEntity> listOfPsu2;
+    List<ComponentEntity> listOf10PSUs;
+    List<ComponentEntity> listOf1Ram;
+    List<ComponentEntity> listOf10SSD;
+    List<ComponentEntity> listOf1SSD;
+    List<ComponentEntity> listOf1GraphicsCard;
+    List<ComponentEntity> listOf10GraphicsCards;
+    List<ComponentEntity> listOf1Processor;
+    List<ComponentEntity> listOf1Motherboard;
+    List<ComponentEntity> listOf1HardDrive;
+    List<ComponentEntity> listOf1Cooling;
+    List<ComponentEntity> listOf1ProcessorCooling;
+    List<ComponentEntity> listOf1ComputerCase;
+    List<ComponentEntity> listOf1PowerSupply;
 
 
-    ComponentEntity resultComponent3;
 
 
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestOneComponentOneSearched;
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestTwoComponentOneSearched;
 
-    GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest requestWithSameComponentAndComponentTypeIds;
+    //Requests
+    ConfiguratorRequest processorProvidedRamSearchedPC;
+    ConfiguratorRequest processorProvidedRamSearchedWorkstation;
+    ConfiguratorRequest processorProvidedRamSearchedServer;
+    ConfiguratorRequest processorProvidedRamSearchedLaptop;
 
-    List<CompatibilityEntity> automaticCompatibilityListBetweenComponent2AndComponentType4;
-    List<CompatibilityEntity> automaticCompatibilityListBetweenComponent3AndComponentType4;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedServer;
+    ConfiguratorRequest requestWithProcessorProvidedSSDSearchedLaptop;
 
-    CompatibilityEntity automaticCompatibility1;
-    CompatibilityEntity automaticCompatibility2;
-    CompatibilityEntity automaticCompatibility3;
+    ConfiguratorRequest requestWithProcessorProvidedHardDriveSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedHardDriveSearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedHardDriveSearchedServer;
 
-    ComponentTypeEntity componentTypeEntity1;
-    ComponentTypeEntity componentTypeEntity2;
-    ComponentTypeEntity componentTypeEntity3;
+    ConfiguratorRequest requestWithProcessorProvidedCoolingSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedCoolingSearchedLaptop;
+    ConfiguratorRequest requestWithProcessorProvidedCoolingSearchedServer;
 
-    RuleEntity ruleEntity1;
-    SpecficationTypeList_ComponentTypeEntity specficationTypeListEntity1;
-    SpecficationTypeList_ComponentTypeEntity specficationTypeListEntity2;
+    ConfiguratorRequest requestWithProcessorProvidedProcessorCoolingSearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedProcessorCoolingSearchedLaptop;
+    ConfiguratorRequest requestWithProcessorProvidedProcessorCoolingSearchedServer;
 
-    SpecificationTypeEntity specificationTypeEntity1;
-    SpecificationTypeEntity specificationTypeEntity2;
+    ConfiguratorRequest requestWithProcessorProvidedComputerCaseSearchedPC;
 
-    RuleEntity ruleEntity2;
-    SpecficationTypeList_ComponentTypeEntity specficationTypeListEntity3;
-    SpecficationTypeList_ComponentTypeEntity specficationTypeListEntity4;
+    ConfiguratorRequest requestWithProcessorProvidedPowerSupplySearchedPC;
+    ConfiguratorRequest requestWithProcessorProvidedPowerSupplySearchedWorkstation;
+    ConfiguratorRequest requestWithProcessorProvidedPowerSupplySearchedServer;
 
-    RuleEntity ruleEntity3;
-    SpecficationTypeList_ComponentTypeEntity specficationTypeListEntity5;
+    ConfiguratorRequest requestWithProcessorProvidedGraphicsCardSearchedPC;
 
-    SpecificationTypeEntity specificationTypeEntity3;
-    SpecificationTypeEntity specificationTypeEntity4;
-    SpecificationType specificationType1;
-    SpecificationType specificationType2;
+    ConfiguratorRequest requestWithGraphicsCardProvidedProcessorSearchedPC;
+    ConfiguratorRequest requestWithGraphicsCardProvidedProcessorSearchedServer;
+    ConfiguratorRequest requestWithGraphicsCardProvidedProcessorSearchedWorkstation;
 
-    Component_SpecificationList specificationForFirstComponent1;
-    Component_SpecificationList specificationForFirstComponent2;
-    Component_SpecificationList specificationForFirstComponent3;
-    Component_SpecificationList specificationForFirstComponent4;
-    Component_SpecificationList specificationForFirstComponent5;
-    Component_SpecificationList specificationForFirstComponent6;
-    Component_SpecificationList specificationForSecondComponent1;
-    Component_SpecificationList specificationForSecondComponent2;
-    Component_SpecificationList specificationForThirdResultComponent1;
-    Component_SpecificationList specificationForThirdComponent1;
-
-    List<Component_SpecificationList> allSpecificationsForComponentForFirstSpecification1;
-    List<Component_SpecificationList> allSpecificationsForComponentForSecondSpecification1;
-    List<Component_SpecificationList> allSpecificationsForComponentForThirdSpecification1;
-
-    List<Component_SpecificationList> allSpecificationsForComponentForSecondComponent;
-    List<Component_SpecificationList> allSpecificationsForComponentForThirdResultComponent;
-
-    List<GetAutomaticCompatibilityResponse> expectedResponse;
-    List<GetAutomaticCompatibilityResponse> expectedResponseWithOnlyOneGivenComponentIdAndNoRules;
-    List<GetAutomaticCompatibilityResponse> expectedResponseWithMoreThanOnceComponentsInRequest;
+    ConfiguratorRequest requestWithGraphicsCardProvidedMotherboardSearchedPC;
+    ConfiguratorRequest requestWithGraphicsCardProvidedMotherboardSearchedServer;
+    ConfiguratorRequest requestWithGraphicsCardProvidedMotherboardSearchedWorkstation;
 
 
-    Map<SpecificationType, List<String>> componentSpecificationsForSecondComponent;
-    Map<SpecificationType, List<String>> componentSpecificationsForThirdComponent;
+    ConfiguratorRequest requestWithProvidedComponentIdTheSameAsSearchedOne;
+    ConfiguratorRequest requestWithMaxProvidedComponentsAndLastSearchedPSU;
+    ConfiguratorRequest requestWithMaxProvidedComponentsAndLastSearchedPSU2;
 
-    GetAutomaticCompatibilityResponse expectedResponse1;
-    GetAutomaticCompatibilityResponse expectedResponse2;
-    GetAutomaticCompatibilityResponse expectedResponse3;
-    GetAutomaticCompatibilityResponse expectedResponse4;
+    ConfiguratorRequest requestProcessorAndGraphicsCardProvidedRamSearchedPC;
+    ConfiguratorRequest requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC;
 
-    BrandEntity brandEntity1;
-    BrandEntity brandEntity2;
-    BrandEntity brandEntity3;
+
+
+    ComponentTypeEntity componentTypeProcessor;
+    ComponentTypeEntity componentTypePSU;
+    ComponentTypeEntity componentTypeSSD;
+    ComponentTypeEntity componentTypeGraphicsCard;
+    ComponentTypeEntity componentTypeMotherboard;
+
+
+
+    //Distinct specification Ids from rules
+    List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam;
+
+    //Types of Configuration
+    String typeOfConfigurationPC;
+    String typeOfConfigurationServer;
+    String typeOfConfigurationWorkstation;
+    String typeOfConfigurationLaptop;
+
+    //Specifications for components
+    //Processor
+    String processorSpecification1;
+    String processorSpecification2;
+    String processorSpecification3;
+    String processorSpecification4;
+    List<String> specification1and2ForProcessor;
+    List<String> specification1and2ForProcessor2;
+
+
+    //Object responses
+    List<Object[]> objectResponseProcessorRam;
+    List<Object[]> objectResponseProcessorRam2;
+    List<Object[]> objectResponseProcessorRam3;
+
+    //Pages
+    Page<ComponentEntity> oneRam;
+    Page<ComponentEntity> twoRams;
+    Page<ComponentEntity> tenRams;
+
+
+    //Pageables
+    Pageable pageableFirstPage;
+    Pageable pageableCheckNextPage;
+
+
+    //Responses
+    GetAutomaticCompatibilityResponse ram1Response;
+    GetAutomaticCompatibilityResponse ram2Response;
+    GetAutomaticCompatibilityResponse psu1Response;
+    GetAutomaticCompatibilityResponse psu1ResponseWithNextPage;
+    GetAutomaticCompatibilityResponse ssd1ResponseWithNextPage;
+    GetAutomaticCompatibilityResponse ssd1ResponseWithoutNextPage;
+    GetAutomaticCompatibilityResponse graphicsCard1ResponseWithNextPage;
+    GetAutomaticCompatibilityResponse graphicsCard1ResponseWithoutNextPage;
+    GetAutomaticCompatibilityResponse processor1ResponseWithoutNextPage;
+    GetAutomaticCompatibilityResponse motherboard1ResponseWithoutNextPage;
+    GetAutomaticCompatibilityResponse ram1WithNextPageResponse;
+    GetAutomaticCompatibilityResponse ram2WithNextPageResponse;
+    GetAutomaticCompatibilityResponse hardDriveResponse;
+    GetAutomaticCompatibilityResponse coolingResponse;
+    GetAutomaticCompatibilityResponse processorCoolingResponse;
+    GetAutomaticCompatibilityResponse computerCaseResponse;
+    GetAutomaticCompatibilityResponse powerSupplyResponse;
+
+
+    List<GetAutomaticCompatibilityResponse> expectedResponseSearchedRamsForProcessor;
+    List<GetAutomaticCompatibilityResponse> expectedResponseHandlePowerSupply;
+    List<GetAutomaticCompatibilityResponse> expectedResponseHandlePowerSupplyWithNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponseHandlePowerSupplyWithoutNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1RamNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponseSSDWithNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponseSSDWithoutNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1GraphicCardWithoutNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1ProcessorNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1MotherboardNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponseSearchedRamsForProcessorWithoutNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1HardDriveNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1CoolingNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1ProcessorCoolingNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1ComputerCaseNoNextPage;
+    List<GetAutomaticCompatibilityResponse> expectedResponse1PowerSupplyNoNextPage;
+
+    Map<Long,List<String>> processorPC;
+    Map.Entry<Long, List<String>> firstEntryProcessorPC;
+
+    Map<Long, List<String>> processorServer;
+    Map.Entry<Long, List<String>> firstEntryProcessorServer;
+
+    Map<Long, List<String>> processorWorkstation;
+    Map.Entry<Long, List<String>> firstEntryProcessorWorkstation;
+
+    Map<Long,List<String>> ramPC;
+    Map.Entry<Long, List<String>> firstEntryRamPC;
+
+    Map<Long, List<String>> ramServer;
+    Map.Entry<Long, List<String>> firstEntryRamServer;
+
+    Map<Long, List<String>> ramWorkstation;
+    Map.Entry<Long, List<String>> firstEntryRamWorkstation;
+
+    Map<Long,List<String>> ssdPC;
+    Map.Entry<Long, List<String>> firstEntrySsdPC;
+
+    Map<Long,List<String>> ssdServer;
+    Map.Entry<Long, List<String>> firstEntrySsdServer;
+
+
+    Map<Long, List<String>> emptyMap;
+
+    Map<Long, List<String>> motherboardPC;
+    Map.Entry<Long, List<String>> firstEntryMotherboardPC;
+
 
     @BeforeEach
     void setUp() {
-        componentTypeEntity1 = ComponentTypeEntity.builder().id(2L).build();
-        componentTypeEntity2 = ComponentTypeEntity.builder().id(4L).build();
-        componentTypeEntity3 = ComponentTypeEntity.builder().id(3L).build();
 
-        brandEntity1 = BrandEntity.builder().id(1L).name("MSI").build();
-        brandEntity2 = BrandEntity.builder().id(2L).name("FURY").build();
-        brandEntity3 = BrandEntity.builder().id(3L).name("DELL").build();
+        componentTypeProcessor = ComponentTypeEntity.builder().id(1L).build();
+        componentTypeMotherboard = ComponentTypeEntity.builder().id(2L).build();
+        componentTypeGraphicsCard = ComponentTypeEntity.builder().id(3L).build();
+        componentTypePSU = ComponentTypeEntity.builder().id(5L).build();
+        componentTypeSSD = ComponentTypeEntity.builder().id(10L).build();
 
-        givenComponent1 = ComponentEntity.builder()
+
+        typeOfConfigurationPC = "PC";
+        typeOfConfigurationServer = "Server";
+        typeOfConfigurationWorkstation = "Workstation";
+        typeOfConfigurationLaptop = "Laptop";
+
+
+        processorSpecification1 = "SATA";
+        processorSpecification2 = "50";
+        processorSpecification3 = "compatibility test";
+        processorSpecification4 = "one more test";
+        specification1and2ForProcessor =  List.of(processorSpecification1, processorSpecification2);
+        specification1and2ForProcessor2 = List.of(processorSpecification3, processorSpecification4);
+
+        //Pageable
+        pageableFirstPage = PageRequest.of(1, 10);
+        pageableCheckNextPage = PageRequest.of(20, 1);
+
+
+        objectResponseProcessorRam = Arrays.asList(
+                new Object[]{1L, "SATA 1, SATA 2"},
+                new Object[]{2L, "21"});
+
+        objectResponseProcessorRam2 = Arrays.asList(
+                new Object[]{3L, null},
+                new Object[]{4L, "test"});
+
+        objectResponseProcessorRam3 = Arrays.asList(
+                new Object[]{1L, "SATA 2"},
+                new Object[]{4L, "test"});
+
+        //Components
+        ram1 = ComponentEntity.builder()
                 .componentId(1L)
-                .componentName("MSI motherboard")
-                .componentType(componentTypeEntity1)
-                .brand(brandEntity1)
+                .componentName("Ram 1")
                 .componentPrice(100.0)
                 .build();
 
-        givenComponent2 = ComponentEntity.builder()
+        ram2 = ComponentEntity.builder()
                 .componentId(2L)
-                .componentName("FURY ram 1")
-                .componentType(componentTypeEntity2)
-                .brand(brandEntity2)
+                .componentName("Ram 2")
                 .componentPrice(101.0)
                 .build();
 
-        givenComponent3 = ComponentEntity.builder()
-                .componentId(2L)
-                .componentName("DELL ssd 1")
-                .componentType(componentTypeEntity3)
-                .brand(brandEntity3)
-                .componentPrice(101.0)
-                .build();
-
-        resultComponent3 = ComponentEntity.builder()
+        psu1 = ComponentEntity.builder()
                 .componentId(3L)
-                .componentName("FURY ram 2")
-                .componentType(componentTypeEntity2)
-                .brand(brandEntity2)
-                .componentPrice(102.0)
+                .componentName("Psu 1")
+                .componentPrice(100.0)
                 .build();
 
-//        componentEntity4 = ComponentEntity.builder()
-//                .componentId(4L)
-//                .componentName("FURY ram 2")
-//                .componentType(componentTypeEntity2)
-//                .brand(brandEntity2)
-//                .componentPrice(102.0)
-//                .build();
-//
-
-        requestOneComponentOneSearched = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
-            .firstComponentId(2L)
-            .searchedComponentTypeId(4L)
-            .build();
-
-        requestTwoComponentOneSearched = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
-                .firstComponentId(2L)
-                .secondComponentId(3L)
-                .searchedComponentTypeId(4L)
+        psu2 = ComponentEntity.builder()
+                .componentId(3L)
+                .componentName("Psu 2")
+                .componentPrice(100.0)
                 .build();
 
-        requestWithSameComponentAndComponentTypeIds = GetCompatibilityBetweenSelectedItemsAndSearchedComponentTypeRequest.builder()
-                .firstComponentId(2L)
-                .searchedComponentTypeId(2L)
+        ssd1 = ComponentEntity.builder()
+                .componentId(4L)
+                .componentName("Ssd 1")
+                .componentPrice(100.0)
                 .build();
 
-
-        specificationTypeEntity1 = SpecificationTypeEntity.builder()
-                .id(96L)
-                .specificationTypeName("Clock Speed")
-                .unit("MHz")
+        graphicsCard1 = ComponentEntity.builder()
+                .componentId(5L)
+                .componentName("GC 1")
+                .componentPrice(100.0)
                 .build();
 
-        specificationTypeEntity2 = SpecificationTypeEntity.builder()
-                .id(96L)
-                .specificationTypeName("Clock Speed")
-                .unit("MHz")
+        processor1 = ComponentEntity.builder()
+                .componentId(6L)
+                .componentName("processor 1")
+                .componentPrice(100.0)
                 .build();
 
-        specificationTypeEntity3 = SpecificationTypeEntity.builder()
-                .id(97L)
-                .specificationTypeName("Double Data Rate")
-                .unit(null)
+        motherboard1 = ComponentEntity.builder()
+                .componentId(7L)
+                .componentName("motherboard 1")
+                .componentPrice(100.0)
                 .build();
 
-        specificationTypeEntity4 = SpecificationTypeEntity.builder()
-                .id(97L)
-                .specificationTypeName("Double Data Rate")
-                .unit(null)
-                .build();
-        specficationTypeListEntity1 = SpecficationTypeList_ComponentTypeEntity.builder()
-                .id(1L)
-                .componentType(componentTypeEntity1)
-                .specificationType(specificationTypeEntity1)
+        hardDrive = ComponentEntity.builder()
+                .componentId(11L)
+                .componentName("hard drive 1")
+                .componentPrice(100.0)
                 .build();
 
-        specficationTypeListEntity2 = SpecficationTypeList_ComponentTypeEntity.builder()
-                .id(2L)
-                .componentType(componentTypeEntity2)
-                .specificationType(specificationTypeEntity2)
+        cooling = ComponentEntity.builder()
+                .componentId(8L)
+                .componentName("cooling 1")
+                .componentPrice(100.0)
                 .build();
 
-        specficationTypeListEntity3 = SpecficationTypeList_ComponentTypeEntity.builder()
-                .id(191L)
-                .componentType(componentTypeEntity1)
-                .specificationType(specificationTypeEntity3)
+        processorCooling = ComponentEntity.builder()
+                .componentId(7L)
+                .componentName("processor cooling 1")
+                .componentPrice(100.0)
                 .build();
 
-        specficationTypeListEntity4 = SpecficationTypeList_ComponentTypeEntity.builder()
-                .id(191L)
-                .componentType(componentTypeEntity1)
-                .specificationType(specificationTypeEntity4)
+        computerCase = ComponentEntity.builder()
+                .componentId(6L)
+                .componentName("computer case 1")
+                .componentPrice(100.0)
                 .build();
 
-//        specficationTypeListEntity5 = SpecficationTypeList_ComponentTypeEntity.builder()
-//                .id(191L)
-//                .componentType(componentTypeEntity2)
-//                .specificationType(specificationTypeEntity3)
-//                .build();
-
-        specficationTypeListEntity5 = SpecficationTypeList_ComponentTypeEntity.builder()
-                .id(191L)
-                .componentType(componentTypeEntity3)
-                .specificationType(specificationTypeEntity4)
+        powerSupply = ComponentEntity.builder()
+                .componentId(5L)
+                .componentName("cooling 1")
+                .componentPrice(100.0)
                 .build();
 
+        //List of components
+        listOfPsu1 = List.of(psu1);
+        listOfPsu2 = List.of(psu2);
+        listOf10PSUs = List.of(psu1, psu2, new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity());
+        listOf1Ram = List.of(ram1);
+        listOf10SSD = List.of(ssd1, new ComponentEntity(), new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity());
+        listOf1SSD = List.of(ssd1);
+        listOf1GraphicsCard = List.of(graphicsCard1);
+        listOf10GraphicsCards = List.of(graphicsCard1, new ComponentEntity(), new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity());
+        listOf1Processor = List.of(processor1);
+        listOf1Motherboard = List.of(motherboard1);
+        listOf1HardDrive = List.of(hardDrive);
+        listOf1Cooling = List.of(cooling);
+        listOf1ProcessorCooling = List.of(processorCooling);
+        listOf1ComputerCase = List.of(computerCase);
+        listOf1PowerSupply = List.of(powerSupply);
+        //Pages
+        oneRam = new PageImpl<>(List.of(ram1),pageableFirstPage, 2);
+        twoRams = new PageImpl<>(List.of(ram1,ram2),pageableFirstPage, 2);
+        tenRams = new PageImpl<>(List.of(ram1,ram2, new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity(),new ComponentEntity()),pageableFirstPage, 2);
 
-
-
-
-        ruleEntity1 = RuleEntity.builder()
-                .id(1L)
-                .specificationToConsider1Id(specficationTypeListEntity1)
-                .specificationToConsider2Id(specficationTypeListEntity2)
+        //Responses
+        ram1Response = GetAutomaticCompatibilityResponse.builder()
+                .componentId(1L)
+                .componentName("Ram 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        ruleEntity2 = RuleEntity.builder()
-                .id(1L)
-                .specificationToConsider1Id(specficationTypeListEntity3)
-                .specificationToConsider2Id(specficationTypeListEntity4)
+        ram2Response = GetAutomaticCompatibilityResponse.builder()
+                .componentId(2L)
+                .componentName("Ram 2")
+                .price(101.0)
+                .thereIsNextPage(false)
                 .build();
 
-        ruleEntity3 = RuleEntity.builder()
-                .id(1L)
-                .specificationToConsider1Id(specficationTypeListEntity3)
-                .specificationToConsider2Id(specficationTypeListEntity5)
+        ram1WithNextPageResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(1L)
+                .componentName("Ram 1")
+                .price(100.0)
+                .thereIsNextPage(true)
                 .build();
-
-        automaticCompatibility1 = CompatibilityEntity.builder()
-                .id(1L)
-                .component1Id(componentTypeEntity1)
-                .component2Id(componentTypeEntity2)
-                .ruleId(ruleEntity1)
-                .build();
-
-        automaticCompatibility2 = CompatibilityEntity.builder()
-                .id(2L)
-                .component1Id(componentTypeEntity1)
-                .component2Id(componentTypeEntity2)
-                .ruleId(ruleEntity2)
+        ram2WithNextPageResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(2L)
+                .componentName("Ram 2")
+                .price(101.0)
+                .thereIsNextPage(true)
                 .build();
 
 
-        automaticCompatibilityListBetweenComponent2AndComponentType4 = List.of(automaticCompatibility1,automaticCompatibility2);
-
-        automaticCompatibility3 = CompatibilityEntity.builder()
-                .id(1L)
-                .component1Id(componentTypeEntity2)
-                .component2Id(componentTypeEntity3)
-                .ruleId(ruleEntity3)
+        psu1Response = GetAutomaticCompatibilityResponse.builder()
+                .componentId(3L)
+                .componentName("Psu 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        automaticCompatibilityListBetweenComponent3AndComponentType4 = List.of(automaticCompatibility3);
-        specificationForFirstComponent1 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent1)
-                .specificationType(specificationTypeEntity1)
-                .value("6000")
-                .build();
-        specificationForFirstComponent2 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent1)
-                .specificationType(specificationTypeEntity1)
-                .value("5800")
-                .build();
-        specificationForFirstComponent3 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent1)
-                .specificationType(specificationTypeEntity1)
-                .value("6400")
-                .build();
-        specificationForFirstComponent4 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent1)
-                .specificationType(specificationTypeEntity1)
-                .value("6600")
-                .build();
-        specificationForFirstComponent5 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent1)
-                .specificationType(specificationTypeEntity1)
-                .value("7000")
-                .build();
-        specificationForFirstComponent6 = Component_SpecificationList.builder()
-                .id(2L)
-                .componentId(givenComponent1)
-                .specificationType(specificationTypeEntity3)
-                .value("DDR5")
+        psu1ResponseWithNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(3L)
+                .componentName("Psu 1")
+                .price(100.0)
+                .thereIsNextPage(true)
                 .build();
 
-        specificationForSecondComponent1 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent2)
-                .specificationType(specificationTypeEntity2)
-                .value("6000")
+        ssd1ResponseWithoutNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(4L)
+                .componentName("Ssd 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        specificationForSecondComponent2 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent2)
-                .specificationType(specificationTypeEntity4)
-                .value("DDR5")
+        ssd1ResponseWithNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(4L)
+                .componentName("Ssd 1")
+                .price(100.0)
+                .thereIsNextPage(true)
                 .build();
 
-        specificationForThirdResultComponent1 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(resultComponent3)
-                .specificationType(specificationTypeEntity4)
-                .value("DDR5")
+        graphicsCard1ResponseWithoutNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(5L)
+                .componentName("GC 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        specificationForThirdComponent1 = Component_SpecificationList.builder()
-                .id(1L)
-                .componentId(givenComponent3)
-                .specificationType(specificationTypeEntity4)
-                .value("DDR5")
+        graphicsCard1ResponseWithNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(5L)
+                .componentName("GC 1")
+                .price(100.0)
+                .thereIsNextPage(true)
                 .build();
 
 
-        allSpecificationsForComponentForFirstSpecification1 = List.of(specificationForFirstComponent1,specificationForFirstComponent2,specificationForFirstComponent3,specificationForFirstComponent4,specificationForFirstComponent5);
-        allSpecificationsForComponentForSecondSpecification1 = List.of(specificationForFirstComponent6);
-        allSpecificationsForComponentForSecondComponent = List.of(specificationForSecondComponent1,specificationForSecondComponent2);
-        allSpecificationsForComponentForThirdResultComponent = List.of(specificationForThirdResultComponent1);
-        allSpecificationsForComponentForThirdSpecification1 = List.of(specificationForThirdComponent1);
-
-        specificationType1 = SpecificationType.builder()
-                .specificationTypeId(96L)
-                .specificationTypeName("Clock Speed")
+        processor1ResponseWithoutNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(6L)
+                .componentName("processor 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        specificationType2 = SpecificationType.builder()
-                .specificationTypeId(97L)
-                .specificationTypeName("Double Data Rate")
+        motherboard1ResponseWithoutNextPage = GetAutomaticCompatibilityResponse.builder()
+                .componentId(7L)
+                .componentName("motherboard 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        componentSpecificationsForSecondComponent = Map.ofEntries(Map.entry(specificationType1, List.of("6000")), Map.entry(specificationType2, List.of("DDR5")));
-        componentSpecificationsForThirdComponent = Map.ofEntries(Map.entry(specificationType2, List.of("DDR5")));
-        expectedResponse1 = GetAutomaticCompatibilityResponse.builder()
-                .componentId(givenComponent2.getComponentId())
-                .componentName(givenComponent2.getComponentName())
-                .componentTypeId(givenComponent2.getComponentType().getId())
-                .componentTypeName(givenComponent2.getComponentType().getComponentTypeName())
-                .componentImageUrl(givenComponent2.getComponentImageUrl())
-                .brand(givenComponent2.getBrand().getName())
-                .price(givenComponent2.getComponentPrice())
-                .componentSpecifications(componentSpecificationsForSecondComponent)
+        hardDriveResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(11L)
+                .componentName("hard drive 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        expectedResponse2 = GetAutomaticCompatibilityResponse.builder()
-                .componentId(resultComponent3.getComponentId())
-                .componentName(resultComponent3.getComponentName())
-                .componentTypeId(resultComponent3.getComponentType().getId())
-                .componentTypeName(resultComponent3.getComponentType().getComponentTypeName())
-                .componentImageUrl(resultComponent3.getComponentImageUrl())
-                .brand(resultComponent3.getBrand().getName())
-                .price(resultComponent3.getComponentPrice())
-                .componentSpecifications(componentSpecificationsForThirdComponent)
+        coolingResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(8L)
+                .componentName("cooling 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        expectedResponse3 = GetAutomaticCompatibilityResponse.builder()
-                .componentId(givenComponent2.getComponentId())
-                .componentName(givenComponent2.getComponentName())
-                .componentTypeId(givenComponent2.getComponentType().getId())
-                .componentTypeName(givenComponent2.getComponentType().getComponentTypeName())
-                .componentImageUrl(givenComponent2.getComponentImageUrl())
-                .brand(givenComponent2.getBrand().getName())
-                .price(givenComponent2.getComponentPrice())
-                .componentSpecifications(componentSpecificationsForSecondComponent)
+        processorCoolingResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(7L)
+                .componentName("processor cooling 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        expectedResponse4 = GetAutomaticCompatibilityResponse.builder()
-                .componentId(resultComponent3.getComponentId())
-                .componentName(resultComponent3.getComponentName())
-                .componentTypeId(resultComponent3.getComponentType().getId())
-                .componentTypeName(resultComponent3.getComponentType().getComponentTypeName())
-                .componentImageUrl(resultComponent3.getComponentImageUrl())
-                .brand(resultComponent3.getBrand().getName())
-                .price(resultComponent3.getComponentPrice())
-                .componentSpecifications(componentSpecificationsForThirdComponent)
+        computerCaseResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(6L)
+                .componentName("computer case 1")
+                .price(100.0)
+                .thereIsNextPage(false)
                 .build();
 
-        expectedResponseWithMoreThanOnceComponentsInRequest = List.of(expectedResponse4);
-        expectedResponse = List.of(expectedResponse2,expectedResponse1);
-        expectedResponseWithOnlyOneGivenComponentIdAndNoRules = List.of(expectedResponse3);
+        powerSupplyResponse = GetAutomaticCompatibilityResponse.builder()
+                .componentId(5L)
+                .componentName("power supply 1")
+                .price(100.0)
+                .thereIsNextPage(false)
+                .build();
+
+        expectedResponseSearchedRamsForProcessor = List.of(ram1Response,ram2Response);
+        expectedResponseSearchedRamsForProcessorWithoutNextPage = List.of(ram1Response,ram2Response,new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse());
+        expectedResponseHandlePowerSupply = List.of(psu1Response);
+        expectedResponseHandlePowerSupplyWithNextPage = List.of(psu1ResponseWithNextPage,new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse());
+        expectedResponseHandlePowerSupplyWithoutNextPage = List.of(psu1Response,new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse());
+        expectedResponse1RamNoNextPage = List.of(ram1Response);
+        expectedResponseSSDWithNextPage = List.of(ssd1ResponseWithNextPage,new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse(),new GetAutomaticCompatibilityResponse());
+        expectedResponseSSDWithoutNextPage = List.of(ssd1ResponseWithoutNextPage);
+        expectedResponse1GraphicCardWithoutNextPage = List.of(graphicsCard1ResponseWithoutNextPage);
+        expectedResponse1ProcessorNoNextPage = List.of(processor1ResponseWithoutNextPage);
+        expectedResponse1MotherboardNoNextPage = List.of(motherboard1ResponseWithoutNextPage);
+        expectedResponse1HardDriveNoNextPage = List.of(hardDriveResponse);
+        expectedResponse1CoolingNoNextPage = List.of(coolingResponse);
+        expectedResponse1ProcessorCoolingNoNextPage = List.of(processorCoolingResponse);
+        expectedResponse1ComputerCaseNoNextPage = List.of(computerCaseResponse);
+        expectedResponse1PowerSupplyNoNextPage = List.of(powerSupplyResponse);
+
+
+        //Requests
+      processorProvidedRamSearchedPC = new ConfiguratorRequest();
+      processorProvidedRamSearchedPC.setComponentIds(List.of(1L));
+      processorProvidedRamSearchedPC.setSearchedComponentTypeId(4L);
+      processorProvidedRamSearchedPC.setPageNumber(1);
+      processorProvidedRamSearchedPC.setTypeOfConfiguration("PC");
+
+      processorProvidedRamSearchedWorkstation = new ConfiguratorRequest();
+        processorProvidedRamSearchedWorkstation.setComponentIds(List.of(1L));
+      processorProvidedRamSearchedWorkstation.setSearchedComponentTypeId(4L);
+      processorProvidedRamSearchedWorkstation.setPageNumber(1);
+      processorProvidedRamSearchedWorkstation.setTypeOfConfiguration("Workstation");
+
+      processorProvidedRamSearchedServer = new ConfiguratorRequest();
+        processorProvidedRamSearchedServer.setComponentIds(List.of(1L));
+      processorProvidedRamSearchedServer.setSearchedComponentTypeId(4L);
+      processorProvidedRamSearchedServer.setPageNumber(1);
+      processorProvidedRamSearchedServer.setTypeOfConfiguration("Server");
+
+      processorProvidedRamSearchedLaptop = new ConfiguratorRequest();
+      processorProvidedRamSearchedLaptop.setComponentIds(List.of(1L));
+      processorProvidedRamSearchedLaptop.setSearchedComponentTypeId(4L);
+      processorProvidedRamSearchedLaptop.setPageNumber(1);
+      processorProvidedRamSearchedLaptop.setTypeOfConfiguration("Laptop");
+
+      requestWithProcessorProvidedSSDSearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedSSDSearchedPC.setComponentIds(List.of(1L));
+      requestWithProcessorProvidedSSDSearchedPC.setSearchedComponentTypeId(10L);
+      requestWithProcessorProvidedSSDSearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedSSDSearchedPC.setTypeOfConfiguration("PC");
+
+      requestWithProcessorProvidedSSDSearchedWorkstation = new ConfiguratorRequest();
+      requestWithProcessorProvidedSSDSearchedWorkstation.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedSSDSearchedWorkstation.setSearchedComponentTypeId(10L);
+      requestWithProcessorProvidedSSDSearchedWorkstation.setPageNumber(1);
+      requestWithProcessorProvidedSSDSearchedWorkstation.setTypeOfConfiguration("Workstation");
+
+      requestWithProcessorProvidedSSDSearchedServer = new ConfiguratorRequest();
+      requestWithProcessorProvidedSSDSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedSSDSearchedServer.setSearchedComponentTypeId(10L);
+      requestWithProcessorProvidedSSDSearchedServer.setPageNumber(1);
+      requestWithProcessorProvidedSSDSearchedServer.setTypeOfConfiguration("Server");
+
+      requestWithProcessorProvidedSSDSearchedLaptop = new ConfiguratorRequest();
+      requestWithProcessorProvidedSSDSearchedLaptop.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedSSDSearchedLaptop.setSearchedComponentTypeId(10L);
+      requestWithProcessorProvidedSSDSearchedLaptop.setPageNumber(1);
+      requestWithProcessorProvidedSSDSearchedLaptop.setTypeOfConfiguration("Laptop");
+
+      requestWithProcessorProvidedHardDriveSearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedHardDriveSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedHardDriveSearchedPC.setSearchedComponentTypeId(11L);
+      requestWithProcessorProvidedHardDriveSearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedHardDriveSearchedPC.setTypeOfConfiguration("PC");
+
+      requestWithProcessorProvidedHardDriveSearchedWorkstation = new ConfiguratorRequest();
+      requestWithProcessorProvidedHardDriveSearchedWorkstation.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedHardDriveSearchedWorkstation.setSearchedComponentTypeId(11L);
+      requestWithProcessorProvidedHardDriveSearchedWorkstation.setPageNumber(1);
+      requestWithProcessorProvidedHardDriveSearchedWorkstation.setTypeOfConfiguration("Workstation");
+
+      requestWithProcessorProvidedHardDriveSearchedServer = new ConfiguratorRequest();
+      requestWithProcessorProvidedHardDriveSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedHardDriveSearchedServer.setSearchedComponentTypeId(11L);
+      requestWithProcessorProvidedHardDriveSearchedServer.setPageNumber(1);
+      requestWithProcessorProvidedHardDriveSearchedServer.setTypeOfConfiguration("Server");
+
+      requestWithProcessorProvidedCoolingSearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedCoolingSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedCoolingSearchedPC.setSearchedComponentTypeId(8L);
+      requestWithProcessorProvidedCoolingSearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedCoolingSearchedPC.setTypeOfConfiguration("PC");
+
+      requestWithProcessorProvidedCoolingSearchedLaptop = new ConfiguratorRequest();
+      requestWithProcessorProvidedCoolingSearchedLaptop.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedCoolingSearchedLaptop.setSearchedComponentTypeId(8L);
+      requestWithProcessorProvidedCoolingSearchedLaptop.setPageNumber(1);
+      requestWithProcessorProvidedCoolingSearchedLaptop.setTypeOfConfiguration("Laptop");
+
+      requestWithProcessorProvidedCoolingSearchedServer = new ConfiguratorRequest();
+      requestWithProcessorProvidedCoolingSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedCoolingSearchedServer.setSearchedComponentTypeId(8L);
+      requestWithProcessorProvidedCoolingSearchedServer.setPageNumber(1);
+      requestWithProcessorProvidedCoolingSearchedServer.setTypeOfConfiguration("Server");
+
+
+
+
+
+
+      requestWithProcessorProvidedProcessorCoolingSearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedProcessorCoolingSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedProcessorCoolingSearchedPC.setSearchedComponentTypeId(7L);
+      requestWithProcessorProvidedProcessorCoolingSearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedProcessorCoolingSearchedPC.setTypeOfConfiguration("PC");
+
+      requestWithProcessorProvidedProcessorCoolingSearchedLaptop = new ConfiguratorRequest();
+      requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setSearchedComponentTypeId(7L);
+      requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setPageNumber(1);
+      requestWithProcessorProvidedProcessorCoolingSearchedLaptop.setTypeOfConfiguration("Laptop");
+
+      requestWithProcessorProvidedProcessorCoolingSearchedServer = new ConfiguratorRequest();
+      requestWithProcessorProvidedProcessorCoolingSearchedServer.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedProcessorCoolingSearchedServer.setSearchedComponentTypeId(7L);
+      requestWithProcessorProvidedProcessorCoolingSearchedServer.setPageNumber(1);
+      requestWithProcessorProvidedProcessorCoolingSearchedServer.setTypeOfConfiguration("Server");
+
+      requestWithProcessorProvidedComputerCaseSearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedComputerCaseSearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedComputerCaseSearchedPC.setSearchedComponentTypeId(6L);
+      requestWithProcessorProvidedComputerCaseSearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedComputerCaseSearchedPC.setTypeOfConfiguration("PC");
+
+      requestWithProcessorProvidedPowerSupplySearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedPowerSupplySearchedPC.setComponentIds(List.of(1L)); // Adjust the list as necessary
+      requestWithProcessorProvidedPowerSupplySearchedPC.setSearchedComponentTypeId(5L);
+      requestWithProcessorProvidedPowerSupplySearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedPowerSupplySearchedPC.setTypeOfConfiguration("PC");
+
+      requestWithProcessorProvidedPowerSupplySearchedWorkstation = new ConfiguratorRequest();
+      requestWithProcessorProvidedPowerSupplySearchedWorkstation.setComponentIds(List.of(1L));
+      requestWithProcessorProvidedPowerSupplySearchedWorkstation.setSearchedComponentTypeId(5L);
+      requestWithProcessorProvidedPowerSupplySearchedWorkstation.setPageNumber(1);
+      requestWithProcessorProvidedPowerSupplySearchedWorkstation.setTypeOfConfiguration("Workstation");
+
+// Request: Processor Provided Power Supply Searched for Server
+      requestWithProcessorProvidedPowerSupplySearchedServer = new ConfiguratorRequest();
+      requestWithProcessorProvidedPowerSupplySearchedServer.setComponentIds(List.of(1L));
+      requestWithProcessorProvidedPowerSupplySearchedServer.setSearchedComponentTypeId(5L);
+      requestWithProcessorProvidedPowerSupplySearchedServer.setPageNumber(1);
+      requestWithProcessorProvidedPowerSupplySearchedServer.setTypeOfConfiguration("Server");
+
+// Request: Processor Provided Graphics Card Searched for PC
+      requestWithProcessorProvidedGraphicsCardSearchedPC = new ConfiguratorRequest();
+      requestWithProcessorProvidedGraphicsCardSearchedPC.setComponentIds(List.of(1L));
+      requestWithProcessorProvidedGraphicsCardSearchedPC.setSearchedComponentTypeId(3L);
+      requestWithProcessorProvidedGraphicsCardSearchedPC.setPageNumber(1);
+      requestWithProcessorProvidedGraphicsCardSearchedPC.setTypeOfConfiguration("PC");
+
+// Request: Graphics Card Provided Processor Searched for PC
+      requestWithGraphicsCardProvidedProcessorSearchedPC = new ConfiguratorRequest();
+      requestWithGraphicsCardProvidedProcessorSearchedPC.setComponentIds(List.of(3L));
+      requestWithGraphicsCardProvidedProcessorSearchedPC.setSearchedComponentTypeId(1L);
+      requestWithGraphicsCardProvidedProcessorSearchedPC.setPageNumber(1);
+      requestWithGraphicsCardProvidedProcessorSearchedPC.setTypeOfConfiguration("PC");
+
+// Request: Graphics Card Provided Processor Searched for Server
+      requestWithGraphicsCardProvidedProcessorSearchedServer = new ConfiguratorRequest();
+      requestWithGraphicsCardProvidedProcessorSearchedServer.setComponentIds(List.of(3L));
+      requestWithGraphicsCardProvidedProcessorSearchedServer.setSearchedComponentTypeId(1L);
+      requestWithGraphicsCardProvidedProcessorSearchedServer.setPageNumber(1);
+      requestWithGraphicsCardProvidedProcessorSearchedServer.setTypeOfConfiguration("Server");
+
+// Request: Graphics Card Provided Processor Searched for Workstation
+      requestWithGraphicsCardProvidedProcessorSearchedWorkstation = new ConfiguratorRequest();
+      requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setComponentIds(List.of(3L));
+      requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setSearchedComponentTypeId(1L);
+      requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setPageNumber(1);
+      requestWithGraphicsCardProvidedProcessorSearchedWorkstation.setTypeOfConfiguration("Workstation");
+
+// Request: Graphics Card Provided Motherboard Searched for PC
+      requestWithGraphicsCardProvidedMotherboardSearchedPC = new ConfiguratorRequest();
+      requestWithGraphicsCardProvidedMotherboardSearchedPC.setComponentIds(List.of(3L));
+      requestWithGraphicsCardProvidedMotherboardSearchedPC.setSearchedComponentTypeId(2L);
+      requestWithGraphicsCardProvidedMotherboardSearchedPC.setPageNumber(1);
+      requestWithGraphicsCardProvidedMotherboardSearchedPC.setTypeOfConfiguration("PC");
+
+
+        requestWithGraphicsCardProvidedMotherboardSearchedServer = new ConfiguratorRequest();
+        requestWithGraphicsCardProvidedMotherboardSearchedServer.setComponentIds(List.of(3L));
+        requestWithGraphicsCardProvidedMotherboardSearchedServer.setSearchedComponentTypeId(2L);
+        requestWithGraphicsCardProvidedMotherboardSearchedServer.setPageNumber(1);
+        requestWithGraphicsCardProvidedMotherboardSearchedServer.setTypeOfConfiguration("Server");
+
+// Request: Graphics Card Provided Motherboard Searched for Workstation
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation = new ConfiguratorRequest();
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setComponentIds(List.of(3L));
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setSearchedComponentTypeId(2L);
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setPageNumber(1);
+        requestWithGraphicsCardProvidedMotherboardSearchedWorkstation.setTypeOfConfiguration("Workstation");
+
+// Request: Provided Component ID Same as Searched One
+        requestWithProvidedComponentIdTheSameAsSearchedOne = new ConfiguratorRequest();
+        requestWithProvidedComponentIdTheSameAsSearchedOne.setComponentIds(List.of(1L));
+        requestWithProvidedComponentIdTheSameAsSearchedOne.setSearchedComponentTypeId(1L);
+        requestWithProvidedComponentIdTheSameAsSearchedOne.setPageNumber(1);
+        requestWithProvidedComponentIdTheSameAsSearchedOne.setTypeOfConfiguration("PC");
+
+// Request: Max Provided Components and Last Searched PSU
+        requestWithMaxProvidedComponentsAndLastSearchedPSU = new ConfiguratorRequest();
+        requestWithMaxProvidedComponentsAndLastSearchedPSU.setComponentIds(Arrays.asList(1L, 2L, 3L, 4L, 7L, 8L, 11L));
+        requestWithMaxProvidedComponentsAndLastSearchedPSU.setSearchedComponentTypeId(5L);
+        requestWithMaxProvidedComponentsAndLastSearchedPSU.setPageNumber(1);
+        requestWithMaxProvidedComponentsAndLastSearchedPSU.setTypeOfConfiguration("PC");
+
+// Request: Max Provided Components and Last Searched PSU (Variation 2)
+        requestWithMaxProvidedComponentsAndLastSearchedPSU2 = new ConfiguratorRequest();
+        requestWithMaxProvidedComponentsAndLastSearchedPSU2.setComponentIds(Arrays.asList(1L, 2L, 3L, 4L, 9L, 10L, 11L));
+        requestWithMaxProvidedComponentsAndLastSearchedPSU2.setSearchedComponentTypeId(5L);
+        requestWithMaxProvidedComponentsAndLastSearchedPSU2.setPageNumber(1);
+        requestWithMaxProvidedComponentsAndLastSearchedPSU2.setTypeOfConfiguration("PC");
+
+// Request: Processor and Graphics Card Provided RAM Searched for PC
+        requestProcessorAndGraphicsCardProvidedRamSearchedPC = new ConfiguratorRequest();
+        requestProcessorAndGraphicsCardProvidedRamSearchedPC.setComponentIds(Arrays.asList(1L, 3L));
+        requestProcessorAndGraphicsCardProvidedRamSearchedPC.setSearchedComponentTypeId(4L);
+        requestProcessorAndGraphicsCardProvidedRamSearchedPC.setPageNumber(1);
+        requestProcessorAndGraphicsCardProvidedRamSearchedPC.setTypeOfConfiguration("PC");
+
+// Request: Processor, Graphics Card, and Motherboard Provided RAM Searched for PC
+        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC = new ConfiguratorRequest();
+        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.setComponentIds(Arrays.asList(1L, 3L, 2L));
+        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.setSearchedComponentTypeId(4L);
+        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.setPageNumber(1);
+        requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.setTypeOfConfiguration("PC");
+        //Specification IDs
+        allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam = List.of(1L,2L);
+
+
+        processorPC = new HashMap<>();
+        processorPC.put(1070L,List.of("Workstation"));
+        firstEntryProcessorPC = processorPC.entrySet().iterator().next();
+
+        ramPC = new HashMap<>();
+        ramPC.put(1070L,List.of("PC"));
+        firstEntryRamPC = ramPC.entrySet().iterator().next();
+
+        processorServer
+        = new HashMap<>();
+        processorServer
+        .put(1070L, List.of("Server"));
+        firstEntryProcessorServer
+         = processorServer
+ .entrySet().iterator().next();
+
+        processorWorkstation = new HashMap<>();
+        processorWorkstation.put(1070L, List.of("Workstation"));
+        firstEntryProcessorWorkstation = processorWorkstation.entrySet().iterator().next();
+
+        ramServer = new HashMap<>();
+        ramServer.put(1070L, List.of("Server"));
+        firstEntryRamServer = ramServer.entrySet().iterator().next();
+
+        ramWorkstation = new HashMap<>();
+        ramWorkstation.put(1070L, List.of("Workstation"));
+        firstEntryRamWorkstation = ramWorkstation.entrySet().iterator().next();
+
+
+        ssdPC = new HashMap<>();
+        ssdPC.put(1070L, List.of("PC"));
+        firstEntrySsdPC = ssdPC.entrySet().iterator().next();
+
+        ssdServer = new HashMap<>();
+        ssdServer.put(1070L, List.of("Server"));
+        firstEntrySsdServer = ssdServer.entrySet().iterator().next();
+
+        emptyMap = new HashMap<>();
+
+        motherboardPC = new HashMap<>();
+        motherboardPC.put(1070L, List.of("PC"));
+        firstEntryMotherboardPC = motherboardPC.entrySet().iterator().next();
     }
+
 
     @Test
     void givenOneComponentAndASearchedComponentType_whenGettingCompatibility_returnsCompatibleComponentFromSearchedComponentType()
     {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(true);
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+        //objectResponseProcessorRam
+        //specification1and2ForProcessor2
+        //objectResponseProcessorRam2
+        //twoRams
+        //expectedResponseSearchedRamsForProcessor
 
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
 
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity1)).thenReturn(allSpecificationsForComponentForFirstSpecification1);
-//        when(componentRepository.findComponentsByTypeAndSpecification(4L,96L,anyList())).thenReturn(List.of(givenComponent2,resultComponent3));
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(96L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
 
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity3)).thenReturn(allSpecificationsForComponentForSecondSpecification1);
-//        when(componentRepository.findComponentsByTypeAndSpecification(4L,97L,anyList())).thenReturn(List.of(resultComponent3));
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(97L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
-        //when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L,4L)).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4)
-        when(componentSpecificationListRepository.findByComponentId(givenComponent2)).thenReturn(allSpecificationsForComponentForSecondComponent);
-        when(componentSpecificationListRepository.findByComponentId(resultComponent3)).thenReturn(allSpecificationsForComponentForThirdResultComponent);
-        //when()
-        when(componentSpecificationListRepository.findByComponentId(2L)).thenReturn(allSpecificationsForComponentForSecondComponent);
-        when(componentSpecificationListRepository.findByComponentId(3L)).thenReturn(allSpecificationsForComponentForThirdResultComponent);
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
 
-        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched);
-        assertEquals(Set.copyOf(expectedResponse), Set.copyOf(actualResponse));
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),specification1and2ForProcessor)).thenReturn(objectResponseProcessorRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor2);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),specification1and2ForProcessor2)).thenReturn(objectResponseProcessorRam2);
+        when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(twoRams);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
+        assertEquals(Set.copyOf(expectedResponseSearchedRamsForProcessor), Set.copyOf(actualResponse));
+
     }
 
     @Test
-    void givenANonExistingComponentId_whenGettingCompatibility_throwsAObjectNotFoundException()
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndConfigurationTypeHasBeenChanged_returnsCompatibleComponentFromSearchedComponentType()
     {
-        when(componentRepository.existsById(2L)).thenReturn(false);
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+        //objectResponseProcessorRam
+        //specification1and2ForProcessor2
+        //objectResponseProcessorRam2
+        //twoRams
+        //expectedResponseSearchedRamsForProcessor
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
-        assertEquals("Components not found: [2]", exception.getReason());
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(false);
+
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
+        assertEquals("One of the selected components is meant to be used in a different configuration", exception.getReason());
+
+    }
+
+
+    @Test
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndProvidedComponentIdIsInvalid_thenThrowsErrorForNotFound()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(false);
+
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
+        assertEquals("Components not found: [1]", exception.getReason());
     }
 
     @Test
-    void givenANonExistingComponentTypeId_whenGettingCompatibility_throwsAObjectNotFoundException()
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndSearchedComponentTypeIsInvalid_thenThrowsErrorForNotFound()
     {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(false);
+        //Used variables:
+        //requestOneComponentProvided
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(false);
 
-        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
         assertEquals("Component type not found", exception.getReason());
     }
 
-    @Test
-    void givenASearchedComponentTypeWhenComponentFromItIsAdded_whenGettingCompatibility_throwsAObjectNotFoundException()
-    {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentTypeRepository.existsById(2L)).thenReturn(true);
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
 
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestWithSameComponentAndComponentTypeIds));
+    @Test
+    void givenComponentIdAndSearchedComponentTypeFromTheSameComponentTypeAsProvidedComponent_whenGettingCompatibility_thenThrowsCompatibilityError()
+    {
+        //Used variables:
+        //requestWithProvidedComponentIdTheSameAsSearchedOne
+        //componentTypeProcessor
+
+        when(componentRepository.existsById(requestWithProvidedComponentIdTheSameAsSearchedOne.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProvidedComponentIdTheSameAsSearchedOne.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProvidedComponentIdTheSameAsSearchedOne.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestWithProvidedComponentIdTheSameAsSearchedOne));
         assertEquals("Once a component is selected, other components from the same category can not be searched.", exception.getReason());
     }
 
     @Test
-    void givenOneComponentAndASearchedComponentType_whenThereIsNoCompatibilityBetweenThem_returnsCompatibleComponentFromSearchedComponentType()
+    void givenAllComponents_whenSearchingForPSU_thenGivesPSUsThatCanHandleThePowerConsumption()
     {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(true);
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
-        when(componentRepository.findByComponentType_Id(4L)).thenReturn(List.of(givenComponent2));
-        when(componentSpecificationListRepository.findByComponentId(2L)).thenReturn(allSpecificationsForComponentForSecondComponent);
+        //Used variables:
+        //requestWithMaxProvidedComponentsAndLastSearchedPSU
+        //componentTypePSU
+        //typeOfConfigurationPC
+        //pageable
+        //listOfPsu1
+        //listOf10PSUs
 
-        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched);
-        assertEquals(expectedResponseWithOnlyOneGivenComponentIdAndNoRules.get(0).getComponentName(), actualResponse.get(0).getComponentName());
-        assertEquals(expectedResponseWithOnlyOneGivenComponentIdAndNoRules.get(0).getComponentTypeName(), actualResponse.get(0).getComponentTypeName());
-        assertEquals(expectedResponseWithOnlyOneGivenComponentIdAndNoRules.get(0).getComponentImageUrl(), actualResponse.get(0).getComponentImageUrl());
-        assertEquals(expectedResponseWithOnlyOneGivenComponentIdAndNoRules.get(0).getBrand(), actualResponse.get(0).getBrand());
-        assertEquals(expectedResponseWithOnlyOneGivenComponentIdAndNoRules.get(0).getPrice(), actualResponse.get(0).getPrice());
-        assertEquals(expectedResponseWithOnlyOneGivenComponentIdAndNoRules.get(0).getComponentSpecifications(), actualResponse.get(0).getComponentSpecifications());
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(0))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(1))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(2))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(3))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(4))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(5))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(6))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU.getSearchedComponentTypeId())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(0))).thenReturn(1L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(1))).thenReturn(2L); //50
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(2))).thenReturn(3L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(3))).thenReturn(4L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(4))).thenReturn(7L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(5))).thenReturn(8L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(6))).thenReturn(11L); //10
+
+
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(0),1120L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(2),937L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU.getComponentIds().get(6),1144L)).thenReturn(10.0);
+
+        when(componentRepository.findComponentsBySpecificationsNative(110.0,typeOfConfigurationPC,20.0,pageableFirstPage)).thenReturn(listOfPsu1);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithMaxProvidedComponentsAndLastSearchedPSU);
+        assertEquals(Set.copyOf(expectedResponseHandlePowerSupply), Set.copyOf(actualResponse));
+    }
+
+
+    @Test
+    void givenAllComponentsSomeOfWhichDoNotHavePowerSupplySpecifiedAtAllOfForFirstIdFromSwitchStatement_whenSearchingForPSU_thenGivesPSUsThatCanHandleThePowerConsumption()
+    {
+        //Used variables:
+        //requestWithMaxProvidedComponentsAndLastSearchedPSU2
+        //componentTypePSU
+        //typeOfConfigurationPC
+        //pageable
+        //listOfPsu1
+
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(1))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(3))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(4))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getSearchedComponentTypeId())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0))).thenReturn(1L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(1))).thenReturn(2L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2))).thenReturn(3L);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(3))).thenReturn(4L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(4))).thenReturn(9L); //30
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5))).thenReturn(10L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6))).thenReturn(11L); //10
+
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0),1120L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2),937L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5),1144L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5),1145L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6),1144L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6),922L)).thenReturn(10.0);
+
+        when(componentRepository.findComponentsBySpecificationsNative(120.0,typeOfConfigurationPC,10.0,pageableFirstPage)).thenReturn(listOf10PSUs);
+        when(componentRepository.findComponentsBySpecificationsNative(120.0,typeOfConfigurationPC,10.0,pageableCheckNextPage)).thenReturn(listOfPsu2);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithMaxProvidedComponentsAndLastSearchedPSU2);
+        assertEquals(expectedResponseHandlePowerSupplyWithNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+
+
     }
 
     @Test
-    void givenOneComponentAndASearchedComponentType_whenThereIsNoComponentsInTheSearchedComponentType_throwsAnCompatibilityError()
+    void givenComponentsAndLookingForPSU_whenNoPSUThatCanHandleThePowerConsumptionIsFound_thenThrowsAnError()
     {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(true);
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
-        when(componentRepository.findByComponentType_Id(4L)).thenReturn(List.of());
+        //Used variables:
+        //requestWithMaxProvidedComponentsAndLastSearchedPSU2
+        //componentTypePSU
+        //typeOfConfigurationPC
+        //pageable
+        //listOfPsu1
 
-        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched));
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(1))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(3))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(4))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getSearchedComponentTypeId())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0))).thenReturn(1L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(1))).thenReturn(2L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2))).thenReturn(3L);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(3))).thenReturn(4L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(4))).thenReturn(9L); //30
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5))).thenReturn(10L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6))).thenReturn(11L); //10
+
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0),1120L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2),937L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5),1144L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5),1145L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6),1144L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6),922L)).thenReturn(10.0);
+
+        when(componentRepository.findComponentsBySpecificationsNative(120.0,typeOfConfigurationPC,10.0,pageableFirstPage)).thenReturn(List.of());
+
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(requestWithMaxProvidedComponentsAndLastSearchedPSU2));
+        assertEquals("PSUs that can handle the power consumption were not found", exception.getReason());
+    }
+
+    @Test
+    void givenComponentsAndLookingForPSU_whenLookingForPSUThatCanHandleThePowerConsumptionWithoutHavingANextPage_thenThrowsAnError()
+    {
+        //Used variables:
+        //requestWithMaxProvidedComponentsAndLastSearchedPSU2
+        //componentTypePSU
+        //typeOfConfigurationPC
+        //pageable
+        //listOfPsu1
+
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(1))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(3))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(4))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5))).thenReturn(true);
+        when(componentRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getSearchedComponentTypeId())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0))).thenReturn(1L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(1))).thenReturn(2L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2))).thenReturn(3L);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(3))).thenReturn(4L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(4))).thenReturn(9L); //30
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5))).thenReturn(10L); //10
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6))).thenReturn(11L); //10
+
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(0),1120L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(2),937L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5),1144L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(5),1145L)).thenReturn(10.0);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6),1144L)).thenReturn(null);
+        when(componentSpecificationListRepository.findValuesBySpecificationTypeIdAndComponentId(requestWithMaxProvidedComponentsAndLastSearchedPSU2.getComponentIds().get(6),922L)).thenReturn(10.0);
+
+        when(componentRepository.findComponentsBySpecificationsNative(120.0,typeOfConfigurationPC,10.0,pageableFirstPage)).thenReturn(listOf10PSUs);
+        when(componentRepository.findComponentsBySpecificationsNative(120.0,typeOfConfigurationPC,10.0,pageableCheckNextPage)).thenReturn(List.of());
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithMaxProvidedComponentsAndLastSearchedPSU2);
+        assertEquals(expectedResponseHandlePowerSupplyWithoutNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+    }
+
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForPCConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(ramPC);
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(processorProvidedRamSearchedPC.getSearchedComponentTypeId(),firstEntryRamPC.getKey(),firstEntryRamPC.getValue(),pageableFirstPage)).thenReturn(listOf1Ram);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
+        assertEquals(Set.copyOf(expectedResponse1RamNoNextPage), Set.copyOf(actualResponse));
+
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForServerConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(processorProvidedRamSearchedServer.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedServer.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedServer.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorServer
+        );
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedServer.getComponentIds().get(0),firstEntryProcessorServer
+        .getKey(),firstEntryProcessorServer
+        .getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedServer.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedServer.getSearchedComponentTypeId(),typeOfConfigurationServer)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedServer.getTypeOfConfiguration(),processorProvidedRamSearchedServer.getSearchedComponentTypeId())).thenReturn(ramServer);
+
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(processorProvidedRamSearchedServer.getSearchedComponentTypeId(),1070L,List.of("Server"),pageableFirstPage)).thenReturn(listOf1Ram);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedServer);
+        assertEquals(Set.copyOf(expectedResponse1RamNoNextPage), Set.copyOf(actualResponse));
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForWorkstationConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationWorkstation
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(processorProvidedRamSearchedWorkstation.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedWorkstation.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedWorkstation.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorWorkstation);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedWorkstation.getComponentIds().get(0),firstEntryProcessorWorkstation.getKey(),firstEntryProcessorWorkstation.getValue())).thenReturn(true);
+
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedWorkstation.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedWorkstation.getSearchedComponentTypeId(),typeOfConfigurationWorkstation)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedWorkstation.getTypeOfConfiguration(),processorProvidedRamSearchedWorkstation.getSearchedComponentTypeId())).thenReturn(ramWorkstation);
+
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(processorProvidedRamSearchedWorkstation.getSearchedComponentTypeId(),1070L,List.of("Workstation"),pageableFirstPage)).thenReturn(listOf1Ram);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedWorkstation);
+        assertEquals(Set.copyOf(expectedResponse1RamNoNextPage), Set.copyOf(actualResponse));
+
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForPCConfiguration_whenNoComponentAreFound_throwsAnError()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedLaptop
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationLaptop
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
+
+        when(componentRepository.existsById(processorProvidedRamSearchedLaptop.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedLaptop.getSearchedComponentTypeId())).thenReturn(true);
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedLaptop.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        CompatibilityError exception = assertThrows(CompatibilityError.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedLaptop));
         assertEquals("COMPONENTS_FROM_CATEGORY_NOT_FOUND", exception.getReason());
-  }
-
-    @Test
-    void givenOneComponentAndASearchedComponentType_whenThereAreNoCompatibleComponentsFromTheSearchedComponentType_returnsCompatibleComponentFromSearchedComponentType() {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(true);
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(compatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L, specificationTypeEntity1)).thenReturn(allSpecificationsForComponentForFirstSpecification1);
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(96L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L, specificationTypeEntity3)).thenReturn(Collections.emptyList());
-
-        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestOneComponentOneSearched);
-        assertEquals(actualResponse, List.of());
     }
 
-    /*@Test
-    void givenTwoComponentsAndASearchedComponentType_whenGettingCompatibilityAndThereIsNotRuleBetweenTheSecondComponentAndThSearchedComponentType_returnsCompatibleComponentFromSearchedComponentType()
+    @Test
+    void givenProcessorAndASearchedComponentTypeForPCConfigurationWithNextPage_whenSearchingForComponentsFromSSD_returnsSSDComponents()
     {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentRepository.existsById(3L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(true);
+        //Used variables:
+        //requestWithProcessorProvidedSSDSearchedPC
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationLaptop
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
 
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity1)).thenReturn(allSpecificationsForComponentForFirstSpecification1);
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(96L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity3)).thenReturn(allSpecificationsForComponentForSecondSpecification1);
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(97L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
-         when(componentSpecificationListRepository.findByComponentId(givenComponent2)).thenReturn(allSpecificationsForComponentForSecondComponent);
-         when(componentSpecificationListRepository.findByComponentId(resultComponent3)).thenReturn(allSpecificationsForComponentForThirdResultComponent);
-         when(componentSpecificationListRepository.findByComponentId(2L)).thenReturn(allSpecificationsForComponentForSecondComponent);
-         when(componentSpecificationListRepository.findByComponentId(3L)).thenReturn(allSpecificationsForComponentForThirdResultComponent);
+        when(componentRepository.existsById(requestWithProcessorProvidedSSDSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedSSDSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestWithProcessorProvidedSSDSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
 
 
-        when(componentRepository.findComponentTypeIdByComponentId(3L)).thenReturn(3L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(3L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(Collections.emptyList());
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedSSDSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedSSDSearchedPC.getTypeOfConfiguration(),componentTypeSSD.getId())).thenReturn(ssdPC);
+
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableFirstPage)).thenReturn(listOf10SSD);
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableCheckNextPage)).thenReturn(listOf1SSD);
 
 
-        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestTwoComponentOneSearched);
-        assertEquals(expectedResponse.get(0).getComponentName(), actualResponse.get(0).getComponentName());
-        assertEquals(expectedResponse.get(0).getComponentTypeName(), actualResponse.get(0).getComponentTypeName());
-        assertEquals(expectedResponse.get(0).getComponentImageUrl(), actualResponse.get(0).getComponentImageUrl());
-        assertEquals(expectedResponse.get(0).getBrand(), actualResponse.get(0).getBrand());
-        assertEquals(expectedResponse.get(0).getPrice(), actualResponse.get(0).getPrice());
-        assertEquals(expectedResponse.get(0).getComponentSpecifications(), actualResponse.get(0).getComponentSpecifications());
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedSSDSearchedPC);
+        assertEquals(expectedResponseSSDWithNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+    }
 
-        assertEquals(expectedResponse.get(1).getComponentId(), actualResponse.get(1).getComponentId());
-        assertEquals(expectedResponse.get(1).getComponentName(), actualResponse.get(1).getComponentName());
-        assertEquals(expectedResponse.get(1).getComponentTypeName(), actualResponse.get(1).getComponentTypeName());
-        assertEquals(expectedResponse.get(1).getComponentImageUrl(), actualResponse.get(1).getComponentImageUrl());
-        assertEquals(expectedResponse.get(1).getBrand(), actualResponse.get(1).getBrand());
-        assertEquals(expectedResponse.get(1).getPrice(), actualResponse.get(1).getPrice());
-        assertEquals(expectedResponse.get(1).getComponentSpecifications(), actualResponse.get(1).getComponentSpecifications());
-    }*/
-
-    /*@Test
-    void givenTwoComponentsAndASearchedComponentType_whenGettingCompatibility_returnsCompatibleComponentFromSearchedComponentType()
+    @Test
+    void givenProcessorAndASearchedComponentTypeForPCConfigurationWithoutNextPage_whenSearchingForComponentsFromSSD_returnsSSDComponents()
     {
-        when(componentRepository.existsById(2L)).thenReturn(true);
-        when(componentRepository.existsById(3L)).thenReturn(true);
-        when(componentTypeRepository.existsById(4L)).thenReturn(true);
+        //Used variables:
+        //requestWithProcessorProvidedSSDSearchedPC
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationLaptop
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
 
-        when(componentRepository.findComponentTypeIdByComponentId(2L)).thenReturn(2L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(2L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent2AndComponentType4);
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity1)).thenReturn(allSpecificationsForComponentForFirstSpecification1);
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(96L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(2L,specificationTypeEntity3)).thenReturn(allSpecificationsForComponentForSecondSpecification1);
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(97L), anyList()))
-                .thenReturn(List.of(givenComponent2, resultComponent3));
+        when(componentRepository.existsById(requestWithProcessorProvidedSSDSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedSSDSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestWithProcessorProvidedSSDSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
 
-        when(componentSpecificationListRepository.findByComponentId(givenComponent2)).thenReturn(allSpecificationsForComponentForSecondComponent);
-        when(componentSpecificationListRepository.findByComponentId(resultComponent3)).thenReturn(allSpecificationsForComponentForThirdResultComponent);
-        when(componentSpecificationListRepository.findByComponentId(2L)).thenReturn(allSpecificationsForComponentForSecondComponent);
-        when(componentSpecificationListRepository.findByComponentId(3L)).thenReturn(allSpecificationsForComponentForThirdResultComponent);
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedSSDSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedSSDSearchedPC.getTypeOfConfiguration(),componentTypeSSD.getId())).thenReturn(ssdPC);
+
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableFirstPage)).thenReturn(listOf10SSD);
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedSSDSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableCheckNextPage)).thenReturn(List.of());
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedSSDSearchedPC);
+        assertEquals(expectedResponseSSDWithoutNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+
+    }
 
 
-        when(componentRepository.findComponentTypeIdByComponentId(3L)).thenReturn(3L);
-        when(automaticCompatibilityRepository.findCompatibilityRecordsBetweenTwoComponentTypeIds(3L, requestOneComponentOneSearched.getSearchedComponentTypeId())).thenReturn(automaticCompatibilityListBetweenComponent3AndComponentType4);
-        when(componentSpecificationListRepository.findByComponentIdAndSpecificationTypeId(3L,specificationTypeEntity3)).thenReturn(allSpecificationsForComponentForThirdSpecification1);
-        when(componentRepository.findComponentsByTypeAndSpecification(eq(4L), eq(96L), anyList()))
-                .thenReturn(List.of(resultComponent3));
 
-        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestTwoComponentOneSearched);
+    @Test
+    void givenProcessorAndASearchedComponentTypeForSsdServerConfiguration_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        //Used variables:
+        //processorProvidedRamSearchedServer
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationServer
+        //listOf1Ram
+        //expectedResponse1RamNoNextPage
 
-        //assertEquals(Set.copyOf(expectedResponseWithMoreThanOnceComponentsInRequest), Set.copyOf(actualResponse));
+        when(componentRepository.existsById(requestWithProcessorProvidedSSDSearchedServer.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedSSDSearchedServer.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedSSDSearchedServer.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestWithProcessorProvidedSSDSearchedServer.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
 
-//
-//
-//
-        assertEquals(expectedResponseWithMoreThanOnceComponentsInRequest.get(0).getComponentName(), actualResponse.get(0).getComponentName());
-        assertEquals(expectedResponseWithMoreThanOnceComponentsInRequest.get(0).getComponentTypeName(), actualResponse.get(0).getComponentTypeName());
-        assertEquals(expectedResponseWithMoreThanOnceComponentsInRequest.get(0).getComponentImageUrl(), actualResponse.get(0).getComponentImageUrl());
-        assertEquals(expectedResponseWithMoreThanOnceComponentsInRequest.get(0).getBrand(), actualResponse.get(0).getBrand());
-        assertEquals(expectedResponseWithMoreThanOnceComponentsInRequest.get(0).getPrice(), actualResponse.get(0).getPrice());
-        assertEquals(expectedResponseWithMoreThanOnceComponentsInRequest.get(0).getComponentSpecifications(), actualResponse.get(0).getComponentSpecifications());
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedSSDSearchedServer.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedSSDSearchedServer.getSearchedComponentTypeId(),typeOfConfigurationServer)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedSSDSearchedServer.getTypeOfConfiguration(),componentTypeSSD.getId())).thenReturn(ssdServer);
 
-//        assertEquals(expectedResponse.get(1).getComponentId(), actualResponse.get(1).getComponentId());
-//        assertEquals(expectedResponse.get(1).getComponentName(), actualResponse.get(1).getComponentName());
-//        assertEquals(expectedResponse.get(1).getComponentTypeName(), actualResponse.get(1).getComponentTypeName());
-//        assertEquals(expectedResponse.get(1).getComponentImageUrl(), actualResponse.get(1).getComponentImageUrl());
-//        assertEquals(expectedResponse.get(1).getBrand(), actualResponse.get(1).getBrand());
-//        assertEquals(expectedResponse.get(1).getPrice(), actualResponse.get(1).getPrice());
-//        assertEquals(expectedResponse.get(1).getComponentSpecifications(), actualResponse.get(1).getComponentSpecifications());
-    }*/
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestWithProcessorProvidedSSDSearchedServer.getSearchedComponentTypeId(),1070L,List.of("Server"),pageableFirstPage)).thenReturn(listOf1Ram);
 
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedSSDSearchedServer);
+        assertEquals(Set.copyOf(expectedResponse1RamNoNextPage), Set.copyOf(actualResponse));
+
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForGraphicsCartPCConfigurationWithoutNextPage_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        when(componentRepository.existsById(requestWithProcessorProvidedGraphicsCardSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedGraphicsCardSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestWithProcessorProvidedGraphicsCardSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedGraphicsCardSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(componentRepository.findByComponentType_Id(requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId(),pageableFirstPage)).thenReturn(listOf1GraphicsCard);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedGraphicsCardSearchedPC);
+        assertEquals(Set.copyOf(expectedResponse1GraphicCardWithoutNextPage), Set.copyOf(actualResponse));
+
+    }
+
+    @Test
+    void givenProcessorAndASearchedComponentTypeForGraphicsCartPCConfigurationWithNextPage_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        when(componentRepository.existsById(requestWithProcessorProvidedGraphicsCardSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestWithProcessorProvidedGraphicsCardSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestWithProcessorProvidedGraphicsCardSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestWithProcessorProvidedGraphicsCardSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(componentRepository.findByComponentType_Id(requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId(),pageableFirstPage)).thenReturn(listOf10GraphicsCards);
+        when(componentRepository.findByComponentType_Id(requestWithProcessorProvidedGraphicsCardSearchedPC.getSearchedComponentTypeId(),pageableCheckNextPage)).thenReturn(List.of());
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestWithProcessorProvidedGraphicsCardSearchedPC);
+        assertEquals(expectedResponse1GraphicCardWithoutNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+
+    }
+
+    @Test
+    void givenRequestWithProcessorAndGraphicsCardProvidedAdnSearchingForRam_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        when(componentRepository.existsById(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentRepository.existsById(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getComponentIds().get(1))).thenReturn(true);
+        when(componentTypeRepository.existsById(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeGraphicsCard.getId())).thenReturn(emptyMap);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(componentRepository.findComponentTypeIdByComponentId(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getComponentIds().get(1))).thenReturn(componentTypeGraphicsCard.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestProcessorAndGraphicsCardProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeGraphicsCard.getId(),requestProcessorAndGraphicsCardProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getTypeOfConfiguration(),requestProcessorAndGraphicsCardProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(ramPC);
+
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestProcessorAndGraphicsCardProvidedRamSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableFirstPage)).thenReturn(listOf1Ram);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestProcessorAndGraphicsCardProvidedRamSearchedPC);
+        assertEquals(expectedResponse1RamNoNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+    }
+
+    @Test
+    void givenRequestWithProcessorAndGraphicsCardAndMotherboardProvidedAdnSearchingForRam_whenThereAreNoRulesForTheirCompatibility_returnsFirstTenComponentsFromSearchedComponentType()
+    {
+        when(componentRepository.existsById(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentRepository.existsById(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(1))).thenReturn(true);
+        when(componentRepository.existsById(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(2))).thenReturn(true);
+
+        when(componentTypeRepository.existsById(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeGraphicsCard.getId())).thenReturn(emptyMap);
+
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeMotherboard.getId())).thenReturn(motherboardPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(2),firstEntryMotherboardPC.getKey(),firstEntryMotherboardPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+        when(componentRepository.findComponentTypeIdByComponentId(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(1))).thenReturn(componentTypeGraphicsCard.getId());
+        when(componentRepository.findComponentTypeIdByComponentId(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getComponentIds().get(2))).thenReturn(componentTypeMotherboard.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeGraphicsCard.getId(),requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeMotherboard.getId(),requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(List.of());
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getTypeOfConfiguration(),requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(ramPC);
+
+        when(componentRepository.findComponentsByGivenComponentTypeAndSpecificationForMeantFor(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC.getSearchedComponentTypeId(),1070L,List.of("PC"),pageableFirstPage)).thenReturn(listOf1Ram);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(requestProcessorAndGraphicsCardAndMotherboardProvidedRamSearchedPC);
+        assertEquals(expectedResponse1RamNoNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+    }
+
+    @Test
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityWithDuplicateKeysForTheSearchedValuesMap_returnsCompatibleComponentFromSearchedComponentType()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+        //objectResponseProcessorRam
+        //specification1and2ForProcessor2
+        //objectResponseProcessorRam2
+        //twoRams
+        //expectedResponseSearchedRamsForProcessor
+
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),specification1and2ForProcessor)).thenReturn(objectResponseProcessorRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor2);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),specification1and2ForProcessor2)).thenReturn(objectResponseProcessorRam3);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(ramPC);
+
+        when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(twoRams);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
+        assertEquals(expectedResponseSearchedRamsForProcessor.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+
+    }
+
+    @Test
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndProvidedComponentDoesNotHaveSpecificationFromRule_throwsAnError()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(List.of());
+
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
+        assertEquals("One of the selected components does not respect any of the rules between it and the searched one;", exception.getReason());
+
+    }
+
+    @Test
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndProvidedComponentDoesNotHaveSpecificationsFromRule_throwsAnError()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+        //objectResponseProcessorRam
+        //specification1and2ForProcessor2
+        //objectResponseProcessorRam2
+        //twoRams
+        //expectedResponseSearchedRamsForProcessor
+
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),specification1and2ForProcessor)).thenReturn(List.of());
+
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
+        assertEquals("Compatible components from searched component type were not found;", exception.getReason());
+
+    }
+
+
+    @Test
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndThereAreNoCompatibleComponentsAtAll_returnsCompatibleComponentFromSearchedComponentType()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+        //objectResponseProcessorRam
+        //specification1and2ForProcessor2
+        //objectResponseProcessorRam2
+        //twoRams
+        //expectedResponseSearchedRamsForProcessor
+
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),specification1and2ForProcessor)).thenReturn(objectResponseProcessorRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor2);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),specification1and2ForProcessor2)).thenReturn(objectResponseProcessorRam2);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(ramPC);
+
+        when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(new PageImpl<>(List.of(),pageableFirstPage, 2));
+
+        ObjectNotFound exception = assertThrows(ObjectNotFound.class, () -> compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC));
+        assertEquals("Compatible components from searched component type were not found;", exception.getReason());
+    }
+
+    @Test
+    void givenOneComponentAndASearchedComponentType_whenGettingCompatibilityAndThereIsNextPage_returnsCompatibleComponentFromSearchedComponentType()
+    {
+        //Used variables:
+        //requestOneComponentProvided
+        //componentTypeProcessor (provided)
+        //typeOfConfigurationPC
+        //specification1and2ForProcessor
+        //objectResponseProcessorRam
+        //specification1and2ForProcessor2
+        //objectResponseProcessorRam2
+        //twoRams
+        //expectedResponseSearchedRamsForProcessor
+
+        when(componentRepository.existsById(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(true);
+        when(componentTypeRepository.existsById(processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(true);
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),componentTypeProcessor.getId())).thenReturn(processorPC);
+        when(componentSpecificationListRepository.existsByComponentIdAndSpecificationTypeIdAndValueIn(processorProvidedRamSearchedPC.getComponentIds().get(0),firstEntryProcessorPC.getKey(),firstEntryProcessorPC.getValue())).thenReturn(true);
+
+        when(componentRepository.findComponentTypeIdByComponentId(processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(componentTypeProcessor.getId());
+
+        when(compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC)).thenReturn(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(0),specification1and2ForProcessor)).thenReturn(objectResponseProcessorRam);
+
+        when(componentSpecificationListRepository.findValuesForAComponentSpecificationTypeBySpecificationTypeComponentRelationAndComponentId(allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),processorProvidedRamSearchedPC.getComponentIds().get(0))).thenReturn(specification1and2ForProcessor2);
+        when(compatibilityRepository.findSpecification2IdsAndValuesOfSecondSpecification2(componentTypeProcessor.getId(),processorProvidedRamSearchedPC.getSearchedComponentTypeId(),typeOfConfigurationPC,allDistinctSpecificationsThatShouldBeConsideredBetweenProcessorAndRam.get(1),specification1and2ForProcessor2)).thenReturn(objectResponseProcessorRam2);
+
+        when(specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(processorProvidedRamSearchedPC.getTypeOfConfiguration(),processorProvidedRamSearchedPC.getSearchedComponentTypeId())).thenReturn(ramPC);
+
+        when(componentRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(tenRams);
+
+        List<GetAutomaticCompatibilityResponse> actualResponse = compatibilityBetweenComponents.automaticCompatibility(processorProvidedRamSearchedPC);
+        assertEquals(expectedResponseSearchedRamsForProcessorWithoutNextPage.get(0).getComponentName(), actualResponse.get(0).getComponentName());
+
+    }
 
 }

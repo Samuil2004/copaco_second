@@ -17,7 +17,6 @@ public class ComponentType
     private Category category;
     private List<String> configurationTypes;
     private List<SpecificationType> specificationTypeList;
-    //private List<CompatibilityType> compatibilityTypeList;
 
     @Override
     public String toString() {

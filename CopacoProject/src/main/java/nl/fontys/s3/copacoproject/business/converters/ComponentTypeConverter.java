@@ -1,6 +1,6 @@
 package nl.fontys.s3.copacoproject.business.converters;
 
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeInCustomResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeInCustomResponse;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 public final class ComponentTypeConverter {
+
+    private ComponentTypeConverter() {}
 
     public static ComponentType convertFromEntityToBase(ComponentTypeEntity entity) {
 

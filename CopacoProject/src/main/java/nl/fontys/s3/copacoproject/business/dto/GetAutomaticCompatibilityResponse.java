@@ -1,9 +1,6 @@
 package nl.fontys.s3.copacoproject.business.dto;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 
 import java.util.List;
@@ -13,6 +10,8 @@ import java.util.Map;
 @Getter
 @Setter
 @EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
 public class GetAutomaticCompatibilityResponse {
     private Long componentId;
     private String componentName;

@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface ComponentManager {
     List<GetComponentResponse> getAllComponents();
-    //GetComponentsByCategoryResponse getComponentsByCategory(String category);
-    //Component GetComponentById(Long id);
     List<Component> getAllComponentsByCategory(long categoryId);
     List<Component> getAllComponentFromComponentType(Long componentTypeId);
     List<SimpleComponentResponse> getComponentsByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, int currentPage);
