@@ -624,14 +624,13 @@ class TemplateManagerImplTest {
     @Test
     void testGetNumberOfTemplates() {
         // Arrange
-        Long categoryId = null;
         String configurationType = "configurationType";
 
         when(mockTemplateRepository.countTemplateEntitiesByCategoryAndConfigurationType(null, configurationType))
                 .thenReturn(5);
 
         // Act
-        int result = templateManagerImplUnderTest.getNumberOfTemplates(categoryId, configurationType);
+        int result = templateManagerImplUnderTest.getNumberOfTemplates(null, configurationType);
 
         // Assert
         assertThat(result).isEqualTo(5);

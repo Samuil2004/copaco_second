@@ -2,9 +2,9 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +12,14 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 public class SpecificationIdsForComponentPurposeImpl implements SpecificationIdsForComponentPurpose {
+    private static final String LAPTOP = "Laptop";
+    private static final String SERVER = "Server";
+    private static final String PC = "PC";
+    private static final String WORKSTATION = "Workstation";
+    private static final String NOTEBOOK = "Notebook";
+    private static final String CITY_BIKE = "CITY BIKE";
+    private static final String DOWNHILL = "DOWNHILL";
+
     @Override
     public Map<Long, List<String>> getSpecificationIdAndValuesForComponentPurpose(String configurationType, Long componentTypeId) {
         //Component voor - 1070 - Hardware
@@ -23,15 +31,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case PC:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -39,34 +49,53 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
+        }
+        else if(componentTypeId == 3)
+        {
+            switch(configurationType)
+            {
+                case SERVER:
+                    return serverConfig;
+                case PC:
+                    return serverConfig;
+                case WORKSTATION:
+                    return serverConfig;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            //return serverConfig;
         }
         else if(componentTypeId == 4)
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
+                case LAPTOP:
+                    serverConfig.put(1070L, List.of(NOTEBOOK));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -74,15 +103,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(947L, List.of("Server","server"));
+                case SERVER:
+                    serverConfig.put(947L, List.of(SERVER,"server"));
                     break;
-                case "PC":
-                    serverConfig.put(947L, List.of("PC"));
+                case PC:
+                    serverConfig.put(947L, List.of(PC));
                     break;
-                case "Workstation":
-                    serverConfig.put(947L, List.of("PC"));
+                case WORKSTATION:
+                    serverConfig.put(947L, List.of(PC));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -90,9 +121,11 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "PC":
-                    serverConfig.put(954L, List.of("PC"));
+                case PC:
+                    serverConfig.put(954L, List.of(PC));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -100,15 +133,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
+                case SERVER:
                     serverConfig.put(954L, List.of("Fan","Fan module"));
                     break;
-                case "PC":
+                case PC:
                     serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
                     break;
-                case "Laptop":
+                case LAPTOP:
                     serverConfig.put(954L, List.of("Thermal paste"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -116,34 +151,50 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
+                case SERVER:
                     serverConfig.put(954L, List.of("Fan","Fan tray","Cooler"));
                     break;
-                case "PC":
+                case PC:
                     serverConfig.put(954L, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
                     break;
-                case "Laptop":
+                case LAPTOP:
                     serverConfig.put(954L, List.of("Thermal paste"));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
+        }
+        else if(componentTypeId == 9)
+        {
+            switch(configurationType)
+            {
+                case WORKSTATION:
+                    return serverConfig;
+                case PC:
+                    return serverConfig;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
         }
         else if(componentTypeId == 10)
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
-                case "Laptop":
-                    serverConfig.put(1070L, List.of("Notebook"));
+                case LAPTOP:
+                    serverConfig.put(1070L, List.of(NOTEBOOK));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -151,15 +202,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "Server":
-                    serverConfig.put(1070L, List.of("Server"));
+                case SERVER:
+                    serverConfig.put(1070L, List.of(SERVER));
                     break;
-                case "Workstation":
-                    serverConfig.put(1070L, List.of("Workstation","workstation"));
+                case WORKSTATION:
+                    serverConfig.put(1070L, List.of(WORKSTATION,"workstation"));
                     break;
-                case "PC":
-                    serverConfig.put(1070L, List.of("PC"));
+                case PC:
+                    serverConfig.put(1070L, List.of(PC));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -167,12 +220,14 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "CITY BIKE":
-                    serverConfig.put(1792L, List.of("CITY BIKE"));
+                case CITY_BIKE:
+                    serverConfig.put(1792L, List.of(CITY_BIKE));
                     break;
-                case "DOWNHILL":
-                    serverConfig.put(1792L, List.of("DOWNHILL"));
+                case DOWNHILL:
+                    serverConfig.put(1792L, List.of(DOWNHILL));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
             }
             return serverConfig;
         }
@@ -180,103 +235,21 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             switch(configurationType)
             {
-                case "CITY BIKE":
-                    serverConfig.put(1792L, List.of("CITY BIKE"));
+                case CITY_BIKE:
+                    serverConfig.put(1792L, List.of(CITY_BIKE));
                     break;
-                case "DOWNHILL":
-                    serverConfig.put(1792L, List.of("DOWNHILL"));
+                case DOWNHILL:
+                    serverConfig.put(1792L, List.of(DOWNHILL));
                     break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+
             }
             return serverConfig;
         }
         else {
-            return null;
+            return serverConfig;
         }
-    }
-
-    @Override
-    public List<String> getConfigurationTypesForSpecificationValueAndComponentType(String specificationValue, Long componentTypeId) {
-        List<String> configurationTypes = new ArrayList<>();
-
-        if (componentTypeId == 1) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("PC");
-                configurationTypes.add("Workstation");
-            }
-        } else if (componentTypeId == 2) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            }
-        } else if (componentTypeId == 4) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            } else if (List.of("Notebook").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 5) {
-            if (List.of("Server", "server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-                configurationTypes.add("Workstation");
-            }
-        } else if (componentTypeId == 6) {
-            if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            }
-        } else if (componentTypeId == 7) {
-            if (List.of("Fan", "Fan module").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Liquid cooling kit", "Heatsink", "Radiatior", "Air cooler", "Radiator block", "Cooler", "All-in-one liquid cooler", "Cooler").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Thermal paste").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 8) {
-            if (List.of("Fan", "Fan tray", "Cooler").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Liquid cooling kit", "Heatsink", "Radiatior", "Air cooler", "Radiator block", "Cooler", "All-in-one liquid cooler").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Thermal paste").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 10) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            } else if (List.of("Notebook").contains(specificationValue)) {
-                configurationTypes.add("Laptop");
-            }
-        } else if (componentTypeId == 11) {
-            if (List.of("Server").contains(specificationValue)) {
-                configurationTypes.add("Server");
-            } else if (List.of("Workstation", "workstation").contains(specificationValue)) {
-                configurationTypes.add("Workstation");
-            } else if (List.of("PC").contains(specificationValue)) {
-                configurationTypes.add("PC");
-            }
-        } else if (componentTypeId == 12 || componentTypeId == 13) {
-            if (List.of("CITY BIKE").contains(specificationValue)) {
-                configurationTypes.add("CITY BIKE");
-            } else if (List.of("DOWNHILL").contains(specificationValue)) {
-                configurationTypes.add("DOWNHILL");
-            }
-        }
-
-        return configurationTypes.isEmpty() ? null : configurationTypes;
     }
 
     @Override

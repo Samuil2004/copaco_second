@@ -245,9 +245,9 @@ class ComponentTypeManagerImplTest {
                                 .build())
                         .build()))
                 .build());
-        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(Arrays.asList(947L, 954L, 1070L,1792L));
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
+                "typeOfConfiguration", Arrays.asList(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
 
         // Run the test
         final List<ComponentTypeResponse> result = componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(

@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -435,7 +436,7 @@ class ComponentManagerImplTest {
                 .componentImageUrl("componentImageUrl")
                 .componentPrice(0.0)
                 .build()));
-        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(Arrays.asList(947L, 954L, 1070L,1792L));
         when(mockComponentRepository.findComponentEntityByComponentTypeAndConfigurationType(eq(0L),
                 eq("configurationType"),eq(List.of(947L, 954L, 1070L,1792L)), any(Pageable.class))).thenReturn(componentEntities);
 
@@ -461,9 +462,10 @@ class ComponentManagerImplTest {
     void testGetComponentsByComponentTypeAndConfigurationType_ComponentRepositoryReturnsNoItems() {
         // Setup
         when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
-        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(Arrays.asList(947L, 954L, 1070L,1792L));
+
         when(mockComponentRepository.findComponentEntityByComponentTypeAndConfigurationType(eq(0L),
-                eq("configurationType"),eq(List.of(947L, 954L, 1070L,1792L)), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+                eq("configurationType"),eq(List.of(947L, 954L, 1070L, 1792L)), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Run the test
         final List<SimpleComponentResponse> result = componentManagerImplUnderTest.getComponentsByComponentTypeAndConfigurationType(
