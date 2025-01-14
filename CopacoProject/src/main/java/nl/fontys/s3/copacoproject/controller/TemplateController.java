@@ -80,7 +80,7 @@ public ResponseEntity<Void> createTemplate(
     }
 
     @GetMapping("/filtered")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    @RolesAllowed({"ADMIN"})
     public ResponseEntity<List<TemplateObjectResponse>> getFilteredTemplates(
             @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
             @RequestParam(value = "currentPage", defaultValue = "1") @Min(1) int currentPage,
@@ -88,6 +88,18 @@ public ResponseEntity<Void> createTemplate(
             @RequestParam(value = "configurationType", required = false) String configurationType) {
 
         List<TemplateObjectResponse> filteredTemplates = templateManager.getFilteredTemplates(itemsPerPage, currentPage, categoryId, configurationType);
+        return ResponseEntity.ok(filteredTemplates);
+    }
+
+    @GetMapping("/filtered/active")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<TemplateObjectResponse>> getActiveFilteredTemplates(
+            @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
+            @RequestParam(value = "currentPage", defaultValue = "1") @Min(1) int currentPage,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "configurationType", required = false) String configurationType) {
+
+        List<TemplateObjectResponse> filteredTemplates = templateManager.getActiveFilteredTemplates(itemsPerPage, currentPage, categoryId, configurationType);
         return ResponseEntity.ok(filteredTemplates);
     }
 

@@ -26,6 +26,18 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             @Param("configurationType") String configurationType,
             Pageable pageable);
 
+    @Query("""
+    SELECT t
+    FROM TemplateEntity t
+    WHERE (:category IS NULL OR t.category = :category)
+      AND (:configurationType IS NULL OR :configurationType = '' OR t.configurationType LIKE %:configurationType%)
+      AND t.active=true
+    """)
+    Page<TemplateEntity> findActiveTemplateEntitiesByCategoryAndConfigurationType(
+            @Param("category") CategoryEntity category,
+            @Param("configurationType") String configurationType,
+            Pageable pageable);
+
     @Query("SELECT CASE WHEN COUNT(te) > 0 THEN true ELSE false END FROM TemplateEntity te " +
             "WHERE te.name = :templateName AND te.category.id = :categoryId")
     boolean existsTemplateEntityByNameAndCategory(@Param("templateName") String templateName,

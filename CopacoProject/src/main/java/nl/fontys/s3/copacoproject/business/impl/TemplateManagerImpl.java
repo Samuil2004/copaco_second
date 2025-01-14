@@ -182,6 +182,38 @@ public class TemplateManagerImpl implements TemplateManager {
     }
 
     @Override
+    public List<TemplateObjectResponse> getActiveFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
+        CategoryEntity categoryEntity = null;
+        if (categoryId != null && categoryId > 0) {
+            if (!categoryRepository.existsById(categoryId)) {
+
+                throw new ObjectNotFound("Category not found");
+            }
+
+            categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
+        }
+
+        Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
+        Page<TemplateEntity> templateEntitiesPage = templateRepository.findActiveTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, pageable);
+
+        if (templateEntitiesPage.isEmpty()) {
+            throw new ObjectNotFound("There are no templates");
+        }
+
+        List<TemplateObjectResponse> templates = new ArrayList<>();
+        for (TemplateEntity templateEntity : templateEntitiesPage) {
+            List<ComponentTypeList_Template> componentEntities = templateRepository.findComponentTypeListByTemplateId(templateEntity.getId());
+            List<String> componentTypes = new ArrayList<>();
+            for (ComponentTypeList_Template componentTypeList_Template : componentEntities) {
+                componentTypes.add(componentTypeList_Template.getComponentType().getComponentTypeName());
+            }
+            templates.add(TemplateConverter.convertFromEntityToResponse(templateEntity, componentTypes));
+        }
+
+        return templates;
+    }
+
+    @Override
     public int getNumberOfTemplates(Long categoryId, String configurationType) {
         CategoryEntity categoryEntity = null;
         if (categoryId!=null && categoryId > 0) {
