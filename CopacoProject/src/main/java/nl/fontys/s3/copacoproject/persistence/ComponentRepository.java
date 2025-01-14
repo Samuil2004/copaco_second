@@ -118,22 +118,38 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
 //            Pageable pageable
 //    );
 
+//    @Query(value = "SELECT c.* FROM component c " +
+//            "JOIN component_specification cs1 ON cs1.component_id = c.id " +
+//            "JOIN component_specification cs2 ON cs2.component_id = c.id " +
+//            "JOIN component_specification cs3 ON cs3.component_id = c.id " +
+//            "WHERE c.component_type_id = 5 " +
+//            "AND cs1.specification_type_id = 1036 AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
+//            "AND cs2.specification_type_id = 947 AND cs2.value = :configurationType " +
+//            "AND cs3.specification_type_id = 1293 AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
+//    List<ComponentEntity> findComponentsBySpecificationsNative(
+//            @Param("totalPowerSupply") Double totalPowerSupply,
+//            @Param("configurationType") String configurationType,
+//            @Param("total12ThLineSupply") Double total12ThLineSupply,
+//            Pageable pageable
+//    );
+
     @Query(value = "SELECT c.* FROM component c " +
             "JOIN component_specification cs1 ON cs1.component_id = c.id " +
             "JOIN component_specification cs2 ON cs2.component_id = c.id " +
             "JOIN component_specification cs3 ON cs3.component_id = c.id " +
             "WHERE c.component_type_id = 5 " +
-            "AND cs1.specification_type_id = 1036 AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
-            "AND cs2.specification_type_id = 947 AND cs2.value = :configurationType " +
-            "AND cs3.specification_type_id = 1293 AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
+            "AND cs1.specification_type_id = :totalPowerSupplyId AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
+            "AND cs2.specification_type_id = :configurationTypeId AND cs2.value = :configurationType " +
+            "AND cs3.specification_type_id = :total12ThLineSupplyId AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
     List<ComponentEntity> findComponentsBySpecificationsNative(
+            @Param("totalPowerSupplyId") Long totalPowerSupplyId,
             @Param("totalPowerSupply") Double totalPowerSupply,
+            @Param("configurationTypeId") Long configurationTypeId,
             @Param("configurationType") String configurationType,
+            @Param("total12ThLineSupplyId") Long total12ThLineSupplyId,
             @Param("total12ThLineSupply") Double total12ThLineSupply,
             Pageable pageable
     );
-
-
 
 //    static Specification<ComponentEntity> dynamicSpecification(
 //            Long componentTypeId,
