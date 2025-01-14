@@ -1,6 +1,5 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
@@ -22,18 +21,20 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
     private static final String CITY_BIKE = "CITY BIKE";
     private static final String DOWNHILL = "DOWNHILL";
 
+    @Value("${ID_Component_Voor}")
+    private Long ID_Component_Voor;
+
+    @Value("${ID_Bedoel_Voor}")
+    private Long ID_Bedoel_Voor;
+
+    @Value("${ID_Soort}")
+    private Long ID_Soort;
+
+    @Value("${ID_Bike_Type}")
+    private Long ID_Bike_Type;
+
     @Value("${spring.datasource.url}")
     private String databaseUrl;
-
-    private Long getDynamicSpecificationId(Long devId, Long stagingId) {
-        if (databaseUrl.contains("dbi527531_testdb")) {
-            return devId;
-        } else if (databaseUrl.contains("dbi527531_stagingcop")) {
-            return stagingId;
-        } else {
-            throw new IllegalStateException("Unknown database in use: " + databaseUrl);
-        }
-    }
 
     @Override
     public Map<Long, List<String>> getSpecificationIdAndValuesForComponentPurpose(String configurationType, Long componentTypeId) {
@@ -47,13 +48,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(SERVER));
+                    serverConfig.put(ID_Component_Voor, List.of(SERVER));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(WORKSTATION));
+                    serverConfig.put(ID_Component_Voor, List.of(WORKSTATION));
                     break;
                 case WORKSTATION:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(WORKSTATION));
+                    serverConfig.put(ID_Component_Voor, List.of(WORKSTATION));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -65,13 +66,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(SERVER));
+                    serverConfig.put(ID_Component_Voor, List.of(SERVER));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(PC));
+                    serverConfig.put(ID_Component_Voor, List.of(PC));
                     break;
                 case WORKSTATION:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(WORKSTATION));
+                    serverConfig.put(ID_Component_Voor, List.of(WORKSTATION));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -98,16 +99,16 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(SERVER));
+                    serverConfig.put(ID_Component_Voor, List.of(SERVER));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(PC));
+                    serverConfig.put(ID_Component_Voor, List.of(PC));
                     break;
                 case WORKSTATION:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(WORKSTATION));
+                    serverConfig.put(ID_Component_Voor, List.of(WORKSTATION));
                     break;
                 case LAPTOP:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(NOTEBOOK));
+                    serverConfig.put(ID_Component_Voor, List.of(NOTEBOOK));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -119,13 +120,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(947L,29L), List.of(SERVER,"server"));
+                    serverConfig.put(ID_Bedoel_Voor, List.of(SERVER,"server"));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(947L,29L), List.of(PC));
+                    serverConfig.put(ID_Bedoel_Voor, List.of(PC));
                     break;
                 case WORKSTATION:
-                    serverConfig.put(getDynamicSpecificationId(947L,29L), List.of(PC));
+                    serverConfig.put(ID_Bedoel_Voor, List.of(PC));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -137,7 +138,7 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of(PC));
+                    serverConfig.put(ID_Soort, List.of(PC));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -149,13 +150,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of("Fan","Fan module"));
+                    serverConfig.put(ID_Soort, List.of("Fan","Fan module"));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
+                    serverConfig.put(ID_Soort, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","Cooler"));
                     break;
                 case LAPTOP:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of("Thermal paste"));
+                    serverConfig.put(ID_Soort, List.of("Thermal paste"));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -167,13 +168,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of("Fan","Fan tray","Cooler"));
+                    serverConfig.put(ID_Soort, List.of("Fan","Fan tray","Cooler"));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
+                    serverConfig.put(ID_Soort, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
                     break;
                 case LAPTOP:
-                    serverConfig.put(getDynamicSpecificationId(954L,36L), List.of("Thermal paste"));
+                    serverConfig.put(ID_Soort, List.of("Thermal paste"));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -197,16 +198,16 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(SERVER));
+                    serverConfig.put(ID_Component_Voor, List.of(SERVER));
                     break;
                 case WORKSTATION:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(WORKSTATION));
+                    serverConfig.put(ID_Component_Voor, List.of(WORKSTATION));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(PC));
+                    serverConfig.put(ID_Component_Voor, List.of(PC));
                     break;
                 case LAPTOP:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(NOTEBOOK));
+                    serverConfig.put(ID_Component_Voor, List.of(NOTEBOOK));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -218,13 +219,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case SERVER:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(SERVER));
+                    serverConfig.put(ID_Component_Voor, List.of(SERVER));
                     break;
                 case WORKSTATION:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(WORKSTATION,"workstation"));
+                    serverConfig.put(ID_Component_Voor, List.of(WORKSTATION,"workstation"));
                     break;
                 case PC:
-                    serverConfig.put(getDynamicSpecificationId(1070L,152L), List.of(PC));
+                    serverConfig.put(ID_Component_Voor, List.of(PC));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -236,10 +237,10 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case CITY_BIKE:
-                    serverConfig.put(1792L, List.of(CITY_BIKE));
+                    serverConfig.put(ID_Bike_Type, List.of(CITY_BIKE));
                     break;
                 case DOWNHILL:
-                    serverConfig.put(1792L, List.of(DOWNHILL));
+                    serverConfig.put(ID_Bike_Type, List.of(DOWNHILL));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -251,10 +252,10 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             switch(configurationType)
             {
                 case CITY_BIKE:
-                    serverConfig.put(1792L, List.of(CITY_BIKE));
+                    serverConfig.put(ID_Bike_Type, List.of(CITY_BIKE));
                     break;
                 case DOWNHILL:
-                    serverConfig.put(1792L, List.of(DOWNHILL));
+                    serverConfig.put(ID_Bike_Type, List.of(DOWNHILL));
                     break;
                 default:
                     throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
@@ -271,24 +272,24 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
     public Long getTheSpecificationIdWhereTheDifferentConfigurationTypesCanBeFoundForCategory(Long categoryId) {
         if(categoryId == 1)
         {
-            return getDynamicSpecificationId(1070L,152L);
+            return ID_Component_Voor;
         }
         else if(categoryId == 2)
         {
-            return 1792L;
+            return ID_Bike_Type;
         }
-        return getDynamicSpecificationId(1070L,152L);
+        return ID_Component_Voor;
     }
 
     @Override
     public List<Long> getAllDistinctSpecificationIdsThatHoldConfigurationType() {
         if (databaseUrl.contains("dbi527531_testdb")) {
-            return List.of(947L, 954L, 1070L,1792L);
+            return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type);
 
         } else if (databaseUrl.contains("dbi527531_stagingcop")) {
-            return List.of(29L, 36L, 152L,1792L);
+            return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor);
         }
-        return List.of(947L, 954L, 1070L,1792L);
+        return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type);
     }
 
 }

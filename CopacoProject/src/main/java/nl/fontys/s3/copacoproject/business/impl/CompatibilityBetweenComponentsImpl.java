@@ -1252,13 +1252,35 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private final ComponentTypeRepository componentTypeRepository;
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
     private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
-    private final SpecificationTypeComponentTypeRepository specificationTypeComponentTypeRepository;
     private static final String VALUE_KEY = "value";
     private static final String ID_KEY = "id";
     private static final String ID2_KEY = "id2";
     private static final String COMPATIBLE_COMPONENTS_NOT_FOUND = "Compatible components from searched component type were not found;";
-    @Value("${spring.datasource.url}")
-    private String databaseUrl;
+
+    @Value("${ID_THERMAL_DESIGN_POWER}")
+    private Long ID_THERMAL_DESIGN_POWER;
+
+    @Value("${ID_Minimum_system_power_voorraad}")
+    private Long ID_Minimum_system_power_voorraad;
+
+    @Value("${ID_Stroomverbruik_schrijven}")
+    private Long ID_Stroomverbruik_schrijven;
+
+    @Value("${ID_Stroomverbruik_lezeN}")
+    private Long ID_Stroomverbruik_lezeN;
+
+    @Value("${ID_Stroomverbruik_typisch}")
+    private Long ID_Stroomverbruik_typisch;
+
+    @Value("${ID_Totaal_vermogen}")
+    private Long ID_Totaal_vermogen;
+
+    @Value("${ID_Bedoel_Voor}")
+    private Long ID_Bedoel_Voor;
+
+    @Value("${ID_Gecombineerd_vermogen}")
+    private Long ID_Gecombineerd_vermogen;
+
 
     private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {
@@ -1472,7 +1494,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                 gpuCpuConsumptionFor12thRail += valueForPowerConsumption;
             }
         }
-        List<ComponentEntity> foundPSUs = componentRepository.findComponentsBySpecificationsNative(getDynamicSpecificationId(1036L,118L),totalPowerConsumption,getDynamicSpecificationId(947L,29L),configurationType,getDynamicSpecificationId(1293L,375L),gpuCpuConsumptionFor12thRail,pageable);
+        List<ComponentEntity> foundPSUs = componentRepository.findComponentsBySpecificationsNative(ID_Totaal_vermogen,totalPowerConsumption,ID_Bedoel_Voor,configurationType,ID_Gecombineerd_vermogen,gpuCpuConsumptionFor12thRail,pageable);
         if(foundPSUs.isEmpty())
         {
             throw new ObjectNotFound("PSUs that can handle the power consumption were not found");
@@ -1482,7 +1504,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
             thereIsNextPage = false;
         }
         else {
-            List<ComponentEntity> nextPageCheck = componentRepository.findComponentsBySpecificationsNative(getDynamicSpecificationId(1036L,118L),totalPowerConsumption,getDynamicSpecificationId(947L,29L),configurationType,getDynamicSpecificationId(1293L,375L),gpuCpuConsumptionFor12thRail,checkNextPageSinceComponent);
+            List<ComponentEntity> nextPageCheck = componentRepository.findComponentsBySpecificationsNative(ID_Totaal_vermogen,totalPowerConsumption,ID_Bedoel_Voor,configurationType,ID_Gecombineerd_vermogen,gpuCpuConsumptionFor12thRail,checkNextPageSinceComponent);
             if(nextPageCheck.size() == 1)
             {
                 thereIsNextPage = true;
@@ -1641,27 +1663,17 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
 
     }
 
-    private Long getDynamicSpecificationId(Long devId, Long stagingId) {
-        if (databaseUrl.contains("dbi527531_testdb")) {
-            return devId;
-        } else if (databaseUrl.contains("dbi527531_stagingcop")) {
-            return stagingId;
-        } else {
-            throw new IllegalStateException("Unknown database in use: " + databaseUrl);
-        }
-    }
-
     private Map<String,Long> defineValuesForPowerConsumptionSpecifications(Long componentTypeId)
     {
         //The map should store a string (the string should be either id if the long is an id of a specification,
         // or value, if we know concrete value (ex.motherboards power consumption that does not have a specification for the power consumption, but in general it should be around 50W))
         Map<String,Long> specificationTypeId = new LinkedHashMap<>();
         if (componentTypeId == 1L) {
-            specificationTypeId.put(ID_KEY, getDynamicSpecificationId(1120L,202L));
+            specificationTypeId.put(ID_KEY, ID_THERMAL_DESIGN_POWER);
         } else if (componentTypeId == 2L) {
             specificationTypeId.put(VALUE_KEY, 50L);
         } else if (componentTypeId == 3L) {
-            specificationTypeId.put(ID_KEY,getDynamicSpecificationId(937L,19L));
+            specificationTypeId.put(ID_KEY,ID_Minimum_system_power_voorraad);
         } else if (componentTypeId == 4L) {
             specificationTypeId.put(VALUE_KEY, 10L);
         } else if (componentTypeId == 7L) {
@@ -1671,13 +1683,13 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
         } else if (componentTypeId == 9L) {
             specificationTypeId.put(VALUE_KEY, 30L);
         } else if (componentTypeId == 10L) {
-            specificationTypeId.put(ID_KEY, getDynamicSpecificationId(1144L,226L));
-            specificationTypeId.put(ID2_KEY, getDynamicSpecificationId(1145L,227L) );
+            specificationTypeId.put(ID_KEY, ID_Stroomverbruik_lezeN);
+            specificationTypeId.put(ID2_KEY, ID_Stroomverbruik_schrijven);
         } else if (componentTypeId == 11L) {
-            specificationTypeId.put(ID_KEY, getDynamicSpecificationId(1144L,226L));
-            specificationTypeId.put(ID2_KEY,getDynamicSpecificationId(922L,4L));
+            specificationTypeId.put(ID_KEY, ID_Stroomverbruik_lezeN);
+            specificationTypeId.put(ID2_KEY,ID_Stroomverbruik_typisch);
         } else {
-            specificationTypeId.put(ID_KEY, getDynamicSpecificationId(1120L,202L));
+            specificationTypeId.put(ID_KEY, ID_THERMAL_DESIGN_POWER);
         }
         return specificationTypeId;
     }
