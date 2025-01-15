@@ -42,7 +42,7 @@ public class ComponentController {
     }
 
     @GetMapping("/findByComponentTypeId/{componentTypeId}")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    //@RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Component>> getComponentsFromComponentType(@PathVariable("componentTypeId") Long componentTypeId) {
         try{
             return ResponseEntity.ok(componentManager.getAllComponentFromComponentType(componentTypeId));
@@ -56,7 +56,7 @@ public class ComponentController {
     }
 
     @GetMapping("/filtered")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    //@RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<SimpleComponentResponse>> getComponentsByComponentTypeAndConfigurationType(
             @RequestParam(name = "componentTypeId") Long componentTypeId,
             @RequestParam(name = "configurationType") String configurationType,
@@ -64,6 +64,7 @@ public class ComponentController {
     ) {
         return ResponseEntity.ok(componentManager.getComponentsByComponentTypeAndConfigurationType(componentTypeId, configurationType, currentPage));
     }
+
     @GetMapping("/countOfFiltered")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<Integer> getNumberOfComponentsByComponentTypeAndConfigurationType(

@@ -176,7 +176,7 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
                     serverConfig.put(ID_Soort, List.of("Fan","Fan tray","Cooler"));
                     break;
                 case PC:
-                    serverConfig.put(ID_Soort, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler"));
+                    serverConfig.put(ID_Soort, List.of("Liquid cooling kit","Heatsink","Radiatior","Air cooler","Radiator block","Cooler","All-in-one liquid cooler","PC"));
                     break;
                 case LAPTOP:
                     serverConfig.put(ID_Soort, List.of("Thermal paste"));

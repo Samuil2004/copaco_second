@@ -1623,7 +1623,7 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
                     //.componentTypeName(componentEntity.getComponentType().getComponentTypeName())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .price(componentEntity.getComponentPrice())
-                    //.componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
+                    .componentSpecifications(getComponentSpecification(componentEntity.getComponentId()))
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }

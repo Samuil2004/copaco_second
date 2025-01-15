@@ -259,12 +259,12 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN :allDistinctSpecificationIdsThatHoldConfigurationType
-    AND cs.value = :configurationType
+    AND cs.specificationType.id = :specificationIDThatHoldsTheComponentPurpose
+    AND cs.value IN :valuesToBeConsidered
     """)
     Page<ComponentEntity> findComponentEntityByComponentTypeAndConfigurationType(@Param("componentTypeId") Long componentTypeId,
-                                                                                 @Param("configurationType") String configurationType,
-                                                                                 @Param("allDistinctSpecificationIdsThatHoldConfigurationType") List<Long> allDistinctSpecificationIdsThatHoldConfigurationType,
+                                                                                 @Param("valuesToBeConsidered") List<String> valuesToBeConsidered,
+                                                                                 @Param("specificationIDThatHoldsTheComponentPurpose") Long specificationIDThatHoldsTheComponentPurpose,
                                                                                  Pageable pageable);
 
     @Query("""

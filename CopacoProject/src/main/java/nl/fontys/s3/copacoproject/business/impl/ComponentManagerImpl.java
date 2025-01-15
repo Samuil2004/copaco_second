@@ -158,8 +158,9 @@ public class ComponentManagerImpl implements ComponentManager {
         }
 
         Pageable pageable = PageRequest.of(currentPage-1, 10, Sort.by("c.componentName").ascending());
-        List<Long> allDistinctSpecificationIdsThatHoldConfigurationType =  specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType();
-        Page<ComponentEntity> entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, configurationType,allDistinctSpecificationIdsThatHoldConfigurationType, pageable);
+        Map<Long,List<String>> idForSpecificationsAndValues = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationType,componentTypeId);
+        Map.Entry<Long, List<String>> firstEntry = idForSpecificationsAndValues.entrySet().iterator().next();
+        Page<ComponentEntity> entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, firstEntry.getValue(),firstEntry.getKey(), pageable);
         List<SimpleComponentResponse> components = new ArrayList<>();
         for (ComponentEntity componentEntity : entities.getContent()) {
             components.add(SimpleComponentResponse.builder()
