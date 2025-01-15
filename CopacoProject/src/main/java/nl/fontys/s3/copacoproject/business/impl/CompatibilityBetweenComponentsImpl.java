@@ -1281,6 +1281,10 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     @Value("${ID_Gecombineerd_vermogen}")
     private Long ID_Gecombineerd_vermogen;
 
+    @Value("${ID_Car_Type}")
+    private Long ID_Car_Type;
+
+
 
     private List<Long> checkIfGivenIdsExistInDatabase(ConfiguratorRequest request)
     {

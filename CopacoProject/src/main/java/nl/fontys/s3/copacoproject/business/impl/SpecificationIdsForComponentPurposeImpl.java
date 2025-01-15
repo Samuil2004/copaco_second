@@ -20,6 +20,8 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
     private static final String NOTEBOOK = "Notebook";
     private static final String CITY_BIKE = "CITY BIKE";
     private static final String DOWNHILL = "DOWNHILL";
+    private static final String SUV = "SUV";
+    private static final String Sedan = "Sedan";
 
     @Value("${ID_Component_Voor}")
     private Long ID_Component_Voor;
@@ -35,6 +37,9 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
 
     @Value("${spring.datasource.url}")
     private String databaseUrl;
+
+    @Value("${ID_Car_Type}")
+    private Long ID_Car_Type;
 
     @Override
     public Map<Long, List<String>> getSpecificationIdAndValuesForComponentPurpose(String configurationType, Long componentTypeId) {
@@ -263,6 +268,81 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
             }
             return serverConfig;
         }
+        if(componentTypeId == 14)
+        {
+            switch(configurationType)
+            {
+                case SUV:
+                    serverConfig.put(ID_Car_Type, List.of(SUV));
+                    break;
+                case Sedan:
+                    serverConfig.put(ID_Car_Type, List.of(Sedan));
+                    break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            return serverConfig;
+        }
+        if(componentTypeId == 15)
+        {
+            switch(configurationType)
+            {
+                case SUV:
+                    serverConfig.put(ID_Car_Type, List.of(SUV));
+                    break;
+                case Sedan:
+                    serverConfig.put(ID_Car_Type, List.of(Sedan));
+                    break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            return serverConfig;
+        }
+        if(componentTypeId == 16)
+        {
+            switch(configurationType)
+            {
+                case SUV:
+                    serverConfig.put(ID_Car_Type, List.of(SUV));
+                    break;
+                case Sedan:
+                    serverConfig.put(ID_Car_Type, List.of(Sedan));
+                    break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            return serverConfig;
+        }
+        if(componentTypeId == 17)
+        {
+            switch(configurationType)
+            {
+                case SUV:
+                    serverConfig.put(ID_Car_Type, List.of(SUV));
+                    break;
+                case Sedan:
+                    serverConfig.put(ID_Car_Type, List.of(Sedan));
+                    break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            return serverConfig;
+        }
+        if(componentTypeId == 18)
+        {
+            switch(configurationType)
+            {
+                case SUV:
+                    serverConfig.put(ID_Car_Type, List.of(SUV));
+                    break;
+                case Sedan:
+                    serverConfig.put(ID_Car_Type, List.of(Sedan));
+                    break;
+                default:
+                    throw new ObjectNotFound("One of the selected component type does not have any components for this type of configuration; ");
+            }
+            return serverConfig;
+        }
         else {
             return serverConfig;
         }
@@ -278,18 +358,22 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         {
             return ID_Bike_Type;
         }
+        else if(categoryId == 3)
+        {
+            return ID_Car_Type;
+        }
         return ID_Component_Voor;
     }
 
     @Override
     public List<Long> getAllDistinctSpecificationIdsThatHoldConfigurationType() {
         if (databaseUrl.contains("dbi527531_testdb")) {
-            return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type);
+            return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type,ID_Car_Type);
 
         } else if (databaseUrl.contains("dbi527531_stagingcop")) {
             return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor);
         }
-        return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type);
+        return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type,ID_Car_Type);
     }
 
 }
