@@ -325,7 +325,7 @@ public class TemplateManagerImpl implements TemplateManager {
             Set<String> componentConfigTypeSet = Arrays.stream(componentConfigTypes.split(","))
                     .map(String::trim)
                     .collect(Collectors.toSet());
-            if (!componentConfigTypeSet.contains(templateConfigType)) {
+            if (!componentConfigTypeSet.contains(templateConfigType.toUpperCase())) {
                 throw new InvalidInputException("Configuration type does not match");
             }
         }
