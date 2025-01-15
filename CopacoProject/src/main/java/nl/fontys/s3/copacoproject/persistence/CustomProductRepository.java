@@ -48,7 +48,7 @@ public interface CustomProductRepository extends JpaRepository<CustomProductEnti
     FROM CustomProductEntity cp
     JOIN AssemblingEntity a ON cp = a.customProductId
     JOIN ComponentEntity c ON c=a.componentId
-    WHERE cp.status.id=1 AND cp.template.configurationType= :configurationType
+    WHERE cp.status.id=2 AND cp.template.configurationType= :configurationType
     """)
     double sumIncomeByConfigurationType(String configurationType);
 
