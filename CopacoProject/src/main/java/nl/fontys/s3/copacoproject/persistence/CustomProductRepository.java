@@ -39,7 +39,7 @@ public interface CustomProductRepository extends JpaRepository<CustomProductEnti
     FROM CustomProductEntity cp
     JOIN AssemblingEntity a ON cp = a.customProductId
     JOIN ComponentEntity c ON c=a.componentId
-    WHERE cp.status.id=1
+    WHERE cp.status.id=2
     """)
     double sumTotalIncome();
 
@@ -57,7 +57,7 @@ public interface CustomProductRepository extends JpaRepository<CustomProductEnti
     FROM CustomProductEntity cp
     JOIN AssemblingEntity a ON cp = a.customProductId
     JOIN ComponentEntity c ON c=a.componentId
-    WHERE cp.status.id=1
+    WHERE cp.status.id=2
     """)
     double calculateAverageFinishedProductPrice();
 }
