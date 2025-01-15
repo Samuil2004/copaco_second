@@ -268,6 +268,15 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
                                                                                  Pageable pageable);
 
     @Query("""
+    SELECT DISTINCT c
+    FROM ComponentEntity c
+    JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
+    WHERE c.componentType.id = :componentTypeId
+    """)
+    Page<ComponentEntity> findComponentEntityByComponentType(@Param("componentTypeId") Long componentTypeId,
+                                                                                 Pageable pageable);
+
+    @Query("""
     SELECT COUNT(c)
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
