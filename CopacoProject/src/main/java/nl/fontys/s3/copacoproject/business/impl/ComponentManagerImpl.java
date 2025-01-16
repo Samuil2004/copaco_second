@@ -157,6 +157,9 @@ public class ComponentManagerImpl implements ComponentManager {
         if(!componentTypeRepository.existsById(firstSelectedComponentTypeId)){
             throw new InvalidInputException("Component type does not exist");
         }
+        if (componentTypesInTheTemplate != null && componentTypesInTheTemplate.contains(firstSelectedComponentTypeId)) {
+            componentTypesInTheTemplate.remove(firstSelectedComponentTypeId);
+        }
         List<ComponentEntity> foundComponentsThatSatisfyAllFilters;
         Pageable pageable = PageRequest.of(currentPage-1, 10);
         Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = new HashMap<>();
@@ -202,7 +205,7 @@ public class ComponentManagerImpl implements ComponentManager {
     private Map<Long,List<String>> getSpecificationsToBeConsideredForSearchedComponentType(List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,Long providedComponentComponentTypeId,Long searchedComponentTypeId, Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,String typeOfConfiguration)
     {
         for(Long specificationId : allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes) {
-      List<Object[]> response = compatibilityRepository.findSpecification1IdsAndValuesOfFirstSpecification1ForFirstComponentType(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration);
+      List<Object[]> response = compatibilityRepository.findSpecification1IdsAndValuesOfFirstSpecification1ForFirstComponentType(providedComponentComponentTypeId,searchedComponentTypeId,specificationId,typeOfConfiguration);
 
             List<SpecificationTypeAndValuesForIt> specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType = response.stream()
                     .map(result -> new SpecificationTypeAndValuesForIt(

@@ -91,11 +91,13 @@ List<Object[]> findSpecification2IdsAndValuesOfSecondSpecification(
     WHERE ac.component1_id = :component1Id
       AND ac.component2_id = :component2Id
       AND ac.configuration_type = :configurationType
+      AND r.specification1_id = :specificationIdForFirstComponent
     GROUP BY ctst.specification_type_id
     """, nativeQuery = true)
     List<Object[]> findSpecification1IdsAndValuesOfFirstSpecification1ForFirstComponentType(
             @Param("component1Id") Long component1Id,
             @Param("component2Id") Long component2Id,
+            @Param("specificationIdForFirstComponent") Long specificationIdForFirstComponent,
             @Param("configurationType") String configurationType
     );
 
