@@ -81,6 +81,48 @@ List<Object[]> findSpecification2IdsAndValuesOfSecondSpecification(
     );
 
 
+    @Query(value = """
+    SELECT 
+        ctst.specification_type_id AS specification1Id, 
+        STRING_AGG(r.value_of_first_specification, ', ') AS valueOfFirstSpecification
+    FROM [Automatic_compatibility] ac
+    JOIN [Rule_entity] r ON ac.rule_id = r.id
+    JOIN specfication_type_component_type ctst ON ctst.id = r.specification1_id
+    WHERE ac.component1_id = :component1Id
+      AND ac.component2_id = :component2Id
+      AND ac.configuration_type = :configurationType
+    GROUP BY ctst.specification_type_id
+    """, nativeQuery = true)
+    List<Object[]> findSpecification1IdsAndValuesOfFirstSpecification1ForFirstComponentType(
+            @Param("component1Id") Long component1Id,
+            @Param("component2Id") Long component2Id,
+            @Param("configurationType") String configurationType
+    );
+
+
+    @Query("SELECT stct.specificationType.id " +
+            "FROM RuleEntity r " +
+            "JOIN CompatibilityEntity ac on ac.ruleId.id = r.id " +
+            "JOIN SpecficationTypeList_ComponentTypeEntity stct on stct.id = r.specificationToConsider2Id.id " +
+            "WHERE ac.component1Id.id = :component1Id " +
+            "AND ac.component2Id.id = :component2Id " +
+            "AND r.specificationToConsider1Id.id = :specification1Id " +
+            "AND r.valueOfSecondSpecification IS NULL " +
+            "AND ac.configurationType = :configurationType")
+    Long getSecondComponentSpecificationId(
+            @Param("component1Id") Long component1Id,
+            @Param("component2Id") Long component2Id,
+            @Param("specification1Id") Long specification1Id,
+            @Param("configurationType") String configurationType);
+
+    @Query("SELECT distinct cs.value " +
+            "FROM Component_SpecificationList cs " +
+            "JOIN ComponentEntity c on c.componentId = cs.componentId.componentId " +
+            "WHERE cs.specificationType.id = :specificationTypeId " +
+            "AND c.componentType.id = :componentTypeId")
+    List<String> getDistinctValuesForASpecification(
+            @Param("specificationTypeId") Long specificationTypeId,
+            @Param("componentTypeId") Long componentTypeId);
 
 
 

@@ -65,6 +65,18 @@ public class ComponentController {
         return ResponseEntity.ok(componentManager.getComponentsByComponentTypeAndConfigurationType(componentTypeId, configurationType, currentPage));
     }
 
+    @PostMapping("/filtered/getFirstComponents")
+    //@RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<SimpleComponentResponse>> getComponentsByComponentTypeAndConfigurationTypeFirstComponent(
+            @RequestParam(name = "componentTypeId") Long componentTypeId,
+            @RequestParam(name = "configurationType") String configurationType,
+            @RequestParam(name = "currentPage") int currentPage,
+            @RequestParam(name = "itemsInTemplate") List<Long> componentTypeIdsInTemplate
+
+    ) {
+        return ResponseEntity.ok(componentManager.getComponentsForFirstComponentTypeConfigurator(componentTypeId, configurationType, currentPage,componentTypeIdsInTemplate));
+    }
+
     @GetMapping("/countOfFiltered")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<Integer> getNumberOfComponentsByComponentTypeAndConfigurationType(

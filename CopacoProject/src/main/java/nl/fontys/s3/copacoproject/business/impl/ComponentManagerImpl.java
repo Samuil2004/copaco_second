@@ -11,17 +11,17 @@ import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse
 import nl.fontys.s3.copacoproject.domain.Component;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.*;
-import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.ComponentTypeEntity;
-import nl.fontys.s3.copacoproject.persistence.entity.Component_SpecificationList;
-import nl.fontys.s3.copacoproject.persistence.entity.SpecificationTypeEntity;
+import nl.fontys.s3.copacoproject.persistence.entity.*;
+import nl.fontys.s3.copacoproject.persistence.entity.supportingEntities.SpecificationTypeAndValuesForIt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,6 +33,7 @@ public class ComponentManagerImpl implements ComponentManager {
     private final CategoryRepository categoryRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
+    private final CompatibilityRepository compatibilityRepository;
 
     @Override
     public List<GetComponentResponse> getAllComponents() {
@@ -149,6 +150,111 @@ public class ComponentManagerImpl implements ComponentManager {
 
         }
         return allComponentsBase;
+    }
+
+    @Override
+    public List<SimpleComponentResponse> getComponentsForFirstComponentTypeConfigurator(Long firstSelectedComponentTypeId, String configurationType, int currentPage,List<Long> componentTypesInTheTemplate) {
+        if(!componentTypeRepository.existsById(firstSelectedComponentTypeId)){
+            throw new InvalidInputException("Component type does not exist");
+        }
+        List<ComponentEntity> foundComponentsThatSatisfyAllFilters;
+        Pageable pageable = PageRequest.of(currentPage-1, 10);
+        Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = new HashMap<>();
+        for(Long componentTypeId : componentTypesInTheTemplate) {
+            List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(firstSelectedComponentTypeId, componentTypeId, configurationType);
+            if(allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes.isEmpty()){
+                if(componentTypesInTheTemplate.indexOf(componentTypeId) == componentTypesInTheTemplate.size() - 1)
+                {
+                    if(specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.isEmpty()){
+                        return getComponentsByComponentTypeAndConfigurationType(firstSelectedComponentTypeId,configurationType,currentPage);
+                    }
+                    break;
+                }
+                continue;
+            }
+            Map<Long,List<String>> updatedIdsAndValues = getSpecificationsToBeConsideredForSearchedComponentType(allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,firstSelectedComponentTypeId,componentTypeId,specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,configurationType);
+            specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = updatedIdsAndValues;
+            //process the rules
+        }
+        Map<Long,List<String>> componentPurposeAndSpecificationId = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationType,firstSelectedComponentTypeId);
+        if(!componentPurposeAndSpecificationId.isEmpty()) {
+            Map.Entry<Long, List<String>> firstEntry = componentPurposeAndSpecificationId.entrySet().iterator().next();
+            specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(firstEntry.getKey(), firstEntry.getValue());
+        }
+        Specification<ComponentEntity> spec = ComponentRepository.dynamicSpecification(
+                firstSelectedComponentTypeId, specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues);
+
+        //Using the dynamic query, get the first ten components that satisfy the filters in the query
+        Page<ComponentEntity> page = componentRepository.findAll(spec, pageable);
+        foundComponentsThatSatisfyAllFilters = page.getContent();
+        List<SimpleComponentResponse> components = new ArrayList<>();
+        for (ComponentEntity componentEntity : foundComponentsThatSatisfyAllFilters) {
+            components.add(SimpleComponentResponse.builder()
+                    .componentId(componentEntity.getComponentId())
+                    .componentImageUrl(componentEntity.getComponentImageUrl())
+                    .componentName(componentEntity.getComponentName())
+                    .componentPrice(componentEntity.getComponentPrice())
+                    .build());
+        }
+        return components;
+    }
+
+    private Map<Long,List<String>> getSpecificationsToBeConsideredForSearchedComponentType(List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes,Long providedComponentComponentTypeId,Long searchedComponentTypeId, Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues,String typeOfConfiguration)
+    {
+        for(Long specificationId : allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes) {
+      List<Object[]> response = compatibilityRepository.findSpecification1IdsAndValuesOfFirstSpecification1ForFirstComponentType(providedComponentComponentTypeId,searchedComponentTypeId,typeOfConfiguration);
+
+            List<SpecificationTypeAndValuesForIt> specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType = response.stream()
+                    .map(result -> new SpecificationTypeAndValuesForIt(
+                            ((Number) result[0]).longValue(),  // Cast to appropriate type
+                            (String) result[1]
+                    ))
+                    .collect(Collectors.toList());
+
+
+
+            //If the list is empty, this means that eventhough the component has the specification, the values it has for this specification is not compatible with any other specification types, which means not compatible
+            if(specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType.isEmpty()){
+                throw new ObjectNotFound("One of the selected components does not respect any of the rules between it and the searched one;");
+            }
+            for (SpecificationTypeAndValuesForIt specificationTypeAndValuesForIt : specificationTypeIdsAndValuesToBeConsideredForTheSearchedComponentType) {
+                Long specificationIdToBeConsideredForSecondSpecification = specificationTypeAndValuesForIt.getSpecification2Id();
+                String valuesToBeConsideredForTheSearchedComponent = specificationTypeAndValuesForIt.getValueOfSecondSpecification();
+
+                List<String> newValuesToConsider;
+                if (valuesToBeConsideredForTheSearchedComponent == null) {
+                    // Automatic Compatibility
+                    Long specificationTypeIdOfTheSecondComponentType = compatibilityRepository.getSecondComponentSpecificationId(providedComponentComponentTypeId,searchedComponentTypeId,specificationId,typeOfConfiguration);
+                    List<String> valuesTheSecondComponentHasForThisSpecification = compatibilityRepository.getDistinctValuesForASpecification(specificationTypeIdOfTheSecondComponentType,searchedComponentTypeId);
+                    if(valuesTheSecondComponentHasForThisSpecification.isEmpty()){
+                        throw new ObjectNotFound("One of the selected components does not respect any of the rules between it and the searched one;");
+                    }
+                    newValuesToConsider = valuesTheSecondComponentHasForThisSpecification;
+                } else {
+                    // Manual Compatibility
+                    newValuesToConsider = Arrays.asList(valuesToBeConsideredForTheSearchedComponent.split("\\s*,\\s*"));
+                }
+                //This code does the following -> if we have component from component type 1 that has a rule for compatibility with component 4 (1,5,"2300","1,2,3,4") and this is already in the map
+                //and now we have another component from component type 2 that has a rule for compatibility with component type 4 (7,5,"2300","4,5,6") and we are looking for component from component
+                //type 4, for specification 5 we should consider only value "4" because all other values will make either the first or the second component incompatible with the searched one
+                if (specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.containsKey(specificationIdToBeConsideredForSecondSpecification)) {
+
+                    List<String> existingValues = specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.get(specificationIdToBeConsideredForSecondSpecification);
+
+                    // Find common values between existing and new values
+                    List<String> commonValues = existingValues.stream()
+                            .filter(newValuesToConsider::contains)
+                            .collect(Collectors.toList());
+
+                    // Update the map with only the common values
+                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationIdToBeConsideredForSecondSpecification, commonValues);
+                } else {
+                    // Insert new values into the map
+                    specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues.put(specificationIdToBeConsideredForSecondSpecification, newValuesToConsider);
+                }
+            }
+        }
+        return specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues;
     }
 
     @Override
