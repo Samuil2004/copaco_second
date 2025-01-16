@@ -29,4 +29,6 @@ public class ConfiguratorRequest {
 
     @NotBlank(message = "Type of configuration must not be null.")
     private String typeOfConfiguration;
+
+    List<Long> componentTypeIdsInTemplate;
 }
