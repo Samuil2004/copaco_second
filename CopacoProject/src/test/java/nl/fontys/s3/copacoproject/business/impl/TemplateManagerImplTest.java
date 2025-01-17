@@ -532,6 +532,63 @@ class TemplateManagerImplTest {
         assertThat(result).isEqualTo(expectedResult);
     }
 
+    @Test
+    void testGetActiveFilteredTemplates() {
+        // Setup
+        final List<TemplateObjectResponse> expectedResult = List.of(TemplateObjectResponse.builder()
+                .templateId(0L)
+                .category(Category.builder()
+                        .categoryId(0L)
+                        .categoryName("categoryName")
+                        .build())
+                .name("newName")
+                .configurationType("configurationType")
+                .image("content".getBytes())
+                .components(List.of("value")) // Expecting "value" in components
+                .build());
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+
+        // Mock template entities
+        final TemplateEntity templateEntity = TemplateEntity.builder()
+                .id(0L)
+                .category(CategoryEntity.builder()
+                        .id(0L)
+                        .categoryName("categoryName")
+                        .build())
+                .name("newName")
+                .configurationType("configurationType")
+                .image("content".getBytes())
+                .build();
+
+        Page<TemplateEntity> templateEntities = new PageImpl<>(List.of(templateEntity));
+
+        // Mock the componentTypeList associated with the template
+        final ComponentTypeEntity componentTypeEntity = ComponentTypeEntity.builder()
+                .id(0L)
+                .componentTypeName("value") // Ensure this matches the expected "value"
+                .build();
+
+        final ComponentTypeList_Template componentTypeListTemplate = ComponentTypeList_Template.builder()
+                .template(templateEntity)
+                .componentType(componentTypeEntity)
+                .build();
+
+        // Mock repository behavior
+        when(mockTemplateRepository.findActiveTemplateEntitiesByCategoryAndConfigurationType(
+                null, "configurationType", pageable)).thenReturn(templateEntities);
+
+        when(mockTemplateRepository.findComponentTypeListByTemplateId(0L))
+                .thenReturn(List.of(componentTypeListTemplate));
+
+        // Run the test
+        final List<TemplateObjectResponse> result = templateManagerImplUnderTest.getActiveFilteredTemplates(10, 1, 0L,
+                "configurationType");
+
+        // Verify the results
+        assertThat(result).isEqualTo(expectedResult);
+    }
+
 
 
     @Test
@@ -542,6 +599,17 @@ class TemplateManagerImplTest {
         // Run the test
         assertThatThrownBy(
                 () -> templateManagerImplUnderTest.getFilteredTemplates(10, 1, 1L, "configurationType"))
+                .isInstanceOf(ObjectNotFound.class);
+    }
+
+    @Test
+    void testGetActiveFilteredTemplates_CategoryRepositoryExistsByIdReturnsFalse() {
+        // Setup
+        when(mockCategoryRepository.existsById(1L)).thenReturn(false);
+
+        // Run the test
+        assertThatThrownBy(
+                () -> templateManagerImplUnderTest.getActiveFilteredTemplates(10, 1, 1L, "configurationType"))
                 .isInstanceOf(ObjectNotFound.class);
     }
 
@@ -558,6 +626,21 @@ class TemplateManagerImplTest {
         // Act & Assert
         assertThatThrownBy(
                 () -> templateManagerImplUnderTest.getFilteredTemplates(10, 1, 0L, "configurationType"))
+                .isInstanceOf(ObjectNotFound.class);
+    }
+    @Test
+    void testGetActiveFilteredTemplates_TemplateRepositoryFindTemplateEntitiesByCategoryAndConfigurationTypeReturnsNoItems() {
+        // Arrange
+        // Configure TemplateRepository to handle null category
+        when(mockTemplateRepository.findActiveTemplateEntitiesByCategoryAndConfigurationType(
+                eq(null),
+                eq("configurationType"),
+                any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+        // Act & Assert
+        assertThatThrownBy(
+                () -> templateManagerImplUnderTest.getActiveFilteredTemplates(10, 1, 0L, "configurationType"))
                 .isInstanceOf(ObjectNotFound.class);
     }
 

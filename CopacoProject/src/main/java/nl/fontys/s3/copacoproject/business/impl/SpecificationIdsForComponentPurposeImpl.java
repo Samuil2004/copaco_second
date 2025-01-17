@@ -23,23 +23,31 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
     private static final String SUV = "SUV";
     private static final String Sedan = "Sedan";
 
-    @Value("${ID_Component_Voor}")
-    private Long ID_Component_Voor;
+//    @Value("${ID_Component_Voor}")
+//    private Long ID_Component_Voor;
+//
+//    @Value("${ID_Bedoel_Voor}")
+//    private Long ID_Bedoel_Voor;
+//
+//    @Value("${ID_Soort}")
+//    private Long ID_Soort;
+//
+//    @Value("${ID_Bike_Type}")
+//    private Long ID_Bike_Type;
+//
+//    @Value("${spring.datasource.url}")
+//    private String databaseUrl;
+//
+//    @Value("${ID_Car_Type}")
+//    private Long ID_Car_Type;
 
-    @Value("${ID_Bedoel_Voor}")
-    private Long ID_Bedoel_Voor;
+    private Long ID_Component_Voor=1070L;
+    private Long ID_Bedoel_Voor=947L;
+    private Long ID_Soort=954L;
+    private Long ID_Bike_Type=1792L;
+    private Long ID_Car_Type=1797L;
 
-    @Value("${ID_Soort}")
-    private Long ID_Soort;
 
-    @Value("${ID_Bike_Type}")
-    private Long ID_Bike_Type;
-
-    @Value("${spring.datasource.url}")
-    private String databaseUrl;
-
-    @Value("${ID_Car_Type}")
-    private Long ID_Car_Type;
 
     @Override
     public Map<Long, List<String>> getSpecificationIdAndValuesForComponentPurpose(String configurationType, Long componentTypeId) {
@@ -367,13 +375,13 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
 
     @Override
     public List<Long> getAllDistinctSpecificationIdsThatHoldConfigurationType() {
-        if (databaseUrl.contains("dbi527531_testdb")) {
+        //if (databaseUrl.contains("dbi527531_testdb")) {
             return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type,ID_Car_Type);
 
-        } else if (databaseUrl.contains("dbi527531_stagingcop")) {
-            return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor);
-        }
-        return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type,ID_Car_Type);
+//        } else if (databaseUrl.contains("dbi527531_stagingcop")) {
+//            return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor);
+//        }
+//        return List.of(ID_Bedoel_Voor, ID_Soort, ID_Component_Voor,ID_Bike_Type,ID_Car_Type);
     }
 
 }
