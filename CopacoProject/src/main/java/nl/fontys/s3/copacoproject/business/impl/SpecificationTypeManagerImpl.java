@@ -1,13 +1,13 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.RequiredArgsConstructor;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
 import nl.fontys.s3.copacoproject.business.converters.SpecificationTypeConverter;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.CreateSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetAllSpecificationTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetSpecificationTypeByComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.CreateSpecificationTypeRequest;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.CreateSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetAllSpecificationTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetSpecificationTypeByComponentTypeResponse;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import nl.fontys.s3.copacoproject.persistence.ComponentRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
@@ -22,8 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 @RequiredArgsConstructor
 public class SpecificationTypeManagerImpl implements SpecificationTypeManager {
@@ -35,7 +33,7 @@ public class SpecificationTypeManagerImpl implements SpecificationTypeManager {
     public GetAllSpecificationTypeResponse getAllSpecificationType() {
         List<SpecificationTypeEntity> specificationTypeEntities = specificationTypeRepository.findAll();
         List<SpecificationType> specificationTypeList = specificationTypeEntities.stream()
-                .map(SpecificationTypeConverter::convertFromEntityToBase).collect(toList());
+                .map(SpecificationTypeConverter::convertFromEntityToBase).toList();
         return GetAllSpecificationTypeResponse.builder().specificationTypes(specificationTypeList).build();
     }
     @Override

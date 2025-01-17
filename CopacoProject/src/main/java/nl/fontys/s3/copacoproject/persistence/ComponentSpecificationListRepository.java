@@ -37,16 +37,25 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             "WHERE csl.componentId.componentId = :componentId AND csl.specificationType.id = :specificationId")
     List<String> findValuesByComponentAndSpecification(long componentId, long specificationId);
 
-    @Query("SELECT DISTINCT cs.value FROM Component_SpecificationList cs " +
-            "WHERE cs.specificationType.id = 1070")
-    List<String> getDistinctConfigurationTypes();
+//    @Query("SELECT DISTINCT cs.value FROM Component_SpecificationList cs " +
+//            "WHERE cs.specificationType.id = 1070")
+//    List<String> getDistinctConfigurationTypes();
 
     @Query("SELECT DISTINCT cs.value " +
             "FROM Component_SpecificationList cs " +
             "JOIN cs.componentId c " +
             "JOIN c.componentType ct " +
-            "WHERE ct.category.id = :categoryId AND cs.specificationType.id = 1070")
-    List<String> getDistinctConfigurationTypesInCategory(@Param("categoryId") Long categoryId);
+            "WHERE ct.category.id = :categoryId AND cs.specificationType.id = :specificationTypeId")
+    List<String> getDistinctConfigurationTypesInCategory(@Param("categoryId") Long categoryId,
+                                                         @Param("specificationTypeId") Long specificationTypeId);
+
+//    @Query("SELECT DISTINCT cs.value " +
+//            "FROM Component_SpecificationList cs " +
+//            "JOIN cs.componentId c " +
+//            "JOIN c.componentType ct " +
+//            "WHERE ct.category.id = :categoryId AND cs.specificationType.id = 1792")
+//    List<String> getDistinctConfigurationTypesInCategory2(@Param("categoryId") Long categoryId);
+//
 
 
     @Query("SELECT cs.value " +
@@ -76,6 +85,7 @@ public interface ComponentSpecificationListRepository extends JpaRepository<Comp
             @Param("componentId") Long componentId,
             @Param("specificationTypeId") Long specificationTypeId,
             @Param("values") List<String> values);
+
 
 
 

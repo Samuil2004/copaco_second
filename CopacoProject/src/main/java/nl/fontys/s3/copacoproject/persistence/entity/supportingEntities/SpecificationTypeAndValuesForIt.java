@@ -2,15 +2,6 @@ package nl.fontys.s3.copacoproject.persistence.entity.supportingEntities;
 
 import lombok.*;
 
-//@Builder
-//@Getter
-//@Setter
-//@RequiredArgsConstructor
-//public class SpecificationTypeAndValuesForIt {
-//    private Long specification2Id;
-//    private String valueOfSecondSpecification;
-//}
-
 @Getter
 @Setter
 @RequiredArgsConstructor

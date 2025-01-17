@@ -12,7 +12,6 @@ import java.util.List;
 
 @Repository
 public interface ComponentTypeRepository extends JpaRepository<ComponentTypeEntity, Long> {
-    //Optional<ComponentTypeEntity> findById(Long id);
     ComponentTypeEntity findComponentTypeEntityById(Long id);
     List<ComponentTypeEntity> findComponentTypeEntitiesByCategory(CategoryEntity category);
 
@@ -20,10 +19,11 @@ public interface ComponentTypeRepository extends JpaRepository<ComponentTypeEnti
             "FROM ComponentTypeEntity ct " +
             "JOIN ComponentEntity c ON c.componentType.id = ct.id " +
             "JOIN Component_SpecificationList csl ON csl.componentId.componentId = c.componentId " +
-            "WHERE csl.specificationType.id = 1070 " +
+            "WHERE csl.specificationType.id IN :allDistinctSpecificationIdsThatHoldConfigurationType " +
             "AND csl.value = :value")
     List<ComponentTypeEntity> findDistinctComponentTypesByTypeOfConfiguration(
-            @Param("value") String value);
+            @Param("value") String value,
+            @Param("allDistinctSpecificationIdsThatHoldConfigurationType") List<Long> allDistinctSpecificationIdsThatHoldConfigurationType);
 
     @Query("""
     SELECT ct

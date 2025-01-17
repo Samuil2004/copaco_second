@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ComponentTypeList_TemplateConverter {
+
+    private ComponentTypeList_TemplateConverter() {}
+
     public static List<ComponentType> convertFromEntityToBase(List<ComponentTypeList_Template> componentEntities){
         List<ComponentType> components = new ArrayList<>();
         for(ComponentTypeList_Template componentEntity : componentEntities){

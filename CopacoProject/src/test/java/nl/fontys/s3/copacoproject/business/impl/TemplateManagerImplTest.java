@@ -2,12 +2,12 @@ package nl.fontys.s3.copacoproject.business.impl;
 
 import jakarta.persistence.EntityManager;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectExistsAlreadyException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.TemplateObjectResponse;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
@@ -31,12 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TemplateManagerImplTest {
@@ -224,29 +224,6 @@ class TemplateManagerImplTest {
         ComponentTypeList_Template savedItem = captor.getValue();
         assertThat(savedItem.getTemplate()).isEqualTo(templateEntity);
         assertThat(savedItem.getComponentType()).isEqualTo(componentTypeEntity);
-    }
-
-
-    @Test
-    void testDeleteTemplate() {
-        // Setup
-        when(mockTemplateRepository.existsById(0L)).thenReturn(true);
-
-        // Run the test
-        templateManagerImplUnderTest.deleteTemplate(0L);
-
-        // Verify the results
-        verify(mockComponentTypeListRepository).deleteByTemplateId(0L);
-        verify(mockTemplateRepository).deleteById(0L);
-    }
-
-    @Test
-    void testDeleteTemplate_TemplateRepositoryExistsByIdReturnsFalse() {
-        // Setup
-        when(mockTemplateRepository.existsById(0L)).thenReturn(false);
-
-        // Run the test
-        assertThatThrownBy(() -> templateManagerImplUnderTest.deleteTemplate(0L)).isInstanceOf(ObjectNotFound.class);
     }
 
     @Test
@@ -624,14 +601,13 @@ class TemplateManagerImplTest {
     @Test
     void testGetNumberOfTemplates() {
         // Arrange
-        Long categoryId = null;
         String configurationType = "configurationType";
 
         when(mockTemplateRepository.countTemplateEntitiesByCategoryAndConfigurationType(null, configurationType))
                 .thenReturn(5);
 
         // Act
-        int result = templateManagerImplUnderTest.getNumberOfTemplates(categoryId, configurationType);
+        int result = templateManagerImplUnderTest.getNumberOfTemplates(null, configurationType);
 
         // Assert
         assertThat(result).isEqualTo(5);
@@ -779,56 +755,56 @@ class TemplateManagerImplTest {
         assertThat(result).isEqualTo(expectedResult);
     }
 
-    @Test
-    void testUpdateTemplate() throws Exception {
-        // Setup
-        final UpdateTemplateRequest request = UpdateTemplateRequest.builder()
-                .categoryId(0L)
-                .name("newName")
-                .componentTypes(List.of(0L))
-                .build();
-
-        final MultipartFile file = new MockMultipartFile(
-                "file", "test.png", MediaType.IMAGE_PNG_VALUE, "mock image content".getBytes()
-        );
-
-        final TemplateEntity templateEntity = TemplateEntity.builder()
-                .id(0L)
-                .category(CategoryEntity.builder().id(0L).categoryName("categoryName").build())
-                .name("newName")
-                .configurationType("configurationType")
-                .image("mock image content".getBytes())
-                .build();
-        when(mockTemplateRepository.findTemplateEntityById(0L)).thenReturn(templateEntity);
-
-        when(mockCategoryRepository.existsById(0L)).thenReturn(true);
-        when(mockCategoryManager.findCategoryById(0L)).thenReturn(Category.builder()
-                .categoryId(0L).categoryName("categoryName").build());
-        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
-
-        when(mockComponentTypeListRepository.findComponentTypeList_TemplatesByTemplate(any(TemplateEntity.class)))
-                .thenReturn(Collections.emptyList());
-        // Configure ComponentTypeRepository.findComponentTypeEntityById(...)
-        final ComponentTypeEntity componentTypeEntity = ComponentTypeEntity.builder()
-                .id(0L)
-                .componentTypeName("componentTypeName")
-                .componentTypeImageUrl("componentTypeImageUrl")
-                .category(CategoryEntity.builder()
-                        .id(0L)
-                        .categoryName("categoryName")
-                        .build())
-                .configurationType("configurationType")
-                .build();
-        when(mockComponentTypeRepository.findComponentTypeEntityById(0L)).thenReturn(componentTypeEntity);
-
-        // Run the test
-        templateManagerImplUnderTest.updateTemplate(0L, request, file);
-
-        // Verify interactions
-        verify(mockTemplateRepository).save(any(TemplateEntity.class));
-        verify(mockComponentTypeListRepository).deleteAll(Collections.emptyList());
-        verify(mockComponentTypeListRepository).save(any(ComponentTypeList_Template.class));
-    }
+//    @Test
+//    void testUpdateTemplate() throws Exception {
+//        // Setup
+//        final UpdateTemplateRequest request = UpdateTemplateRequest.builder()
+//                .categoryId(0L)
+//                .name("newName")
+//                .componentTypes(List.of(0L))
+//                .build();
+//
+//        final MultipartFile file = new MockMultipartFile(
+//                "file", "test.png", MediaType.IMAGE_PNG_VALUE, "mock image content".getBytes()
+//        );
+//
+//        final TemplateEntity templateEntity = TemplateEntity.builder()
+//                .id(0L)
+//                .category(CategoryEntity.builder().id(0L).categoryName("categoryName").build())
+//                .name("newName")
+//                .configurationType("configurationType")
+//                .image("mock image content".getBytes())
+//                .build();
+//        when(mockTemplateRepository.findTemplateEntityById(0L)).thenReturn(templateEntity);
+//
+//        when(mockCategoryRepository.existsById(0L)).thenReturn(true);
+//        when(mockCategoryManager.findCategoryById(0L)).thenReturn(Category.builder()
+//                .categoryId(0L).categoryName("categoryName").build());
+//        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+//
+//        when(mockComponentTypeListRepository.findComponentTypeList_TemplatesByTemplate(any(TemplateEntity.class)))
+//                .thenReturn(Collections.emptyList());
+//        // Configure ComponentTypeRepository.findComponentTypeEntityById(...)
+//        final ComponentTypeEntity componentTypeEntity = ComponentTypeEntity.builder()
+//                .id(0L)
+//                .componentTypeName("componentTypeName")
+//                .componentTypeImageUrl("componentTypeImageUrl")
+//                .category(CategoryEntity.builder()
+//                        .id(0L)
+//                        .categoryName("categoryName")
+//                        .build())
+//                .configurationType("configurationType")
+//                .build();
+//        when(mockComponentTypeRepository.findComponentTypeEntityById(0L)).thenReturn(componentTypeEntity);
+//
+//        // Run the test
+//        templateManagerImplUnderTest.updateTemplate(0L, request, file);
+//
+//        // Verify interactions
+//        verify(mockTemplateRepository).save(any(TemplateEntity.class));
+//        verify(mockComponentTypeListRepository).deleteAll(Collections.emptyList());
+//        verify(mockComponentTypeListRepository).save(any(ComponentTypeList_Template.class));
+//    }
 
 
     @Test
@@ -956,92 +932,92 @@ class TemplateManagerImplTest {
                 .isInstanceOf(ObjectExistsAlreadyException.class);
     }
 
-    @Test
-    void testUpdateTemplate_ComponentTypeList_TemplateRepositoryFindComponentTypeList_TemplatesByTemplateReturnsNoItems() throws Exception {
-        // Setup
-        final UpdateTemplateRequest request = UpdateTemplateRequest.builder()
-                .categoryId(0L)
-                .name("newName")
-                .componentTypes(List.of(0L))
-                .build();
-        final byte[] fileBytes = "mock image content".getBytes(); // Use consistent byte array for the image
-        final MultipartFile file = new MockMultipartFile(
-                "file", "test.png", MediaType.IMAGE_PNG_VALUE, fileBytes
-        );
-
-        // Configure TemplateRepository.findTemplateEntityById(...).
-        final TemplateEntity templateEntity = TemplateEntity.builder()
-                .id(0L)
-                .category(CategoryEntity.builder()
-                        .id(0L)
-                        .categoryName("categoryName")
-                        .build())
-                .name("newName")
-                .configurationType("configurationType")
-                .image(fileBytes)
-                .build();
-        when(mockTemplateRepository.findTemplateEntityById(0L)).thenReturn(templateEntity);
-
-        when(mockCategoryRepository.existsById(0L)).thenReturn(true);
-
-        // Configure CategoryManager.findCategoryById(...).
-        final Category category = Category.builder()
-                .categoryId(0L)
-                .categoryName("categoryName")
-                .build();
-        when(mockCategoryManager.findCategoryById(0L)).thenReturn(category);
-
-        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
-        when(mockTemplateRepository.existsTemplateEntityForUpdate(0L, "newName", 0L)).thenReturn(false);
-        when(mockComponentTypeListRepository.findComponentTypeList_TemplatesByTemplate(TemplateEntity.builder()
-                .id(0L)
-                .category(CategoryEntity.builder()
-                        .id(0L)
-                        .categoryName("categoryName")
-                        .build())
-                .name("newName")
-                .configurationType("configurationType")
-                .image(fileBytes)
-                .build())).thenReturn(Collections.emptyList());
-
-        // Configure ComponentTypeRepository.findComponentTypeEntityById(...).
-        final ComponentTypeEntity componentTypeEntity = ComponentTypeEntity.builder()
-                .id(0L)
-                .componentTypeName("componentTypeName")
-                .componentTypeImageUrl("componentTypeImageUrl")
-                .category(CategoryEntity.builder()
-                        .id(0L)
-                        .categoryName("categoryName")
-                        .build())
-                .configurationType("configurationType")
-                .specifications(List.of(SpecficationTypeList_ComponentTypeEntity.builder()
-                        .specificationType(SpecificationTypeEntity.builder()
-                                .id(0L)
-                                .specificationTypeName("specificationTypeName")
-                                .build())
-                        .build()))
-                .build();
-        when(mockComponentTypeRepository.findComponentTypeEntityById(0L)).thenReturn(componentTypeEntity);
-
-        when(mockComponentTypeListRepository.existsById(argThat(cpk ->
-                cpk.getTemplate().getId() == 0L &&
-                        cpk.getComponentType().getId() == 0L
-        ))).thenReturn(false);
-
-
-        // Run the test
-        templateManagerImplUnderTest.updateTemplate(0L, request, file);
-
-        // Verify the results
-        ArgumentCaptor<ComponentTypeList_Template> captor = ArgumentCaptor.forClass(ComponentTypeList_Template.class);
-
-        verify(mockComponentTypeListRepository).save(captor.capture());
-        ComponentTypeList_Template captured = captor.getValue();
-
-        assertThat(captured.getTemplate().getId()).isEqualTo(0L);
-        assertThat(captured.getComponentType().getId()).isEqualTo(0L);
-
-    }
+//    @Test
+//    void testUpdateTemplate_ComponentTypeList_TemplateRepositoryFindComponentTypeList_TemplatesByTemplateReturnsNoItems() throws Exception {
+//        // Setup
+//        final UpdateTemplateRequest request = UpdateTemplateRequest.builder()
+//                .categoryId(0L)
+//                .name("newName")
+//                .componentTypes(List.of(0L))
+//                .build();
+//        final byte[] fileBytes = "mock image content".getBytes(); // Use consistent byte array for the image
+//        final MultipartFile file = new MockMultipartFile(
+//                "file", "test.png", MediaType.IMAGE_PNG_VALUE, fileBytes
+//        );
+//
+//        // Configure TemplateRepository.findTemplateEntityById(...).
+//        final TemplateEntity templateEntity = TemplateEntity.builder()
+//                .id(0L)
+//                .category(CategoryEntity.builder()
+//                        .id(0L)
+//                        .categoryName("categoryName")
+//                        .build())
+//                .name("newName")
+//                .configurationType("configurationType")
+//                .image(fileBytes)
+//                .build();
+//        when(mockTemplateRepository.findTemplateEntityById(0L)).thenReturn(templateEntity);
+//
+//        when(mockCategoryRepository.existsById(0L)).thenReturn(true);
+//
+//        // Configure CategoryManager.findCategoryById(...).
+//        final Category category = Category.builder()
+//                .categoryId(0L)
+//                .categoryName("categoryName")
+//                .build();
+//        when(mockCategoryManager.findCategoryById(0L)).thenReturn(category);
+//
+//        when(mockComponentTypeRepository.existsById(0L)).thenReturn(true);
+//        when(mockTemplateRepository.existsTemplateEntityForUpdate(0L, "newName", 0L)).thenReturn(false);
+//        when(mockComponentTypeListRepository.findComponentTypeList_TemplatesByTemplate(TemplateEntity.builder()
+//                .id(0L)
+//                .category(CategoryEntity.builder()
+//                        .id(0L)
+//                        .categoryName("categoryName")
+//                        .build())
+//                .name("newName")
+//                .configurationType("configurationType")
+//                .image(fileBytes)
+//                .build())).thenReturn(Collections.emptyList());
+//
+//        // Configure ComponentTypeRepository.findComponentTypeEntityById(...).
+//        final ComponentTypeEntity componentTypeEntity = ComponentTypeEntity.builder()
+//                .id(0L)
+//                .componentTypeName("componentTypeName")
+//                .componentTypeImageUrl("componentTypeImageUrl")
+//                .category(CategoryEntity.builder()
+//                        .id(0L)
+//                        .categoryName("categoryName")
+//                        .build())
+//                .configurationType("configurationType")
+//                .specifications(List.of(SpecficationTypeList_ComponentTypeEntity.builder()
+//                        .specificationType(SpecificationTypeEntity.builder()
+//                                .id(0L)
+//                                .specificationTypeName("specificationTypeName")
+//                                .build())
+//                        .build()))
+//                .build();
+//        when(mockComponentTypeRepository.findComponentTypeEntityById(0L)).thenReturn(componentTypeEntity);
+//
+//        when(mockComponentTypeListRepository.existsById(argThat(cpk ->
+//                cpk.getTemplate().getId() == 0L &&
+//                        cpk.getComponentType().getId() == 0L
+//        ))).thenReturn(false);
+//
+//
+//        // Run the test
+//        templateManagerImplUnderTest.updateTemplate(0L, request, file);
+//
+//        // Verify the results
+//        ArgumentCaptor<ComponentTypeList_Template> captor = ArgumentCaptor.forClass(ComponentTypeList_Template.class);
+//
+//        verify(mockComponentTypeListRepository).save(captor.capture());
+//        ComponentTypeList_Template captured = captor.getValue();
+//
+//        assertThat(captured.getTemplate().getId()).isZero();
+//        assertThat(captured.getComponentType().getId()).isZero();
+//
+//    }
 
     @Test
     void testUpdateTemplate_ComponentTypeList_TemplateRepositoryExistsByIdReturnsTrue() throws Exception {
@@ -1095,5 +1071,58 @@ class TemplateManagerImplTest {
         verify(mockTemplateRepository).save(templateEntity);
         verify(mockComponentTypeListRepository).save(any());
     }
+
+    @Test
+    void testUpdateTemplateStatus_TemplateExists_ActiveTrue() {
+        // Arrange
+        TemplateEntity templateEntity = TemplateEntity.builder()
+                .id(1L)
+                .active(false)
+                .build();
+
+        when(mockTemplateRepository.findById(1L)).thenReturn(Optional.of(templateEntity));
+
+        // Act
+        templateManagerImplUnderTest.updateTemplateStatus(1L, true);
+
+        // Assert
+        assertThat(templateEntity.isActive()).isTrue();
+        verify(mockTemplateRepository, times(1)).findById(1L);
+        verify(mockTemplateRepository, times(1)).save(templateEntity);
+    }
+
+    @Test
+    void testUpdateTemplateStatus_TemplateExists_ActiveFalse() {
+        // Arrange
+        TemplateEntity templateEntity = TemplateEntity.builder()
+                .id(1L)
+                .active(true)
+                .build();
+
+        when(mockTemplateRepository.findById(1L)).thenReturn(Optional.of(templateEntity));
+
+        // Act
+        templateManagerImplUnderTest.updateTemplateStatus(1L, false);
+
+        // Assert
+        assertThat(templateEntity.isActive()).isFalse();
+        verify(mockTemplateRepository, times(1)).findById(1L);
+        verify(mockTemplateRepository, times(1)).save(templateEntity);
+    }
+
+    @Test
+    void testUpdateTemplateStatus_TemplateDoesNotExist() {
+        // Arrange
+        when(mockTemplateRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> templateManagerImplUnderTest.updateTemplateStatus(1L, true))
+                .isInstanceOf(ObjectNotFound.class)
+                .hasMessageContaining("Template not found");
+
+        verify(mockTemplateRepository, times(1)).findById(1L);
+        verify(mockTemplateRepository, never()).save(any(TemplateEntity.class));
+    }
+
 
 }

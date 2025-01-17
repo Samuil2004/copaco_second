@@ -1,5 +1,4 @@
 package nl.fontys.s3.copacoproject.persistence;
-import java.util.*;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.*;
 
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import nl.fontys.s3.copacoproject.persistence.entity.ComponentEntity;
 import nl.fontys.s3.copacoproject.persistence.entity.Component_SpecificationList;
-import nl.fontys.s3.copacoproject.persistence.entity.supportingEntities.SpecificationTypeAndValuesForIt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +15,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -122,22 +118,38 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
 //            Pageable pageable
 //    );
 
+//    @Query(value = "SELECT c.* FROM component c " +
+//            "JOIN component_specification cs1 ON cs1.component_id = c.id " +
+//            "JOIN component_specification cs2 ON cs2.component_id = c.id " +
+//            "JOIN component_specification cs3 ON cs3.component_id = c.id " +
+//            "WHERE c.component_type_id = 5 " +
+//            "AND cs1.specification_type_id = 1036 AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
+//            "AND cs2.specification_type_id = 947 AND cs2.value = :configurationType " +
+//            "AND cs3.specification_type_id = 1293 AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
+//    List<ComponentEntity> findComponentsBySpecificationsNative(
+//            @Param("totalPowerSupply") Double totalPowerSupply,
+//            @Param("configurationType") String configurationType,
+//            @Param("total12ThLineSupply") Double total12ThLineSupply,
+//            Pageable pageable
+//    );
+
     @Query(value = "SELECT c.* FROM component c " +
             "JOIN component_specification cs1 ON cs1.component_id = c.id " +
             "JOIN component_specification cs2 ON cs2.component_id = c.id " +
             "JOIN component_specification cs3 ON cs3.component_id = c.id " +
             "WHERE c.component_type_id = 5 " +
-            "AND cs1.specification_type_id = 1036 AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
-            "AND cs2.specification_type_id = 947 AND cs2.value = :configurationType " +
-            "AND cs3.specification_type_id = 1293 AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
+            "AND cs1.specification_type_id = :totalPowerSupplyId AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
+            "AND cs2.specification_type_id = :configurationTypeId AND cs2.value = :configurationType " +
+            "AND cs3.specification_type_id = :total12ThLineSupplyId AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
     List<ComponentEntity> findComponentsBySpecificationsNative(
+            @Param("totalPowerSupplyId") Long totalPowerSupplyId,
             @Param("totalPowerSupply") Double totalPowerSupply,
+            @Param("configurationTypeId") Long configurationTypeId,
             @Param("configurationType") String configurationType,
+            @Param("total12ThLineSupplyId") Long total12ThLineSupplyId,
             @Param("total12ThLineSupply") Double total12ThLineSupply,
             Pageable pageable
     );
-
-
 
 //    static Specification<ComponentEntity> dynamicSpecification(
 //            Long componentTypeId,
@@ -247,18 +259,32 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN (947, 954, 1070)
-    AND cs.value = :configurationType
+    AND cs.specificationType.id = :specificationIDThatHoldsTheComponentPurpose
+    AND cs.value IN :valuesToBeConsidered
     """)
-    Page<ComponentEntity> findComponentEntityByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, Pageable pageable);
+    Page<ComponentEntity> findComponentEntityByComponentTypeAndConfigurationType(@Param("componentTypeId") Long componentTypeId,
+                                                                                 @Param("valuesToBeConsidered") List<String> valuesToBeConsidered,
+                                                                                 @Param("specificationIDThatHoldsTheComponentPurpose") Long specificationIDThatHoldsTheComponentPurpose,
+                                                                                 Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT c
+    FROM ComponentEntity c
+    JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
+    WHERE c.componentType.id = :componentTypeId
+    """)
+    Page<ComponentEntity> findComponentEntityByComponentType(@Param("componentTypeId") Long componentTypeId,
+                                                                                 Pageable pageable);
 
     @Query("""
     SELECT COUNT(c)
     FROM ComponentEntity c
     JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
     WHERE c.componentType.id = :componentTypeId
-    AND cs.specificationType.id IN (947, 954, 1070)
+    AND cs.specificationType.id IN :allDistinctSpecificationIdsThatHoldConfigurationType
     AND cs.value = :configurationType
     """)
-    Integer countByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType);
+    Integer countByComponentTypeAndConfigurationType(@Param("componentTypeId") Long componentTypeId,
+                                                     @Param("configurationType") String configurationType,
+                                                     @Param("allDistinctSpecificationIdsThatHoldConfigurationType") List<Long> allDistinctSpecificationIdsThatHoldConfigurationType);
 }

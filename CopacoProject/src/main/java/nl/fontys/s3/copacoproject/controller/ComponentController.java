@@ -3,7 +3,7 @@ package nl.fontys.s3.copacoproject.controller;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.GetComponentResponse;
 import nl.fontys.s3.copacoproject.business.dto.component.SimpleComponentResponse;
 import nl.fontys.s3.copacoproject.domain.Component;
@@ -42,7 +42,7 @@ public class ComponentController {
     }
 
     @GetMapping("/findByComponentTypeId/{componentTypeId}")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    //@RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Component>> getComponentsFromComponentType(@PathVariable("componentTypeId") Long componentTypeId) {
         try{
             return ResponseEntity.ok(componentManager.getAllComponentFromComponentType(componentTypeId));
@@ -56,7 +56,7 @@ public class ComponentController {
     }
 
     @GetMapping("/filtered")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    //@RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<SimpleComponentResponse>> getComponentsByComponentTypeAndConfigurationType(
             @RequestParam(name = "componentTypeId") Long componentTypeId,
             @RequestParam(name = "configurationType") String configurationType,
@@ -64,6 +64,19 @@ public class ComponentController {
     ) {
         return ResponseEntity.ok(componentManager.getComponentsByComponentTypeAndConfigurationType(componentTypeId, configurationType, currentPage));
     }
+
+    @PostMapping("/filtered/getFirstComponents")
+    //@RolesAllowed({"ADMIN", "CUSTOMER"})
+    public ResponseEntity<List<SimpleComponentResponse>> getComponentsByComponentTypeAndConfigurationTypeFirstComponent(
+            @RequestParam(name = "componentTypeId") Long componentTypeId,
+            @RequestParam(name = "configurationType") String configurationType,
+            @RequestParam(name = "currentPage") int currentPage,
+            @RequestParam(name = "itemsInTemplate") List<Long> componentTypeIdsInTemplate
+
+    ) {
+        return ResponseEntity.ok(componentManager.getComponentsForFirstComponentTypeConfigurator(componentTypeId, configurationType, currentPage,componentTypeIdsInTemplate));
+    }
+
     @GetMapping("/countOfFiltered")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<Integer> getNumberOfComponentsByComponentTypeAndConfigurationType(

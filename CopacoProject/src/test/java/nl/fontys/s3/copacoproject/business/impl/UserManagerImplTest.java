@@ -1,10 +1,10 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidCredentialsException;
+import nl.fontys.s3.copacoproject.business.exception.InvalidCredentialsException;
 import nl.fontys.s3.copacoproject.business.dto.auth.AuthRequest;
 import nl.fontys.s3.copacoproject.business.dto.auth.AuthResponse;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateUserRequest;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateUserResponse;
+import nl.fontys.s3.copacoproject.business.dto.user_dto.CreateUserRequest;
+import nl.fontys.s3.copacoproject.business.dto.user_dto.CreateUserResponse;
 import nl.fontys.s3.copacoproject.configuration.security.token.AccessTokenEncoder;
 import nl.fontys.s3.copacoproject.configuration.security.token.impl.AccessTokenImpl;
 import nl.fontys.s3.copacoproject.domain.User;
@@ -49,54 +49,6 @@ class UserManagerImplTest {
                 mockAccessTokenEncoder
         );
     }
-
-//    @Test
-//    void testGetUser() {
-//        // Mock UserEntity returned by the repository
-//        UserEntity userEntity = UserEntity.builder()
-//                .id(1L)
-//                .firstName("John")
-//                .lastName("Doe")
-//                .email("john.doe@example.com")
-//                .role(RoleEntity.builder()
-//                        .id(0L)
-//                        .roleName("ADMIN")
-//                        .build())
-//                .address(AddressEntity.builder()
-//                        .id(100L)
-//                        .build())
-//                .build();
-//        when(mockUserRepository.findById(1L)).thenReturn(Optional.of(userEntity));
-//
-//        // Mock AddressEntity (if needed in the converter)
-//        AddressEntity addressEntity = AddressEntity.builder().id(100L).build();
-//
-//        // Mock User conversion
-//        User mockUser = User.builder()
-//                .userId(1L)
-//                .firstName("John")
-//                .lastName("Doe")
-//                .email("john.doe@example.com")
-//                .role(Role.ADMIN)
-//                .build();
-//
-//        // Stub the converter method
-//        when(mockUserConverter.convertFromEntityToBase(userEntity, addressEntity)).thenReturn(mockUser);
-//
-//        // Act
-//        Optional<User> result = userManagerImplUnderTest.getUser(1L);
-//
-//        // Assert
-//        assertThat(result).isPresent();
-//        assertThat(result.get().getFirstName()).isEqualTo("John");
-//        assertThat(result.get().getLastName()).isEqualTo("Doe");
-//        assertThat(result.get().getEmail()).isEqualTo("john.doe@example.com");
-//
-//        // Verify interactions
-//        verify(mockUserRepository).findById(1L);
-//        verify(mockUserConverter).convertFromEntityToBase(userEntity, addressEntity);
-//    }
-
 
     @Test
     void testGetUser_UserRepositoryReturnsAbsent() {

@@ -1,12 +1,12 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
 import lombok.AllArgsConstructor;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.business.SpecificationsManager;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigTypesInCategRequest;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfTypesInCategResponse;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.GetConfigurationTypesResponse;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfigTypesInCategRequest;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.GetConfTypesInCategResponse;
 import nl.fontys.s3.copacoproject.persistence.ComponentSpecificationListRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.SpecficationTypeList_ComponentTypeEntity;
@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -23,20 +24,14 @@ public class SpecificationsManagerImpl implements SpecificationsManager {
     private final ComponentSpecificationListRepository componentSpecificationListRepository;
     private final ComponentTypeRepository componentTypeRepository;
     private final SpecificationTypeList_ComponentTypeRepository specificationTypeList_ComponentTypeRepository;
+    private final SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
 
-    @Override
-    public GetConfigurationTypesResponse getDistinctConfigurationTypes() {
-        List<String> distinctConfigurationTypes = componentSpecificationListRepository.getDistinctConfigurationTypes();
-        if(distinctConfigurationTypes.isEmpty())
-        {
-            throw new ObjectNotFound("No configuration types were found");
-        }
-        return GetConfigurationTypesResponse.builder().distinctConfigurationTypes(distinctConfigurationTypes).build();
-    }
 
     @Override
     public GetConfTypesInCategResponse getDistinctConfigurationTypesInCategory(GetConfigTypesInCategRequest request) {
-        List<String> distinctConfigurationTypesFromCategory = componentSpecificationListRepository.getDistinctConfigurationTypesInCategory(request.getCategoryId());
+        List<String> distinctConfigurationTypesFromCategory = new ArrayList<>();
+        Long specificationIdWhereTheDifferentConfigurationTypesPerCategoryAreStored = specificationIdsForComponentPurpose.getTheSpecificationIdWhereTheDifferentConfigurationTypesCanBeFoundForCategory(request.getCategoryId());
+        distinctConfigurationTypesFromCategory = componentSpecificationListRepository.getDistinctConfigurationTypesInCategory(request.getCategoryId(),specificationIdWhereTheDifferentConfigurationTypesPerCategoryAreStored);
         if(distinctConfigurationTypesFromCategory.isEmpty())
         {
             throw new ObjectNotFound("No configuration types were found within the selected category");

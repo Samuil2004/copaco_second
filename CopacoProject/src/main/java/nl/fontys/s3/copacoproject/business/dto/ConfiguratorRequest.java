@@ -1,21 +1,34 @@
 package nl.fontys.s3.copacoproject.business.dto;
 
-import lombok.Builder;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
+import java.util.List;
+
 @Getter
 @Setter
+@NoArgsConstructor
 public class ConfiguratorRequest {
-    private Long firstComponentId;
-    private Long secondComponentId;
-    private Long thirdComponentId;
-    private Long fourthComponentId;
-    private Long fifthComponentId;
-    private Long sixthComponentId;
-    private Long seventhComponentId;
+    @NotNull(message = "Component IDs list must not be null.")
+    @NotEmpty(message = "Component IDs list must not be empty.")
+    @Valid
+    private List<@NotNull(message = "Component ID must not be null.")
+    @Min(value = 1, message = "Component ID must be positive.") Long> componentIds;
+
+
+    @NotNull(message = "Searched component type ID must not be null.")
+    @PositiveOrZero(message = "Searched component type ID must not be negative.")
     private Long searchedComponentTypeId;
+
+    @NotNull(message = "Page number must not be null.")
+    @PositiveOrZero(message = "Searched page must not be negative.")
     private Integer pageNumber;
+
+    @NotBlank(message = "Type of configuration must not be null.")
     private String typeOfConfiguration;
+
+    List<Long> componentTypeIdsInTemplate;
 }

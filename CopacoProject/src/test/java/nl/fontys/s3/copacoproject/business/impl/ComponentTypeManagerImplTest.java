@@ -1,13 +1,13 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetAllComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetDistCompTypesByTyOfConfRequest;
+import nl.fontys.s3.copacoproject.business.SpecificationIdsForComponentPurpose;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import nl.fontys.s3.copacoproject.persistence.CategoryRepository;
-import nl.fontys.s3.copacoproject.persistence.ComponentTypeList_TemplateRepository;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.TemplateRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.CategoryEntity;
@@ -20,13 +20,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,16 +33,17 @@ class ComponentTypeManagerImplTest {
     @Mock
     private CategoryRepository mockCategoryRepository;
     @Mock
-    private ComponentTypeList_TemplateRepository mockComponentTypeList_TemplateRepository;
-    @Mock
     private TemplateRepository mockTemplateRepository;
+    @Mock
+    private SpecificationIdsForComponentPurpose specificationIdsForComponentPurpose;
+
 
     private ComponentTypeManagerImpl componentTypeManagerImplUnderTest;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(){
         componentTypeManagerImplUnderTest = new ComponentTypeManagerImpl(mockComponentTypeRepository,
-                mockCategoryRepository, mockComponentTypeList_TemplateRepository, mockTemplateRepository);
+                mockCategoryRepository, mockTemplateRepository,specificationIdsForComponentPurpose);
     }
 
     @Test
@@ -75,6 +72,7 @@ class ComponentTypeManagerImplTest {
         final GetAllComponentTypeResponse result = componentTypeManagerImplUnderTest.getAllComponentTypes();
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -86,6 +84,9 @@ class ComponentTypeManagerImplTest {
         final GetAllComponentTypeResponse result = componentTypeManagerImplUnderTest.getAllComponentTypes();
 
         // Verify the results
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(GetAllComponentTypeResponse.class);
     }
 
     @Test
@@ -114,6 +115,7 @@ class ComponentTypeManagerImplTest {
         final ComponentType result = componentTypeManagerImplUnderTest.getComponentTypeById(0L);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -164,6 +166,7 @@ class ComponentTypeManagerImplTest {
         final List<ComponentType> result = componentTypeManagerImplUnderTest.getComponentTypesByCategory(0L);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -242,8 +245,9 @@ class ComponentTypeManagerImplTest {
                                 .build())
                         .build()))
                 .build());
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(Arrays.asList(947L, 954L, 1070L,1792L));
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-                "typeOfConfiguration")).thenReturn(componentTypeEntities);
+                "typeOfConfiguration", Arrays.asList(947L, 954L, 1070L,1792L))).thenReturn(componentTypeEntities);
 
         // Run the test
         final List<ComponentTypeResponse> result = componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(
@@ -259,8 +263,9 @@ class ComponentTypeManagerImplTest {
         final GetDistCompTypesByTyOfConfRequest request = GetDistCompTypesByTyOfConfRequest.builder()
                 .typeOfConfiguration("typeOfConfiguration")
                 .build();
+        when(specificationIdsForComponentPurpose.getAllDistinctSpecificationIdsThatHoldConfigurationType()).thenReturn(List.of(947L, 954L, 1070L,1792L));
         when(mockComponentTypeRepository.findDistinctComponentTypesByTypeOfConfiguration(
-                "typeOfConfiguration")).thenReturn(Collections.emptyList());
+                "typeOfConfiguration",List.of(947L, 954L, 1070L,1792L))).thenReturn(Collections.emptyList());
 
         // Run the test
         assertThatThrownBy(() -> componentTypeManagerImplUnderTest.findDistinctComponentTypesByTypeOfConfiguration(

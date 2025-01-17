@@ -2,26 +2,27 @@ variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 stages:
-  - build
-  - test
+#  - build
+#  - test
   - sonarqube
 
-build:
-  stage: build
-  tags:
-    - shared
-  script:
-    - cd CopacoProject
-    - ./gradlew clean
-    - ./gradlew assemble
+#build:
+#  stage: build
+#  tags:
+#    - shared
+#  script:
+#    - cd CopacoProject
+#    - ./gradlew clean
+#    - ./gradlew assemble
 
-test:
-  stage: test
-  tags:
-    - shared
-  script:
-    - cd CopacoProject
-    - ./gradlew test
+#test:
+#  stage: test
+#  tags:
+#    - shared
+#  script:
+#    - cd CopacoProject
+#    - ./gradlew test
+
 
 sonarqube:
   stage: sonarqube
@@ -37,5 +38,5 @@ sonarqube:
   script:
     -  cd CopacoProject
     - ./gradlew clean test jacocoTestReport
-    - ./gradlew sonar "-Dsonar.host.url=http://localhost:9000" "-Dsonar.token=sqp_5daf6275312c253fa0b42828a8223404380d2a1e" "-Dsonar.qualitygate.wait=true"
+    - ./gradlew sonar "-Dsonar.host.url=http://localhost:9000" "-Dsonar.token=sqp_acf29ea2b2067e85eea187d18c881fc001652408" "-Dsonar.qualitygate.wait=true"
   allow_failure: false

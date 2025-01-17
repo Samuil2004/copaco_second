@@ -5,15 +5,15 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nl.fontys.s3.copacoproject.business.CategoryManager;
-import nl.fontys.s3.copacoproject.business.Exceptions.InvalidInputException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.InvalidInputException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectExistsAlreadyException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.TemplateManager;
 import nl.fontys.s3.copacoproject.business.converters.CategoryConverter;
 import nl.fontys.s3.copacoproject.business.converters.TemplateConverter;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.CreateTemplateRequest;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.TemplateObjectResponse;
-import nl.fontys.s3.copacoproject.business.dto.TemplateDTOs.UpdateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.CreateTemplateRequest;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.TemplateObjectResponse;
+import nl.fontys.s3.copacoproject.business.dto.template_dto.UpdateTemplateRequest;
 import nl.fontys.s3.copacoproject.domain.Category;
 import nl.fontys.s3.copacoproject.domain.Template;
 import nl.fontys.s3.copacoproject.persistence.*;
@@ -68,6 +68,7 @@ public class TemplateManagerImpl implements TemplateManager {
                 .category(category)
                 .configurationType(request.getConfigurationType())
                 .image(imageInByte)
+                .active(true)
                 .build();
 
         TemplateEntity templateEntity = TemplateConverter.convertFromBaseToEntity(template);
@@ -120,17 +121,6 @@ public class TemplateManagerImpl implements TemplateManager {
         }
     }
 
-
-
-    @Override
-    @Transactional
-    public void deleteTemplate(long id) {
-        if(templateRepository.existsById(id)){
-            componentTypeListRepository.deleteByTemplateId(id);
-            templateRepository.deleteById(id);
-        }
-        else throw new ObjectNotFound("Template not found");
-    }
     @Override
     public TemplateObjectResponse getTemplateById(long id) {
         if(!templateRepository.existsById(id)) {
@@ -164,13 +154,47 @@ public class TemplateManagerImpl implements TemplateManager {
         CategoryEntity categoryEntity = null;
         if (categoryId != null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
+
                 throw new ObjectNotFound("Category not found");
             }
+
             categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
         }
 
         Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
         Page<TemplateEntity> templateEntitiesPage = templateRepository.findTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, pageable);
+
+        if (templateEntitiesPage.isEmpty()) {
+            throw new ObjectNotFound("There are no templates");
+        }
+
+        List<TemplateObjectResponse> templates = new ArrayList<>();
+        for (TemplateEntity templateEntity : templateEntitiesPage) {
+            List<ComponentTypeList_Template> componentEntities = templateRepository.findComponentTypeListByTemplateId(templateEntity.getId());
+            List<String> componentTypes = new ArrayList<>();
+            for (ComponentTypeList_Template componentTypeList_Template : componentEntities) {
+                componentTypes.add(componentTypeList_Template.getComponentType().getComponentTypeName());
+            }
+            templates.add(TemplateConverter.convertFromEntityToResponse(templateEntity, componentTypes));
+        }
+
+        return templates;
+    }
+
+    @Override
+    public List<TemplateObjectResponse> getActiveFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
+        CategoryEntity categoryEntity = null;
+        if (categoryId != null && categoryId > 0) {
+            if (!categoryRepository.existsById(categoryId)) {
+
+                throw new ObjectNotFound("Category not found");
+            }
+
+            categoryEntity = categoryRepository.findCategoryEntityById(categoryId);
+        }
+
+        Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
+        Page<TemplateEntity> templateEntitiesPage = templateRepository.findActiveTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, pageable);
 
         if (templateEntitiesPage.isEmpty()) {
             throw new ObjectNotFound("There are no templates");
@@ -241,6 +265,17 @@ public class TemplateManagerImpl implements TemplateManager {
         updateTemplateComponents(templateEntity, request.getComponentTypes());
     }
 
+    @Override
+    public void updateTemplateStatus(Long id, boolean active) {
+        TemplateEntity templateEntity = templateRepository.findById(id).orElse(null);
+        if(templateEntity == null) {
+            throw new ObjectNotFound("Template not found");
+        }
+
+        templateEntity.setActive(active);
+        templateRepository.save(templateEntity);
+    }
+
     private void updateTemplateData(TemplateEntity templateEntity, String newName, CategoryEntity category, byte[] newImage) {
         templateEntity.setName(newName);
         templateEntity.setCategory(category);
@@ -290,7 +325,7 @@ public class TemplateManagerImpl implements TemplateManager {
             Set<String> componentConfigTypeSet = Arrays.stream(componentConfigTypes.split(","))
                     .map(String::trim)
                     .collect(Collectors.toSet());
-            if (!componentConfigTypeSet.contains(templateConfigType)) {
+            if (!componentConfigTypeSet.contains(templateConfigType.toUpperCase())) {
                 throw new InvalidInputException("Configuration type does not match");
             }
         }

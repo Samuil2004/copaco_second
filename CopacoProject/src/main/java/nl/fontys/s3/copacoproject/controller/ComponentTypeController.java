@@ -3,9 +3,9 @@ package nl.fontys.s3.copacoproject.controller;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.ComponentTypeManager;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.ComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetAllComponentTypeResponse;
-import nl.fontys.s3.copacoproject.business.dto.componentTypeDto.GetDistCompTypesByTyOfConfRequest;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.ComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetAllComponentTypeResponse;
+import nl.fontys.s3.copacoproject.business.dto.component_type_dto.GetDistCompTypesByTyOfConfRequest;
 import nl.fontys.s3.copacoproject.domain.ComponentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +24,7 @@ public class ComponentTypeController {
         GetAllComponentTypeResponse response = componentTypeManager.getAllComponentTypes();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-//    @PostMapping
-//    public ResponseEntity<CreateComponentTypeResponse> createComponentType(@RequestBody CreateComponentTypeRequest request){
-//        CreateComponentTypeResponse response = componentTypeManager.createComponentType(request);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
+
     @GetMapping("/{id}")
     @RolesAllowed({"ADMIN"})
     public ResponseEntity<ComponentType> getComponentTypeById(@PathVariable Long id){

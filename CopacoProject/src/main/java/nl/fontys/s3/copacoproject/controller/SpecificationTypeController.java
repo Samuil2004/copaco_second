@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import nl.fontys.s3.copacoproject.business.SpecificationTypeManager;
 import nl.fontys.s3.copacoproject.business.SpecificationType_ComponentType;
 import nl.fontys.s3.copacoproject.business.SpecificationsManager;
-import nl.fontys.s3.copacoproject.business.dto.specificationTypeDto.*;
+import nl.fontys.s3.copacoproject.business.dto.specification_type_dto.*;
 import nl.fontys.s3.copacoproject.domain.SpecificationType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,12 +78,12 @@ public class SpecificationTypeController {
         return specificationType_ComponentType.findIdByComponentTypeIdAndSpecificationTypeId(componentTypeId,specificationTypeId);
     }
 
-    @GetMapping("/getDistinctConfigurationTypes")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public ResponseEntity<GetConfigurationTypesResponse> getDistinctConfigurationTypes(){
-        GetConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+//    @GetMapping("/getDistinctConfigurationTypes")
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    public ResponseEntity<GetConfigurationTypesResponse> getDistinctConfigurationTypes(){
+//        GetConfigurationTypesResponse response = specificationsManager.getDistinctConfigurationTypes();
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
 
 
     @GetMapping("/getDistinctConfigurationTypesInCategory")

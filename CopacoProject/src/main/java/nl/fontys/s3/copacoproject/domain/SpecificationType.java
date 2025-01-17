@@ -1,14 +1,12 @@
 package nl.fontys.s3.copacoproject.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class SpecificationType {
     private Long specificationTypeId;
     private String specificationTypeName;

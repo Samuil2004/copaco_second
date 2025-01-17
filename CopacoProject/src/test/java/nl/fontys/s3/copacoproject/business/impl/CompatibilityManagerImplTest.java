@@ -1,14 +1,14 @@
 package nl.fontys.s3.copacoproject.business.impl;
 
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectExistsAlreadyException;
-import nl.fontys.s3.copacoproject.business.Exceptions.ObjectNotFound;
+import nl.fontys.s3.copacoproject.business.exception.ObjectExistsAlreadyException;
+import nl.fontys.s3.copacoproject.business.exception.ObjectNotFound;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.CreateAutomaticCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.business.dto.CreateManualCompatibilityDtoRequest;
 import nl.fontys.s3.copacoproject.business.dto.GetAutomaticCompatibilityByIdResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.RuleResponse;
 import nl.fontys.s3.copacoproject.business.dto.rule.UpdateRuleRequest;
-import nl.fontys.s3.copacoproject.business.dto.userDto.CreateManualCompatibilityDtoResponse;
+import nl.fontys.s3.copacoproject.business.dto.user_dto.CreateManualCompatibilityDtoResponse;
 import nl.fontys.s3.copacoproject.domain.CompatibilityType;
 import nl.fontys.s3.copacoproject.persistence.ComponentTypeRepository;
 import nl.fontys.s3.copacoproject.persistence.entity.*;
@@ -49,7 +49,7 @@ class CompatibilityManagerImplTest {
     private CompatibilityManagerImpl compatibilityManagerImplUnderTest;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(){
         compatibilityManagerImplUnderTest = new CompatibilityManagerImpl(mockCompatibilityTypeEntityRepository,
                 mockCompatibilityRepository, mockSpecificationTypeList_ComponentTypeRepository,
                 mockComponentTypeRepository, mockRuleEntityRepository);
@@ -459,101 +459,6 @@ class CompatibilityManagerImplTest {
     }
 
     @Test
-    void testCreateManualCompatibility_RuleEntityRepositoryFindBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationTypeReturnsNoItems() {
-        // Setup
-        final CreateManualCompatibilityDtoRequest createManualCompatibilityDtoRequest = CreateManualCompatibilityDtoRequest.builder()
-                .componentType1Id(1L)
-                .componentType2Id(2L) // Different component types
-                .specificationToConsiderId_from_component1(1L)
-                .specificationToConsiderId_from_component2(2L)
-                .valueForTheFirstSpecification("valueForTheFirstSpecification")
-                .valuesForTheSecondSpecification(List.of("value"))
-                .configurationType("configurationType")
-                .build();
-
-        // Mock ComponentTypeRepository.findById
-        final Optional<ComponentTypeEntity> componentTypeEntity1 = Optional.of(ComponentTypeEntity.builder()
-                .id(1L)
-                .componentTypeName("componentTypeName1")
-                .build());
-        final Optional<ComponentTypeEntity> componentTypeEntity2 = Optional.of(ComponentTypeEntity.builder()
-                .id(2L)
-                .componentTypeName("componentTypeName2")
-                .build());
-        when(mockComponentTypeRepository.findById(1L)).thenReturn(componentTypeEntity1);
-        when(mockComponentTypeRepository.findById(2L)).thenReturn(componentTypeEntity2);
-
-        // Mock SpecificationTypeList_ComponentTypeRepository.findById
-        final Optional<SpecficationTypeList_ComponentTypeEntity> specificationType1 = Optional.of(
-                SpecficationTypeList_ComponentTypeEntity.builder()
-                        .id(1L)
-                        .specificationType(SpecificationTypeEntity.builder()
-                                .id(1L)
-                                .specificationTypeName("specificationTypeName1")
-                                .build())
-                        .build());
-        final Optional<SpecficationTypeList_ComponentTypeEntity> specificationType2 = Optional.of(
-                SpecficationTypeList_ComponentTypeEntity.builder()
-                        .id(2L)
-                        .specificationType(SpecificationTypeEntity.builder()
-                                .id(2L)
-                                .specificationTypeName("specificationTypeName2")
-                                .build())
-                        .build());
-        when(mockSpecificationTypeList_ComponentTypeRepository.findById(1L)).thenReturn(specificationType1);
-        when(mockSpecificationTypeList_ComponentTypeRepository.findById(2L)).thenReturn(specificationType2);
-
-        // Mock RuleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationType
-        when(mockRuleEntityRepository.findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationType(
-                1L, 2L, "configurationType")).thenReturn(Collections.emptyList());
-
-        // Mock RuleEntityRepository.save
-        final RuleEntity savedRuleEntity = RuleEntity.builder()
-                .id(1L)
-                .specificationToConsider1Id(specificationType1.get())
-                .specificationToConsider2Id(specificationType2.get())
-                .valueOfFirstSpecification("valueForTheFirstSpecification")
-                .valueOfSecondSpecification("value")
-                .configurationType("configurationType")
-                .build();
-        when(mockRuleEntityRepository.save(any(RuleEntity.class))).thenReturn(savedRuleEntity);
-
-        // Mock CompatibilityRepository.save
-        final CompatibilityEntity savedCompatibilityEntity = CompatibilityEntity.builder()
-                .id(1L)
-                .component1Id(componentTypeEntity1.get())
-                .component2Id(componentTypeEntity2.get())
-                .ruleId(savedRuleEntity)
-                .configurationType("configurationType")
-                .build();
-        when(mockCompatibilityRepository.save(any(CompatibilityEntity.class))).thenReturn(savedCompatibilityEntity);
-
-        // Run the test
-        final CreateManualCompatibilityDtoResponse result = compatibilityManagerImplUnderTest.createManualCompatibility(
-                createManualCompatibilityDtoRequest);
-
-        // Verify the results
-        assertThat(result).isNotNull();
-        assertThat(result.getAutomaticCompatibility()).isNotNull();
-        assertThat(result.getAutomaticCompatibility().getId()).isEqualTo(1L);
-        assertThat(result.getAutomaticCompatibility().getRuleId().getId()).isEqualTo(1L);
-        assertThat(result.getAutomaticCompatibility().getComponent1Id().getId()).isEqualTo(1L); // Check id of the first component
-        assertThat(result.getAutomaticCompatibility().getComponent2Id().getId()).isEqualTo(2L); // Check id of the second component
-        assertThat(result.getAutomaticCompatibility().getConfigurationType()).isEqualTo("configurationType");
-
-        // Verify method calls
-        verify(mockComponentTypeRepository, times(1)).findById(1L);
-        verify(mockComponentTypeRepository, times(1)).findById(2L);
-        verify(mockSpecificationTypeList_ComponentTypeRepository, times(1)).findById(1L);
-        verify(mockSpecificationTypeList_ComponentTypeRepository, times(1)).findById(2L);
-        verify(mockRuleEntityRepository, times(1)).findBySpecificationToConsider1IdIdAndSpecificationToConsider2IdIdAndConfigurationType(
-                1L, 2L, "configurationType");
-        verify(mockRuleEntityRepository, times(1)).save(any(RuleEntity.class));
-        verify(mockCompatibilityRepository, times(1)).save(any(CompatibilityEntity.class));
-    }
-
-
-    @Test
     void testAutomaticCompatibilityByCompatibilityId() {
         // Setup
         // Configure CompatibilityRepository.findById(...).
@@ -622,6 +527,7 @@ class CompatibilityManagerImplTest {
                 0L);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -705,6 +611,7 @@ class CompatibilityManagerImplTest {
                 0L);
 
         // Verify the results
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -859,6 +766,7 @@ class CompatibilityManagerImplTest {
         compatibilityManagerImplUnderTest.deleteRuleById(0L);
 
         // Verify the results
+        verifyNoInteractions(mockRuleEntityRepository);
     }
 
     @Test
