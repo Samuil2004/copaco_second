@@ -52,7 +52,7 @@ public ResponseEntity<Void> createTemplate(
 }
 
     @GetMapping("/{id}")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<TemplateObjectResponse> getTemplateById(@PathVariable("id") long id) {
         try{
             return ResponseEntity.ok(templateManager.getTemplateById(id));
@@ -73,8 +73,8 @@ public ResponseEntity<Void> createTemplate(
         }
     }
 
-    @GetMapping()
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    @GetMapping("/all")
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Template>> getTemplates() {
         return ResponseEntity.ok(templateManager.getTemplates());
     }
@@ -92,7 +92,7 @@ public ResponseEntity<Void> createTemplate(
     }
 
     @GetMapping("/filtered/active")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<TemplateObjectResponse>> getActiveFilteredTemplates(
             @RequestParam(value = "itemsPerPage", defaultValue = "10") int itemsPerPage,
             @RequestParam(value = "currentPage", defaultValue = "1") @Min(1) int currentPage,
@@ -104,7 +104,7 @@ public ResponseEntity<Void> createTemplate(
     }
 
     @GetMapping("/countItems")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<Integer> getNumberOfTemplates(@RequestParam(value = "categoryId", required = false) Long categoryId,
                                                         @RequestParam(value = "configurationType", required = false) String configurationType) {
         int numberOfTemplates = templateManager.getNumberOfTemplates(categoryId, configurationType);
@@ -136,7 +136,7 @@ public ResponseEntity<Void> createTemplate(
     }
 
     @GetMapping("/{templateId}/componentTypes")
-    @RolesAllowed({"ADMIN","CUSTOMER"})
+//    @RolesAllowed({"ADMIN","CUSTOMER"})
     public ResponseEntity<List<ComponentTypeResponse>> getComponentTypesByTemplateId (@PathVariable Long templateId){
         List<ComponentTypeResponse> componentTypes = componentTypeManager.getComponentTypesByTemplateId(templateId);
         return ResponseEntity.status(HttpStatus.OK).body(componentTypes);

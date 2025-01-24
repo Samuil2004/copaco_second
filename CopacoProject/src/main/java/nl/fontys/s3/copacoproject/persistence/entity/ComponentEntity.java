@@ -29,7 +29,7 @@ public class ComponentEntity{
     @NotNull
     private ComponentTypeEntity componentType;
 
-    @Column(name="imageURL")
+    @Column(name="image_url")
     @NotNull
     @Length(max = 256)
     private String componentImageUrl;

@@ -154,6 +154,8 @@ public class ComponentManagerImpl implements ComponentManager {
 
     @Override
     public List<SimpleComponentResponse> getComponentsForFirstComponentTypeConfigurator(Long firstSelectedComponentTypeId, String configurationType, int currentPage,List<Long> componentTypesInTheTemplate) {
+        boolean thereIsNextPage = true;
+
         if(!componentTypeRepository.existsById(firstSelectedComponentTypeId)){
             throw new InvalidInputException("Component type does not exist");
         }
@@ -162,6 +164,8 @@ public class ComponentManagerImpl implements ComponentManager {
         }
         List<ComponentEntity> foundComponentsThatSatisfyAllFilters;
         Pageable pageable = PageRequest.of(currentPage-1, 10);
+        Pageable checkNextPageSinceComponent = PageRequest.of(currentPage*10, 1);
+
         Map<Long,List<String>> specificationIdToBeConsideredForTheSearchedComponentAndCorrespondingValues = new HashMap<>();
         for(Long componentTypeId : componentTypesInTheTemplate) {
             List<Long> allDistinctSpecificationsThatShouldBeConsideredBetweenTheTwoComponentTypes = compatibilityRepository.findDistinctSpecification1IdsForCoupleOfComponentTypesAndTypeOfConfiguration(firstSelectedComponentTypeId, componentTypeId, configurationType);
@@ -190,6 +194,20 @@ public class ComponentManagerImpl implements ComponentManager {
         //Using the dynamic query, get the first ten components that satisfy the filters in the query
         Page<ComponentEntity> page = componentRepository.findAll(spec, pageable);
         foundComponentsThatSatisfyAllFilters = page.getContent();
+        if(foundComponentsThatSatisfyAllFilters.size() < 10)
+        {
+            thereIsNextPage = false;
+        }
+        else {
+            Page<ComponentEntity> checkForNextPage = componentRepository.findAll(spec,checkNextPageSinceComponent);
+            if(checkForNextPage.getContent().size() == 1)
+            {
+                thereIsNextPage = true;
+            }
+            else {
+                thereIsNextPage = false;
+            }
+        }
         List<SimpleComponentResponse> components = new ArrayList<>();
         for (ComponentEntity componentEntity : foundComponentsThatSatisfyAllFilters) {
             components.add(SimpleComponentResponse.builder()
@@ -197,6 +215,7 @@ public class ComponentManagerImpl implements ComponentManager {
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .componentName(componentEntity.getComponentName())
                     .componentPrice(componentEntity.getComponentPrice())
+                    .thereIsNextPage(thereIsNextPage)
                     .build());
         }
         return components;
@@ -262,20 +281,49 @@ public class ComponentManagerImpl implements ComponentManager {
 
     @Override
     public List<SimpleComponentResponse> getComponentsByComponentTypeAndConfigurationType(Long componentTypeId, String configurationType, int currentPage) {
+        boolean thereIsNextPage = true;
         if(!componentTypeRepository.existsById(componentTypeId)){
             throw new InvalidInputException("Component type does not exist");
         }
 
         Pageable pageable = PageRequest.of(currentPage-1, 10, Sort.by("c.componentName").ascending());
+//        Pageable checkNextPageSinceComponent = PageRequest.of(currentPage*10, 1);
+
         Map<Long,List<String>> idForSpecificationsAndValues = specificationIdsForComponentPurpose.getSpecificationIdAndValuesForComponentPurpose(configurationType,componentTypeId);
         Page<ComponentEntity> entities;
         if(idForSpecificationsAndValues.isEmpty())
         {
             entities = componentRepository.findComponentEntityByComponentType(componentTypeId,pageable);
+            if(entities.getContent().size() < 10)
+            {
+                thereIsNextPage = false;
+            }
+            else {
+                long totalNumberOfComponentsFromComponentType = componentRepository.countComponentsByTypeId(componentTypeId);
+                if (currentPage * 10 == totalNumberOfComponentsFromComponentType) {
+                    thereIsNextPage = false;
+                }
+                else {
+                    thereIsNextPage = true;
+                }
+            }
         }
         else {
             Map.Entry<Long, List<String>> firstEntry = idForSpecificationsAndValues.entrySet().iterator().next();
             entities = componentRepository.findComponentEntityByComponentTypeAndConfigurationType(componentTypeId, firstEntry.getValue(), firstEntry.getKey(), pageable);
+            if(entities.getContent().size() < 10)
+            {
+                thereIsNextPage = false;
+            }
+            else {
+                long totalNumberOfComponentsFromComponentType = componentRepository.countComponentsByComponentTypeAndConfigurationType(componentTypeId, firstEntry.getValue(), firstEntry.getKey());
+                if (currentPage * 10 == totalNumberOfComponentsFromComponentType) {
+                    thereIsNextPage = false;
+                }
+                else {
+                    thereIsNextPage = true;
+                }
+            }
         }
         List<SimpleComponentResponse> components = new ArrayList<>();
         for (ComponentEntity componentEntity : entities.getContent()) {
@@ -284,6 +332,7 @@ public class ComponentManagerImpl implements ComponentManager {
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .componentName(componentEntity.getComponentName())
                     .componentPrice(componentEntity.getComponentPrice())
+                    .thereIsNextPage(thereIsNextPage)
                     .build());
         }
         return components;

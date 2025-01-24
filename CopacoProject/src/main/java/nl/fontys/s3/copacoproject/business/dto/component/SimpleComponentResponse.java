@@ -13,4 +13,5 @@ public class SimpleComponentResponse {
     private String componentName;
     private String componentImageUrl;
     private Double componentPrice;
+    private boolean thereIsNextPage;
 }

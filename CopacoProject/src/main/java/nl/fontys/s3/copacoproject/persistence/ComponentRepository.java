@@ -103,44 +103,43 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
     @Query("SELECT c.componentType.id FROM ComponentEntity c WHERE c.componentId = :componentId")
     Long findComponentTypeIdByComponentId(@Param("componentId") Long componentId);
 
-//    @Query("SELECT c FROM ComponentEntity c " +
-//            "JOIN Component_SpecificationList cs1 ON cs1.componentId.componentId = c.componentId " +
-//            "JOIN Component_SpecificationList cs2 ON cs2.componentId.componentId = c.componentId " +
-//            "JOIN Component_SpecificationList cs3 ON cs3.componentId.componentId = c.componentId " +
-//            "WHERE c.componentType.id = 5 " +
-//            "AND cs1.specificationType.id = 1036 AND CAST(cs1.value AS decimal(10,2)) >= :totalPowerSupply " +
-//            "AND cs2.specificationType.id = 947 AND cs2.value = :configurationType " +
-//            "AND cs3.specificationType.id = 1293 AND CAST(cs3.value AS decimal(10,2)) >= :total12ThLineSupply")
-//    List<ComponentEntity> findCompatiblePowerSupply(
-//            @Param("totalPowerSupply") Double totalPowerSupply,
-//            @Param("configurationType") String configurationType,
-//            @Param("total12ThLineSupply") Double total12ThLineSupply,
-//            Pageable pageable
-//    );
 
+
+    //For MSSQL
 //    @Query(value = "SELECT c.* FROM component c " +
 //            "JOIN component_specification cs1 ON cs1.component_id = c.id " +
 //            "JOIN component_specification cs2 ON cs2.component_id = c.id " +
 //            "JOIN component_specification cs3 ON cs3.component_id = c.id " +
 //            "WHERE c.component_type_id = 5 " +
-//            "AND cs1.specification_type_id = 1036 AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
-//            "AND cs2.specification_type_id = 947 AND cs2.value = :configurationType " +
-//            "AND cs3.specification_type_id = 1293 AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
+//            "AND cs1.specification_type_id = :totalPowerSupplyId AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
+//            "AND cs2.specification_type_id = :configurationTypeId AND cs2.value = :configurationType " +
+//            "AND cs3.specification_type_id = :total12ThLineSupplyId AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
 //    List<ComponentEntity> findComponentsBySpecificationsNative(
+//            @Param("totalPowerSupplyId") Long totalPowerSupplyId,
 //            @Param("totalPowerSupply") Double totalPowerSupply,
+//            @Param("configurationTypeId") Long configurationTypeId,
 //            @Param("configurationType") String configurationType,
+//            @Param("total12ThLineSupplyId") Long total12ThLineSupplyId,
 //            @Param("total12ThLineSupply") Double total12ThLineSupply,
 //            Pageable pageable
 //    );
 
+
+    //For MySQL
     @Query(value = "SELECT c.* FROM component c " +
             "JOIN component_specification cs1 ON cs1.component_id = c.id " +
             "JOIN component_specification cs2 ON cs2.component_id = c.id " +
             "JOIN component_specification cs3 ON cs3.component_id = c.id " +
             "WHERE c.component_type_id = 5 " +
-            "AND cs1.specification_type_id = :totalPowerSupplyId AND TRY_CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
-            "AND cs2.specification_type_id = :configurationTypeId AND cs2.value = :configurationType " +
-            "AND cs3.specification_type_id = :total12ThLineSupplyId AND TRY_CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply", nativeQuery = true)
+            "AND cs1.specification_type_id = :totalPowerSupplyId " +
+            "AND cs1.value REGEXP '^-?[0-9]+(\\.[0-9]+)?$' " +  // Ensures valid numeric value
+            "AND CAST(cs1.value AS DECIMAL(10,2)) >= :totalPowerSupply " +
+            "AND cs2.specification_type_id = :configurationTypeId " +
+            "AND cs2.value = :configurationType " +
+            "AND cs3.specification_type_id = :total12ThLineSupplyId " +
+            "AND cs3.value REGEXP '^-?[0-9]+(\\.[0-9]+)?$' " +  // Ensures valid numeric value
+            "AND CAST(cs3.value AS DECIMAL(10,2)) >= :total12ThLineSupply",
+            nativeQuery = true)
     List<ComponentEntity> findComponentsBySpecificationsNative(
             @Param("totalPowerSupplyId") Long totalPowerSupplyId,
             @Param("totalPowerSupply") Double totalPowerSupply,
@@ -150,6 +149,10 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
             @Param("total12ThLineSupply") Double total12ThLineSupply,
             Pageable pageable
     );
+
+    @Query("SELECT COUNT(c) FROM ComponentEntity c WHERE c.componentType.id = :typeId")
+    long countComponentsByTypeId(@Param("typeId") Long typeId);
+
 
 //    static Specification<ComponentEntity> dynamicSpecification(
 //            Long componentTypeId,
@@ -266,6 +269,19 @@ public interface ComponentRepository extends JpaRepository<ComponentEntity, Long
                                                                                  @Param("valuesToBeConsidered") List<String> valuesToBeConsidered,
                                                                                  @Param("specificationIDThatHoldsTheComponentPurpose") Long specificationIDThatHoldsTheComponentPurpose,
                                                                                  Pageable pageable);
+
+    @Query("""
+    SELECT COUNT(DISTINCT c)
+    FROM ComponentEntity c
+    JOIN Component_SpecificationList cs ON c.componentId = cs.componentId.componentId
+    WHERE c.componentType.id = :componentTypeId
+    AND cs.specificationType.id = :specificationIDThatHoldsTheComponentPurpose
+    AND cs.value IN :valuesToBeConsidered
+    """)
+    long countComponentsByComponentTypeAndConfigurationType(@Param("componentTypeId") Long componentTypeId,
+                                                            @Param("valuesToBeConsidered") List<String> valuesToBeConsidered,
+                                                            @Param("specificationIDThatHoldsTheComponentPurpose") Long specificationIDThatHoldsTheComponentPurpose);
+
 
     @Query("""
     SELECT DISTINCT c

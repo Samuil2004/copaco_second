@@ -41,11 +41,17 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
 //    @Value("${ID_Car_Type}")
 //    private Long ID_Car_Type;
 
-    private Long ID_Component_Voor=1070L;
-    private Long ID_Bedoel_Voor=947L;
-    private Long ID_Soort=954L;
-    private Long ID_Bike_Type=1792L;
-    private Long ID_Car_Type=1797L;
+//    private Long ID_Component_Voor=1070L;
+//    private Long ID_Bedoel_Voor=947L;
+//    private Long ID_Soort=954L;
+//    private Long ID_Bike_Type=1792L;
+//    private Long ID_Car_Type=1797L;
+
+    private Long ID_Component_Voor=152L;
+    private Long ID_Bedoel_Voor=29L;
+    private Long ID_Soort=36L;
+    private Long ID_Bike_Type=885L;
+    private Long ID_Car_Type=870L;
 
 
 

@@ -41,16 +41,30 @@ public class CompatibilityBetweenComponentsImpl implements CompatibilityBetweenC
     private static final String COMPATIBLE_COMPONENTS_NOT_FOUND = "Compatible components from searched component type were not found;";
 
 
-    private Long ID_Component_Voor=1070L;
-    private Long ID_Bedoel_Voor=947L;
+//    private Long ID_Component_Voor=1070L;
+//    private Long ID_Bedoel_Voor=947L;
 
-    private Long ID_THERMAL_DESIGN_POWER=1120L;
-    private Long ID_Minimum_system_power_voorraad=937L;
-    private Long ID_Stroomverbruik_lezeN=1144L;
-    private Long ID_Stroomverbruik_schrijven=1145L;
-    private Long ID_Stroomverbruik_typisch=922L;
-    private Long ID_Totaal_vermogen=1036L;
-    private Long ID_Gecombineerd_vermogen=1293L;
+    private Long ID_Component_Voor=152L;
+    private Long ID_Bedoel_Voor=29L;
+
+
+//    private Long ID_THERMAL_DESIGN_POWER=1120L;
+//    private Long ID_Minimum_system_power_voorraad=937L;
+//    private Long ID_Stroomverbruik_lezeN=1144L;
+//    private Long ID_Stroomverbruik_schrijven=1145L;
+//    private Long ID_Stroomverbruik_typisch=922L;
+//    private Long ID_Totaal_vermogen=1036L;
+//    private Long ID_Gecombineerd_vermogen=1293L;
+
+
+    private Long ID_THERMAL_DESIGN_POWER=202L;
+    private Long ID_Minimum_system_power_voorraad=19L;
+    private Long ID_Stroomverbruik_lezeN=226L;
+    private Long ID_Stroomverbruik_schrijven=227L;
+    private Long ID_Stroomverbruik_typisch=4L;
+    private Long ID_Totaal_vermogen=118L;
+    private Long ID_Gecombineerd_vermogen=375L;
+
 
 
 

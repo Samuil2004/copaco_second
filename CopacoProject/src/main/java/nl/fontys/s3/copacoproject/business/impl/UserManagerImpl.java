@@ -58,7 +58,8 @@ public class UserManagerImpl implements UserManager {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(encodedPassword)
-                .role(RoleEntity.builder().roleName(role.name()).id(role.getValue()).build())
+                .role(RoleEntity.builder().roleName("CUSTOMER").id(4).build())
+//                .role()
                 .build();
         return userRepository.save(newUser);
     }

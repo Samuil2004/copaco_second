@@ -87,7 +87,7 @@ public class SpecificationTypeController {
 
 
     @GetMapping("/getDistinctConfigurationTypesInCategory")
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<GetConfTypesInCategResponse> getDistinctConfigurationTypesInCategory(
             @RequestParam("categoryId") Long categoryId) {
         GetConfigTypesInCategRequest request =  GetConfigTypesInCategRequest.builder().categoryId(categoryId).build();

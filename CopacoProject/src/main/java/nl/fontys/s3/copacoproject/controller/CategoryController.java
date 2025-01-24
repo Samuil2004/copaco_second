@@ -19,7 +19,7 @@ public class CategoryController {
     private final CategoryManager categoryManager;
 
     @GetMapping()
-    @RolesAllowed({"ADMIN", "CUSTOMER"})
+//    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public ResponseEntity<List<Category>> getAllCategories() {
         return ResponseEntity.ok().body(categoryManager.getAllCategories());
     }
