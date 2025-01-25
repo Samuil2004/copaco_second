@@ -214,7 +214,7 @@ public class ComponentManagerImpl implements ComponentManager {
                     .componentId(componentEntity.getComponentId())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .componentName(componentEntity.getComponentName())
-                    .componentPrice(componentEntity.getComponentPrice())
+                    .price(componentEntity.getComponentPrice())
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
@@ -331,7 +331,7 @@ public class ComponentManagerImpl implements ComponentManager {
                     .componentId(componentEntity.getComponentId())
                     .componentImageUrl(componentEntity.getComponentImageUrl())
                     .componentName(componentEntity.getComponentName())
-                    .componentPrice(componentEntity.getComponentPrice())
+                    .price(componentEntity.getComponentPrice())
                     .thereIsNextPage(thereIsNextPage)
                     .build());
         }
