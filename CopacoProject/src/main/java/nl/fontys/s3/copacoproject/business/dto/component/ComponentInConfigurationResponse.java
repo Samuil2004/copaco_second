@@ -13,6 +13,6 @@ public class ComponentInConfigurationResponse {
     private Long componentId;
     private String componentName;
     private String componentImageUrl;
-    private Double componentPrice;
+    private Double price;
     private ComponentTypeInCustomResponse componentType;
 }

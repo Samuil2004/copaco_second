@@ -45,4 +45,17 @@ public final class TemplateConverter {
                 .active(templateEntity.isActive())
                 .build();
     }
+
+    public static TemplateObjectResponse convertFromEntityToResponse(TemplateEntity templateEntity, List<String> componentTypes,boolean thereIsNextPage) {
+        return TemplateObjectResponse.builder()
+                .templateId(templateEntity.getId())
+                .category(CategoryConverter.convertFromEntityToBase(templateEntity.getCategory()))
+                .image(templateEntity.getImage())
+                .name(templateEntity.getName())
+                .components(componentTypes)
+                .configurationType(templateEntity.getConfigurationType())
+                .active(templateEntity.isActive())
+                .thereIsNextPage(thereIsNextPage)
+                .build();
+    }
 }

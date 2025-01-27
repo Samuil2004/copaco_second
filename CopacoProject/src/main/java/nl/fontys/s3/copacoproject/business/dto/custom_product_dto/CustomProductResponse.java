@@ -18,5 +18,6 @@ public class CustomProductResponse {
     private long templateId;
     private List<ComponentInConfigurationResponse> componentsIncluded;
     private long statusId;
+    private Long totalNumberOfComponentsExpected;
 
 }

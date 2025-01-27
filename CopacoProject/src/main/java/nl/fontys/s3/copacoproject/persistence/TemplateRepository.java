@@ -56,6 +56,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query("SELECT c FROM ComponentTypeList_Template c WHERE c.template.id = :template_id")
     List<ComponentTypeList_Template> findComponentTypeListByTemplateId(@Param("template_id") long templateId);
 
+    @Query("SELECT COUNT(c) FROM ComponentTypeList_Template c WHERE c.template.id = :template_id")
+    Long countComponentTypesInTemplateId(@Param("template_id") long templateId);
     @Query("""
     SELECT COUNT(t)
     FROM TemplateEntity t

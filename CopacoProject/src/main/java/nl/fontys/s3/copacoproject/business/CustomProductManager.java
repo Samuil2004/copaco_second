@@ -16,4 +16,5 @@ public interface CustomProductManager {
     double getTotalIncome();
     double getIncomeByConfigurationType(String configurationType);
     double getAverageOrderPrice();
+    CustomProductResponse getCustomProductById(long productId);
 }

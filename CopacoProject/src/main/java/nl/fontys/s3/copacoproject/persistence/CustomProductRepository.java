@@ -7,12 +7,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
 public interface CustomProductRepository extends JpaRepository<CustomProductEntity, Long> {
     CustomProductEntity findById(long id);
 
     Page<CustomProductEntity> findCustomProductEntitiesByStatusAndUserId(StatusEntity status, UserEntity userId, Pageable pageable);
+
+    @Query("SELECT c.id FROM CustomProductEntity c WHERE c.status = :status AND c.userId = :userId")
+    Page<Long> findCustomProductIdsByStatusAndUserId(
+            @Param("status") StatusEntity status,
+            @Param("userId") UserEntity userId,
+            Pageable pageable
+    );
+    @Query("SELECT c.template.id FROM CustomProductEntity c WHERE c.id = :customProductId")
+    Long findTemplateIdByCustomProductId(@Param("customProductId") Long customProductId);
 
     int countCustomProductEntitiesByStatusAndUserId(StatusEntity status, UserEntity userId);
 

@@ -32,6 +32,17 @@ public final class ComponentConverter {
                 .specifications(baseMap)
                 .build();
     }
+
+    public static Component convertFromEntityToBaseNoSpecifications(ComponentEntity entity)
+    {
+        return Component.builder()
+                .componentId(entity.getComponentId())
+                .componentName(entity.getComponentName())
+                .componentImageUrl(entity.getComponentImageUrl())
+                .componentType(ComponentTypeConverter.convertFromEntityToBase(entity.getComponentType()))
+                .componentPrice(entity.getComponentPrice())
+                .build();
+    }
     public static ComponentEntity convertFromBaseToEntity (Component component)
     {
         return ComponentEntity.builder()
@@ -49,7 +60,7 @@ public final class ComponentConverter {
                 .componentId(component.getComponentId())
                 .componentImageUrl(component.getComponentImageUrl())
                 .componentName(component.getComponentName())
-                .componentPrice(component.getComponentPrice())
+                .price(component.getComponentPrice())
                 .componentType(ComponentTypeConverter.convertFromBaseToResponse(component.getComponentType()))
                 .build();
     }

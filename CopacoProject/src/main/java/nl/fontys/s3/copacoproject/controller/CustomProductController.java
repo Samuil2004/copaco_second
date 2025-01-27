@@ -52,6 +52,19 @@ public class CustomProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/custom-product/{customProductID}")
+    @RolesAllowed({"CUSTOMER"})
+    public ResponseEntity<CustomProductResponse> getCustomProductById(@PathVariable("customProductID") Long customProductID) {
+        AccessToken accessToken = requestAuthenticatedUserProvider.getAuthenticatedUserInRequest();
+
+        if (accessToken == null || accessToken.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        CustomProductResponse response = customProductManager.getCustomProductById(customProductID);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping("/countItems/{userId}")
     @RolesAllowed({"CUSTOMER"})
     public ResponseEntity<Integer> getNumberOfCustomProductsOfUserByState(@PathVariable("userId") long userId, @RequestParam("statusId") @NotNull @Positive int statusId) {

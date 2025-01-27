@@ -20,4 +20,5 @@ public class TemplateObjectResponse {
     private byte[] image;
     private List<String> components;
     private boolean active;
+    private boolean thereIsNextPage;
 }

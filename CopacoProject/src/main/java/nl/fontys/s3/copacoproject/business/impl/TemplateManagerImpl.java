@@ -183,6 +183,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
     @Override
     public List<TemplateObjectResponse> getActiveFilteredTemplates(int itemsPerPage, int currentPage, Long categoryId, String configurationType) {
+        boolean thereIsNextPage;
         CategoryEntity categoryEntity = null;
         if (categoryId != null && categoryId > 0) {
             if (!categoryRepository.existsById(categoryId)) {
@@ -199,6 +200,19 @@ public class TemplateManagerImpl implements TemplateManager {
         if (templateEntitiesPage.isEmpty()) {
             throw new ObjectNotFound("There are no templates");
         }
+        if(templateEntitiesPage.getContent().size() == itemsPerPage){
+            Pageable nextPageCheck = PageRequest.of(currentPage*itemsPerPage, 1, Sort.by("id").descending());
+            Page<TemplateEntity> templateEntitiesPageNextPage = templateRepository.findActiveTemplateEntitiesByCategoryAndConfigurationType(categoryEntity, configurationType, nextPageCheck);
+            if(templateEntitiesPageNextPage.getContent().size() == 1){
+                thereIsNextPage = true;
+            }
+            else {
+                thereIsNextPage = false;
+            }
+        }
+        else{
+            thereIsNextPage = false;
+        }
 
         List<TemplateObjectResponse> templates = new ArrayList<>();
         for (TemplateEntity templateEntity : templateEntitiesPage) {
@@ -207,7 +221,18 @@ public class TemplateManagerImpl implements TemplateManager {
             for (ComponentTypeList_Template componentTypeList_Template : componentEntities) {
                 componentTypes.add(componentTypeList_Template.getComponentType().getComponentTypeName());
             }
-            templates.add(TemplateConverter.convertFromEntityToResponse(templateEntity, componentTypes));
+
+            templates.add(TemplateConverter.convertFromEntityToResponse(templateEntity, componentTypes,thereIsNextPage));
+//            templates.add(TemplateObjectResponse.builder()
+//                    .templateId(templateEntity.getId())
+//                    .category(templateEntity.getCategory())
+//                    .name(templateEntity.getName())
+//                    .configurationType(templateEntity.getConfigurationType())
+//                    .image(templateEntity.getImage())
+//                    .components(componentTypes)
+//                    .active(templateEntity.isActive())
+//                    .thereIsNextPage(thereIsNextPage) // Set the next page flag
+//                    .build());
         }
 
         return templates;

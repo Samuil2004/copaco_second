@@ -81,19 +81,25 @@ public class CustomProductManagerImpl implements CustomProductManager {
         UserEntity userEntity = userRepository.findUserEntityById(userId);
 
         Pageable pageable = PageRequest.of(currentPage-1, itemsPerPage, Sort.by("id").descending());
-        Page<CustomProductEntity> productEntities = customProductRepository.findCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity, pageable);
-        for(CustomProductEntity productEntity : productEntities) {
-            List<Component> components = getComponentsOfCustomProductEntity(productEntity);
+//        Page<CustomProductEntity> productEntities = customProductRepository.findCustomProductEntitiesByStatusAndUserId(statusEntity, userEntity, pageable);
+        Page<Long> productEntities = customProductRepository.findCustomProductIdsByStatusAndUserId(statusEntity, userEntity, pageable);
+
+        for(Long productEntityId : productEntities) {
+            List<Component> components = getComponentsOfCustomProductEntityWithoutSpecifications(productEntityId);
             List<ComponentInConfigurationResponse> componentsResponse = new ArrayList<>();
             for(Component component : components) {
                 componentsResponse.add(ComponentConverter.convertFromBaseToResponse(component));
             }
+            Long templateId = customProductRepository.findTemplateIdByCustomProductId(productEntityId);
+            Long numberOfComponentTypesInTemplate = templateRepository.countComponentTypesInTemplateId(templateId);
+
             customProducts.add(CustomProductResponse.builder()
-                    .customProductId(productEntity.getId())
+                    .customProductId(productEntityId)
                     .componentsIncluded(componentsResponse)
                     .statusId(status.getValue())
                     .userId(userId)
-                    .templateId(productEntity.getTemplate().getId())
+                    .templateId(templateId)
+                    .totalNumberOfComponentsExpected(numberOfComponentTypesInTemplate)
                     .build());
         }
         return customProducts;
@@ -174,6 +180,35 @@ public class CustomProductManagerImpl implements CustomProductManager {
         return customProductRepository.calculateAverageFinishedProductPrice();
     }
 
+    @Override
+    public CustomProductResponse getCustomProductById(long productId) {
+        CustomProductEntity foundCustomProduct = customProductRepository.findById(productId);
+        if(foundCustomProduct == null){
+            throw new ObjectNotFound("Custom product not found");
+        }
+//        UserEntity userEntity = userRepository.findUserEntityById(foundCustomProduct.getUserId().getId());
+        List<Component> components = getComponentsOfCustomProductEntity(foundCustomProduct);
+        List<ComponentInConfigurationResponse> componentsResponse = new ArrayList<>();
+        for(Component component : components) {
+            componentsResponse.add(ComponentConverter.convertFromBaseToResponse(component));
+        }
+        StatusEntity statusEntity = StatusEntity.builder()
+                .id(foundCustomProduct.getStatus().getId())
+                .name(foundCustomProduct.getStatus().getName())
+                .build();
+
+        Long numberOfComponentTypesInTemplate = templateRepository.countComponentTypesInTemplateId(foundCustomProduct.getTemplate().getId());
+        return CustomProductResponse.builder()
+                .customProductId(foundCustomProduct.getId())
+                .componentsIncluded(componentsResponse)
+                .statusId(statusEntity.getId())
+                .userId(foundCustomProduct.getUserId().getId())
+                .templateId(foundCustomProduct.getTemplate().getId())
+                .totalNumberOfComponentsExpected(numberOfComponentTypesInTemplate)
+                .build();
+
+    }
+
     private void validateCreateRequest(CreateCustomProductRequest request){
 
         if(!userRepository.existsById(request.getUserId())) {
@@ -218,7 +253,7 @@ public class CustomProductManagerImpl implements CustomProductManager {
 
     private List<Component> getComponentsOfCustomProductEntity (CustomProductEntity entity){
         List<Component> components = new ArrayList<>();
-        List<AssemblingEntity> componentEntities = assemblingRepository.findAssemblingEntitiesByCustomProductId(entity);
+        List<AssemblingEntity> componentEntities = assemblingRepository.findAssemblingEntitiesByCustomProductId(entity.getId());
         for(AssemblingEntity assembling : componentEntities){
             ComponentEntity componentEntity = assembling.getComponentId();
             List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
@@ -239,6 +274,35 @@ public class CustomProductManagerImpl implements CustomProductManager {
                 }
             }
             Component componentBase = ComponentConverter.convertFromEntityToBase(componentEntity,dictionaryWithTheSpecificationAndAllValuesForComponent);
+            components.add(componentBase);
+        }
+
+        return components;
+    }
+
+    private List<Component> getComponentsOfCustomProductEntityWithoutSpecifications (Long customProductEntityId){
+        List<Component> components = new ArrayList<>();
+        List<AssemblingEntity> componentEntities = assemblingRepository.findAssemblingEntitiesByCustomProductId(customProductEntityId);
+        for(AssemblingEntity assembling : componentEntities){
+            ComponentEntity componentEntity = assembling.getComponentId();
+            //List<Component_SpecificationList> allSpecificationsForComponent = componentSpecificationListRepository.findByComponentId(componentEntity);
+            //Map<SpecificationTypeEntity, List<String>> dictionaryWithTheSpecificationAndAllValuesForComponent = new HashMap<>();
+
+//            for(Component_SpecificationList specificationList : allSpecificationsForComponent){
+//                SpecificationTypeEntity specType = specificationList.getSpecificationType();
+//                String value = specificationList.getValue();
+//
+//                List<String> valuesList = dictionaryWithTheSpecificationAndAllValuesForComponent.get(specType);
+//
+//                if (valuesList == null) {
+//                    valuesList = new ArrayList<>();
+//                    valuesList.add(value);
+//                    dictionaryWithTheSpecificationAndAllValuesForComponent.put(specType, valuesList);
+//                } else {
+//                    valuesList.add(value);
+//                }
+//            }
+            Component componentBase = ComponentConverter.convertFromEntityToBaseNoSpecifications(componentEntity);
             components.add(componentBase);
         }
 

@@ -370,11 +370,11 @@ public class SpecificationIdsForComponentPurposeImpl implements SpecificationIds
         }
         else if(categoryId == 2)
         {
-            return ID_Bike_Type;
+            return ID_Car_Type;
         }
         else if(categoryId == 3)
         {
-            return ID_Car_Type;
+            return ID_Bike_Type;
         }
         return ID_Component_Voor;
     }
